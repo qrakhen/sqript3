@@ -1,16 +1,19 @@
 # depslib dependency file v1.0
-1670643804 source:c:\users\filos\projects\sqript_c\sqript_c\main.c
+1670664684 source:c:\users\filos\projects\sqript_c\sqript_c\main.c
 	<stdio.h>
 	<stdlib.h>
 	"common.h"
 	"segment.h"
 	"digest.h"
 	"log.h"
+	"runtime.h"
 
-1670643814 c:\users\filos\projects\sqript_c\sqript_c\common.h
+1670664317 c:\users\filos\projects\sqript_c\sqript_c\common.h
 	<stdbool.h>
 	<stddef.h>
 	<stdint.h>
+	<string.h>
+	<stdio.h>
 	"value.h"
 
 1670639581 source:c:\users\filos\projects\sqript_c\sqript_c\memory.c
@@ -23,28 +26,29 @@
 1670637996 source:c:\users\filos\projects\sqript_c\sqript_c\memory.h
 	"common.h"
 
-1670642158 source:c:\users\filos\projects\sqript_c\sqript_c\log.c
+1670662074 source:c:\users\filos\projects\sqript_c\sqript_c\log.c
 	<stdio.h>
 	<time.h>
+	<stdarg.h>
 	"log.h"
 
-1670640886 c:\users\filos\projects\sqript_c\sqript_c\log.h
+1670661709 c:\users\filos\projects\sqript_c\sqript_c\log.h
 	"common.h"
 
-1670643954 source:c:\users\filos\projects\sqript_c\sqript_c\segment.c
+1670659511 source:c:\users\filos\projects\sqript_c\sqript_c\segment.c
 	<stdlib.h>
 	"segment.h"
 	"memory.h"
 
-1670643570 c:\users\filos\projects\sqript_c\sqript_c\segment.h
+1670658707 c:\users\filos\projects\sqript_c\sqript_c\segment.h
 	"common.h"
 	"operation.h"
 	"value.h"
 
-1670643637 c:\users\filos\projects\sqript_c\sqript_c\operation.h
+1670645367 c:\users\filos\projects\sqript_c\sqript_c\operation.h
 	"common.h"
 
-1670644359 source:c:\users\filos\projects\sqript_c\sqript_c\digest.c
+1670661050 source:c:\users\filos\projects\sqript_c\sqript_c\digest.c
 	<stdio.h>
 	"digest.h"
 
@@ -53,11 +57,20 @@
 
 1670643015 c:\users\filos\projects\sqript_c\sqript_c\type.h
 
-1670644442 c:\users\filos\projects\sqript_c\sqript_c\value.h
+1670664936 c:\users\filos\projects\sqript_c\sqript_c\value.h
 	<stdint.h>
 
 1670644329 source:c:\users\filos\projects\sqript_c\sqript_c\value.c
 	<stdlib.h>
 	"value.h"
 	"memory.h"
+
+1670663751 c:\users\filos\projects\sqript_c\sqript_c\runtime.h
+	"segment.h"
+
+1670664549 source:c:\users\filos\projects\sqript_c\sqript_c\runtime.c
+	<stdio.h>
+	"common.h"
+	"runtime.h"
+	"digest.h"
 

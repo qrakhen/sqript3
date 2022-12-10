@@ -9,12 +9,13 @@ typedef struct {
     int pos;
     int size;
     uint8_t* code;
+    int* lines;
     ValueArray constants;
 } Segment;
 
 void initSegment(Segment* segment);
 void clearSegment(Segment* segment);
-void writeSegment(Segment* segment, uint8_t byte);
+void writeSegment(Segment* segment, uint8_t byte, int line);
 int registerConstant(Segment* segment, Value value);
 
 #endif

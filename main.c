@@ -5,22 +5,23 @@
 #include "segment.h"
 #include "digest.h"
 #include "log.h"
+#include "runtime.h"
 
-#define ws writeSegment
-#define is initSegment
-#define cs clearSegment
-#define ds digestSegment
+#define write writeSegment
+#define init initSegment
+#define clear clearSegment
+#define digest digestSegment
 
 int main(int argc, const char* argv[])
 {
-    logInfo("zers");
-    Segment s;
-    is(&s);
-    int c = registerConstant(&s, 36.72);
-    ws(&s, OP_CONSTANT);
-    ws(&s, c);
-    ws(&s, OP_RETURN);
-    ds(&s, "test 123");
-    cs(&s);
+    stdout < "ASd";
+
+    initRuntime();
+    Segment seg;
+    init(&seg);
+    write(&seg, argc > 0 ? argv : "return 0;", 0);
+    interpret(&seg);
+    clearRuntime();
+    clear(&seg);
     return 0;
 }

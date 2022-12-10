@@ -20,7 +20,7 @@ int digestInstruction(Segment* segment, int position)
     case OP_RETURN:
         return basicInstruction("OP_RETURN", position);
     default:
-        printf("unknown instruction %d\n", instruction);
+        logError("unknown instruction %d\n", instruction);
         return position + 1;
     }
 }
@@ -32,8 +32,6 @@ static int basicInstruction(const char* name, int position) {
 
 static int constantInstruction(const char* name, Segment* segment, int position) {
     uint8_t constant = segment->code[position + 1];
-    printf("%-16s %4d '", name, constant);
-    printValue(segment->constants.values[constant]);
-    printf("'\n");
+    logSpam(segment->constants.values[constant]);
     return position + 2;
 }
