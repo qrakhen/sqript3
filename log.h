@@ -24,5 +24,4 @@ void logInfo(char* message, ...) { __logWrite(message, LOG_LEVEL_INFO); }
 void logDebug(char* message, ...) { __logWrite(message, LOG_LEVEL_DEBUG); }
 void logSpam(char* message, ...) { __logWrite(message, LOG_LEVEL_SPAM); }
 
-
 #endif

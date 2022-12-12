@@ -14,7 +14,9 @@
 
 int main(int argc, const char* argv[])
 {
-    stdout < "ASd";
+    void* a;
+
+    DBG_printBytes(a);
 
     initRuntime();
     Segment seg;

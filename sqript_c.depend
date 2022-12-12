@@ -1,5 +1,5 @@
 # depslib dependency file v1.0
-1670664684 source:c:\users\filos\projects\sqript_c\sqript_c\main.c
+1670668241 source:c:\users\filos\projects\sqript_c\sqript_c\main.c
 	<stdio.h>
 	<stdlib.h>
 	"common.h"
@@ -57,7 +57,7 @@
 
 1670643015 c:\users\filos\projects\sqript_c\sqript_c\type.h
 
-1670664936 c:\users\filos\projects\sqript_c\sqript_c\value.h
+1670668102 c:\users\filos\projects\sqript_c\sqript_c\value.h
 	<stdint.h>
 
 1670644329 source:c:\users\filos\projects\sqript_c\sqript_c\value.c

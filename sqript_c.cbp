@@ -32,6 +32,7 @@
 			<Add option="-Wall" />
 		</Compiler>
 		<Unit filename="common.h" />
+		<Unit filename="debug.h" />
 		<Unit filename="digest.c">
 			<Option compilerVar="CC" />
 		</Unit>

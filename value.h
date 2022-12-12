@@ -6,11 +6,14 @@
 typedef uint8_t byte; // brauchma immer
 typedef double Value; // eeeeigentlich ja long oder so? für bitwise ops
 
+typedef void* protoVal;
+typedef protoVal Integer;
+
 typedef enum {
-    Boolean,
-    Integer,
-    Number,
-    String
+    T_Boolean,
+    T_Integer,
+    T_Number,
+    T_String
 } ValueType;
 
 typedef struct {
@@ -23,6 +26,15 @@ typedef struct {
     int size;
     Value* values;
 } ValueArray;
+
+typedef struct {
+    byte value;
+
+} Boolean;
+
+//typedef int Integer;
+typedef float Number;
+typedef char* String;
 
 void initValueArray(ValueArray* array);
 void writeValueArray(ValueArray* array, Value value);
