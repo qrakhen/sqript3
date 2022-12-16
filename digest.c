@@ -12,7 +12,7 @@ void digestSegment(Segment* segment, const char* name)
 
 int digestInstruction(Segment* segment, int position)
 {
-    logSpam(position);
+    //logSpam(position);
     uint8_t instruction = segment->code[position];
     switch (instruction) {
     case OP_CONSTANT:

@@ -14,14 +14,16 @@
 
 int main(int argc, const char* argv[])
 {
-    void* a;
+    //void* a;
 
-    DBG_printBytes(a);
+    //DBG_printBytes(a);
 
     initRuntime();
     Segment seg;
     init(&seg);
-    write(&seg, argc > 0 ? argv : "return 0;", 0);
+    write(&seg, OP_CONSTANT, 0);
+    write(&seg, 5, 0);
+    write(&seg, OP_RETURN, 0);
     interpret(&seg);
     clearRuntime();
     clear(&seg);
