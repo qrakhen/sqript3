@@ -8,7 +8,7 @@
 	"log.h"
 	"runtime.h"
 
-1670664317 c:\users\filos\projects\sqript_c\sqript_c\common.h
+1671195266 c:\users\filos\projects\sqript_c\sqript_c\common.h
 	<stdbool.h>
 	<stddef.h>
 	<stdint.h>
@@ -69,7 +69,7 @@
 	"segment.h"
 	"value.h"
 
-1671194532 source:c:\users\filos\projects\sqript_c\sqript_c\runtime.c
+1671195030 source:c:\users\filos\projects\sqript_c\sqript_c\runtime.c
 	<stdio.h>
 	"common.h"
 	"runtime.h"

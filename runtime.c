@@ -23,17 +23,19 @@ static InterpretResult run() {
             printf("]");
         }
         printf("\n");
-        digestInstruction(rt.segment, (int)(rt.ip = rt.segment->code));
+        //digestInstruction(rt.segment, (int)(rt.ip = rt.segment->code));
         #endif
         byte ix;
         switch (ix = RBYTE()) {
-        case OP_CONSTANT:
-            Value c = CONST();
-            push(c);
-            break;
-        case OP_RETURN:
-            printValue(pop());
-            return OK;
+            case OP_CONSTANT: {
+                Value c = CONST();
+                push(c);
+                break;
+            }
+            case OP_RETURN: {
+                printValue(pop());
+                return OK;
+            }
         }
     } while(true);
 

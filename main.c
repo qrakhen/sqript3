@@ -21,8 +21,9 @@ int main(int argc, const char* argv[])
     initRuntime();
     Segment seg;
     init(&seg);
+    int c = registerConstant(&seg, 1.32);
     write(&seg, OP_CONSTANT, 0);
-    write(&seg, 5, 0);
+    write(&seg, c, 0);
     write(&seg, OP_RETURN, 0);
     interpret(&seg);
     clearRuntime();
