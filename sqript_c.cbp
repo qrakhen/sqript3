@@ -32,6 +32,10 @@
 			<Add option="-Wall" />
 		</Compiler>
 		<Unit filename="common.h" />
+		<Unit filename="compiler.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="compiler.h" />
 		<Unit filename="debug.h" />
 		<Unit filename="digest.c">
 			<Option compilerVar="CC" />
@@ -53,6 +57,7 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="runtime.h" />
+		<Unit filename="scanner.h" />
 		<Unit filename="segment.c">
 			<Option compilerVar="CC" />
 		</Unit>

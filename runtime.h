@@ -22,7 +22,7 @@ typedef enum {
 
 void initRuntime();
 void clearRuntime();
-InterpretResult interpret(Segment* segment);
+InterpretResult interpret(const char* source);
 
 void push(Value value);
 Value pop();

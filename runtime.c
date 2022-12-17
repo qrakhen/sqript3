@@ -56,9 +56,8 @@ void clearRuntime() {
 
 }
 
-InterpretResult interpret(Segment* segment) {
-    rt.segment = segment;
-    rt.ip = rt.segment->code;
+InterpretResult interpret(const char* source) {
+    compile(source);
     return run();
 }
 

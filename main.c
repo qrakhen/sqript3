@@ -19,14 +19,6 @@ static void runConsole() {
     }
 }
 
-static void runFile(const char* path) {
-    char* source = readFile(path);
-    InterpretResult result = interpret(source);
-    free(source);
-    if (result == INTERPRET_COMPILE_ERROR) exit(E_ERR_SQR_COMPILE);
-    if (result == INTERPRET_RUNTIME_ERROR) exit(E_ERR_SQR_RUNTIME);
-}
-
 static char* readFile(const char* path) {
     FILE* file = fopen(path, "rb");
     if (file == NULL) {
@@ -37,6 +29,7 @@ static char* readFile(const char* path) {
     size_t fileSize = ftell(file);
     rewind(file);
     char* buffer = (char*)malloc(fileSize + 1);
+    size_t bytesRead = fread(buffer, sizeof(char), fileSize, file);
     if (bytesRead < fileSize) {
         fprintf(stderr, "file seems to be corrupt: \"%s\".\n", path);
         exit(E_ERR_IO_BADFILE);
@@ -46,6 +39,14 @@ static char* readFile(const char* path) {
     return buffer;
 }
 
+static void runFile(const char* path) {
+    char* source = readFile(path);
+    InterpretResult result = interpret(source);
+    free(source);
+    if (result == ERR_COMPILE) exit(E_ERR_SQR_COMPILE);
+    if (result == ERR_RUNTIME) exit(E_ERR_SQR_RUNTIME);
+}
+
 int main(int argc, const char* argv[])
 {
     initRuntime();
@@ -53,7 +54,7 @@ int main(int argc, const char* argv[])
     if (argc == 1) {
         runConsole();
     } else if (argc > 1) {
-        runFile(argvs[1]);
+        runFile(argv[1]);
     }
 
     clearRuntime();

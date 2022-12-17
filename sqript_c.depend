@@ -1,5 +1,5 @@
 # depslib dependency file v1.0
-1671253382 source:c:\users\filos\projects\sqript_c\sqript_c\main.c
+1671291325 source:c:\users\filos\projects\sqript_c\sqript_c\main.c
 	<stdio.h>
 	<stdlib.h>
 	"common.h"
@@ -8,7 +8,7 @@
 	"log.h"
 	"runtime.h"
 
-1671246167 c:\users\filos\projects\sqript_c\sqript_c\common.h
+1671290346 c:\users\filos\projects\sqript_c\sqript_c\common.h
 	<stdbool.h>
 	<stddef.h>
 	<stdint.h>
@@ -66,13 +66,28 @@
 	"value.h"
 	"memory.h"
 
-1671193528 c:\users\filos\projects\sqript_c\sqript_c\runtime.h
+1671290513 c:\users\filos\projects\sqript_c\sqript_c\runtime.h
 	"segment.h"
 	"value.h"
 
-1671252461 source:c:\users\filos\projects\sqript_c\sqript_c\runtime.c
+1671290538 source:c:\users\filos\projects\sqript_c\sqript_c\runtime.c
 	<stdio.h>
 	"common.h"
 	"runtime.h"
 	"digest.h"
+
+1671291155 source:c:\users\filos\projects\sqript_c\sqript_c\reader.c
+	<stdio.h>
+	"common.h"
+	"reader.h"
+
+1671290794 c:\users\filos\projects\sqript_c\sqript_c\reader.h
+
+1671291172 source:c:\users\filos\projects\sqript_c\sqript_c\compiler.c
+	<stdio.h>
+	"common.h"
+	"compiler.h"
+	"reader.h"
+
+1671290570 c:\users\filos\projects\sqript_c\sqript_c\compiler.h
 
