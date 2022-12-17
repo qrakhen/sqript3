@@ -13,20 +13,24 @@ static void resetStack() {
 static InterpretResult run() {
     #define RBYTE() (*rt.ip++)
     #define CONST() (rt.segment->constants.values[RBYTE()])
+    #define OPBIN(op) do { Value b = pop(); Value a = pop(); push(a op b); } while(false);
 
     do {
         #ifdef DEBUG_MODE
-        printf("schteck: ");
         for (Value* v = rt.stack; v < rt.cursor; v++) {
             printf("[");
             printValue(*v);
             printf("]");
         }
         printf("\n");
-        //digestInstruction(rt.segment, (int)(rt.ip = rt.segment->code));
         #endif
         byte ix;
         switch (ix = RBYTE()) {
+            case OP_NEG: push(-pop()); break;
+            case OP_ADD: OPBIN(+); break;
+            case OP_SUB: OPBIN(-); break;
+            case OP_MUL: OPBIN(*); break;
+            case OP_DIV: OPBIN(/); break;
             case OP_CONSTANT: {
                 Value c = CONST();
                 push(c);
@@ -41,6 +45,7 @@ static InterpretResult run() {
 
     #undef RBYTE
     #undef CONST
+    #undef OPBIN
 }
 
 void initRuntime() {
@@ -58,11 +63,12 @@ InterpretResult interpret(Segment* segment) {
 }
 
 void push(Value value) {
-    *rt.cursor = value;
-    rt.cursor++;
+    printf(" push val: %g ", value);
+    *(rt.cursor++) = value;
 }
 
 Value pop() {
+    printf(" pop val: %g ", *(rt.cursor - 1));
     return *(--rt.cursor);
 }
 

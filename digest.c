@@ -12,9 +12,19 @@ void digestSegment(Segment* segment, const char* name)
 
 int digestInstruction(Segment* segment, int position)
 {
-    //logSpam(position);
+    printf("%04d ", position);
     uint8_t instruction = segment->code[position];
     switch (instruction) {
+    case OP_NEG:
+        return basicInstruction("OP_NEG", position);
+    case OP_ADD:
+        return basicInstruction("OP_ADD", position);
+    case OP_SUB:
+        return basicInstruction("OP_SUB", position);
+    case OP_MUL:
+        return basicInstruction("OP_MUL", position);
+    case OP_DIV:
+        return basicInstruction("OP_DIV", position);
     case OP_CONSTANT:
         return constantInstruction("OP_CONSTANT", segment, position);
     case OP_RETURN:
@@ -26,12 +36,14 @@ int digestInstruction(Segment* segment, int position)
 }
 
 static int basicInstruction(const char* name, int position) {
-    logSpam(name);
+    printf("%s\n", name);
     return position + 1;
 }
 
 static int constantInstruction(const char* name, Segment* segment, int position) {
     uint8_t constant = segment->code[position + 1];
-    logSpam(segment->constants.values[constant]);
+    printf("%s: ", name);
+    printValue(segment->constants.values[constant]);
+    printf("\n");
     return position + 2;
 }

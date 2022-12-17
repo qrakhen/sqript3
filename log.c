@@ -16,7 +16,7 @@ void __logWrite(char* message, byte level, ...) {
     time(&t);
     timeInfo = localtime(&t);
     strftime(buffer, 64, "%H:%M:%S", timeInfo);
-    printf(buffer);
+    //printf(buffer);
 
     /*va_list args;
     va_start(args, 16);

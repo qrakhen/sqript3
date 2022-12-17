@@ -28,7 +28,6 @@ void writeSegment(Segment* segment, uint8_t byte, int line)
         segment->code = SCALE_ARRAY(uint8_t, segment->code, size, segment->size);
         segment->lines = SCALE_ARRAY(int, segment->lines, size, segment->size);
     }
-
     segment->code[segment->pos] = byte;
     segment->lines[segment->pos] = line;
     segment->pos++;
@@ -37,5 +36,5 @@ void writeSegment(Segment* segment, uint8_t byte, int line)
 int registerConstant(Segment* segment, Value value)
 {
     writeValueArray(&segment->constants, value);
-    return segment->constants.size - 1;
+    return segment->constants.pos - 1;
 }
