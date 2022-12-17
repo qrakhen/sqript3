@@ -3,10 +3,11 @@
 #include <stdarg.h>
 
 #include "log.h"
+#include "common.h"
 
 static byte logLevel = LOG_LEVEL_SPAM;
 
-void __logWrite(char* message, byte level, ...) {
+static void __logWrite(char* message, byte level, ...) {
     if (level > logLevel)
         return;
 
@@ -15,7 +16,7 @@ void __logWrite(char* message, byte level, ...) {
     struct tm * timeInfo;
     time(&t);
     timeInfo = localtime(&t);
-    strftime(buffer, 64, "%H:%M:%S", timeInfo);
+    strftime(buffer, 32, "%H:%M:%S", timeInfo);
     //printf(buffer);
 
     /*va_list args;
@@ -27,6 +28,12 @@ void __logWrite(char* message, byte level, ...) {
     }*/
     printf(" > %s\n", message);
 }
+
+void logError(char* message, ...) { __logWrite(message, LOG_LEVEL_ERROR); }
+void logWarn(char* message, ...) { __logWrite(message, LOG_LEVEL_WARN); }
+void logInfo(char* message, ...) { __logWrite(message, LOG_LEVEL_INFO); }
+void logDebug(char* message, ...) { __logWrite(message, LOG_LEVEL_DEBUG); }
+void logSpam(char* message, ...) { __logWrite(message, LOG_LEVEL_SPAM); }
 
 void logLn() {
     printf("\n");

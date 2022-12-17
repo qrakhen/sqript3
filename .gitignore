@@ -5,3 +5,7 @@ obj/
 log/
 lib/
 .vs/
+*.depend
+*.stackdump
+*.layout
+*.user

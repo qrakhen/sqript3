@@ -1,5 +1,5 @@
-#ifndef sqript_type_h
-#define sqript_type_h
+#ifndef sqript_value_h
+#define sqript_value_h
 
 #include <stdint.h>
 

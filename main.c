@@ -29,6 +29,10 @@ static char* readFile(const char* path) {
     size_t fileSize = ftell(file);
     rewind(file);
     char* buffer = (char*)malloc(fileSize + 1);
+    if (buffer == NULL) {
+        fprintf(stderr, "could not allocate buffer for file: \"%s\".\n", path);
+        exit(E_ERR_IO_BADFILE);
+    }
     size_t bytesRead = fread(buffer, sizeof(char), fileSize, file);
     if (bytesRead < fileSize) {
         fprintf(stderr, "file seems to be corrupt: \"%s\".\n", path);

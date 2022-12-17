@@ -1,6 +1,7 @@
 #include <stdio.h>
 
 #include "digest.h"
+#include "log.h"
 
 void digestSegment(Segment* segment, const char* name)
 {

@@ -1,5 +1,5 @@
-#ifndef sqript_log_h
-#define sqript_log_h
+#ifndef sqript_digest_h
+#define sqript_digest_h
 
 #include "segment.h"
 
