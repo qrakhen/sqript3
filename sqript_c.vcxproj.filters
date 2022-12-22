@@ -21,7 +21,7 @@
     <ClCompile Include="segment.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="compiler.c">
+    <ClCompile Include="digester.c">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="digest.c">
@@ -56,7 +56,7 @@
     <ClInclude Include="memory.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="compiler.h">
+    <ClInclude Include="digester.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="debug.h">

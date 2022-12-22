@@ -3,6 +3,7 @@
 #include "common.h"
 #include "runtime.h"
 #include "digest.h"
+#include "digester.h"
 
 Runtime rt;
 
@@ -31,6 +32,7 @@ static InterpretResult run() {
             case OP_SUB: OPBIN(-); break;
             case OP_MUL: OPBIN(*); break;
             case OP_DIV: OPBIN(/); break;
+            // OP_AND, OR
             case OP_CONSTANT: {
                 Value c = CONST();
                 push(c);
@@ -57,8 +59,17 @@ void clearRuntime() {
 }
 
 InterpretResult interpret(const char* source) {
-    compile(source);
-    return run();
+    Segment seg;
+    initSegment(&seg);
+    if (!digest(source, &seg)) {
+        clearSegment(&seg);
+        return ERR_COMPILE;
+    }
+    rt.segment = &seg;
+    rt.ip = rt.segment->code;
+    InterpretResult result = run();
+    clearSegment(&seg);
+    return result;
 }
 
 void push(Value value) {
