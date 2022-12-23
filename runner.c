@@ -419,7 +419,7 @@ static InterpretResult run() {
                 push(NUMBER_VAL(-AS_NUMBER(pop())));
                 break;
             case OP_PRINT: {
-                consoleWrite("  :> ");
+                printf(" :> ");
                 //consoleWriteLine(valueToString(pop()));
                 printValue(pop());
                 printf("\n");
@@ -514,7 +514,7 @@ static InterpretResult run() {
                 ObjClass* subclass = AS_CLASS(peek(0));
                 tableAddAll(&AS_CLASS(superclass)->methods,
                             &subclass->methods);
-                pop(); // Subclass.
+                pop();
                 break;
             }
             case OP_METHOD:

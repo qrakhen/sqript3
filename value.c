@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+#include <math.h>
 
 #include "object.h"
 #include "memory.h"
@@ -48,6 +49,8 @@ void printValue(Value value) {
         printf(AS_BOOL(value) ? "true" : "false");
     } else if (IS_NULL(value)) {
         printf("NULL");
+    } else if (IS_INTEGER(value)) {
+        printf("%d", (int64)AS_NUMBER(value));
     } else if (IS_NUMBER(value)) {
         printf("%g", AS_NUMBER(value));
     } else if (IS_OBJ(value)) {

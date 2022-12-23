@@ -8,8 +8,8 @@
 #include "runner.h"
 #include "console.h"
 
-#define __C_PREFIX_INPUT " <:  "
-#define __C_PREFIT_OUTPUT "  :> "
+#define __C_PREFIX_INPUT " <: "
+#define __C_PREFIT_OUTPUT " :> "
 
 static void repl() {
     char line[1024];

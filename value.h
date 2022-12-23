@@ -26,6 +26,7 @@ typedef int64 Value;
 #define IS_BOOL(value)      (((value) | 1) == TRUE_VAL)
 #define IS_NULL(value)       ((value) == NULL_VAL)
 #define IS_NUMBER(value)    (((value) & QNAN) != QNAN)
+#define IS_INTEGER(value)    (IS_NUMBER(value) && (abs(ceil(AS_NUMBER(value)) - floor(AS_NUMBER(value))) == 0))
 #define IS_OBJ(value) \
     (((value) & (QNAN | SIGN_BIT)) == (QNAN | SIGN_BIT))
 

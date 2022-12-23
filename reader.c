@@ -199,7 +199,8 @@ Token scanToken() {
         case '<': return makeToken(
             match('=') ? TOKEN_LESS_EQUAL : (
                 match('<') ? TOKEN_BITWISE_LEFT : (
-                    match('~') ? TOKEN_EQUAL : TOKEN_LESS)));
+                    match('~') ? TOKEN_EQUAL : (
+                        match(':') ? TOKEN_RETURN : TOKEN_LESS))));
         case '"': return string('"');
         case '\'': return string('\'');
     }
