@@ -106,7 +106,7 @@ static void errorAtCurrent(const char* message) {
     errorAt(&digester.current, message);
 }
 
-static void advance() {
+static void next() {
     digester.previous = digester.current;
 
     for (;;) {
@@ -119,7 +119,7 @@ static void advance() {
 
 static void consume(TokenType type, const char* message) {
     if (digester.current.type == type) {
-        advance();
+        next();
         return;
     }
 
@@ -132,7 +132,7 @@ static bool check(TokenType type) {
 
 static bool match(TokenType type) {
     if (!check(type)) return false;
-    advance();
+    next();
     return true;
 }
 
@@ -573,69 +573,67 @@ static void __MOD(bool canAssign) {
 }
 
 WeightRule rules[] = {
-    [TOKEN_GROUP_OPEN] = { __GRP,  __CAL,  W_CALL },
-    [TOKEN_GROUP_CLOSE] = { NULL,   NULL,   W_NONE },
-    [TOKEN_CONTEXT_OPEN] = { NULL,   NULL,   W_NONE },
-    [TOKEN_CONTEXT_CLOSE] = { NULL,   NULL,   W_NONE },
-    [TOKEN_COMMA] = { NULL,   NULL,   W_NONE },
-    [TOKEN_DOT] = { NULL,   __DOT,  W_CALL },
-    [TOKEN_MINUS] = { __MOD,  __BIN,  W_TERM },
-    [TOKEN_PLUS] = { NULL,   __BIN,  W_TERM },
-    [TOKEN_BITWISE_AND] = { NULL,   __BIN,  W_TERM },
-    [TOKEN_BITWISE_OR] = { NULL,   __BIN,  W_TERM },
-    [TOKEN_BITWISE_XOR] = { NULL,   __BIN,  W_TERM },
-    [TOKEN_BITWISE_NOT] = { __MOD,  NULL,   W_TERM },
-    [TOKEN_SEMICOLON] = { NULL,   NULL,   W_NONE },
-    [TOKEN_SLASH] = { NULL,   __BIN,  W_FACTOR },
-    [TOKEN_STAR] = { NULL,   __BIN,  W_FACTOR },
-    [TOKEN_BANG] = { __MOD,  NULL,   W_NONE },
-    [TOKEN_BANG_EQUAL] = { NULL,   __BIN,  W_EQUALITY },
-    [TOKEN_EQUAL] = { NULL,   NULL,   W_NONE },
-    [TOKEN_EQUAL_EQUAL] = { NULL,   __BIN,  W_EQUALITY },
-    [TOKEN_GREATER] = { NULL,   __BIN,  W_COMPARISON },
-    [TOKEN_GREATER_EQUAL] = { NULL,   __BIN,  W_COMPARISON },
-    [TOKEN_LESS] = { NULL,   __BIN,  W_COMPARISON },
-    [TOKEN_LESS_EQUAL] = { NULL,   __BIN,  W_COMPARISON },
-    [TOKEN_IDENTIFIER] = { __REF,  NULL,   W_NONE },
-    [TOKEN_STRING] = { __STR,  NULL,   W_NONE },
-    [TOKEN_NUMBER] = { __NUM,  NULL,   W_NONE },
-    [TOKEN_AND] = { NULL,   __AND,  W_AND },
-    [TOKEN_CLASS] = { NULL,   NULL,   W_NONE },
-    [TOKEN_ELSE] = { NULL,   NULL,   W_NONE },
-    [TOKEN_FALSE] = { __LIT,  NULL,   W_NONE },
-    [TOKEN_FOR] = { NULL,   NULL,   W_NONE },
-    [TOKEN_FUN] = { NULL,   NULL,   W_NONE },
-    [TOKEN_IF] = { NULL,   NULL,   W_NONE },
-    [TOKEN_NULL] = { __LIT,  NULL,   W_NONE },
-    [TOKEN_OR] = { NULL,   __OR,   W_OR },
-    [TOKEN_PRINT] = { NULL,   NULL,   W_NONE },
-    [TOKEN_RETURN] = { NULL,   NULL,   W_NONE },
-    [TOKEN_SUPER] = { __SUP,  NULL,   W_NONE },
-    [TOKEN_THIS] = { __CUR,  NULL,   W_NONE },
-    [TOKEN_TRUE] = { __LIT,  NULL,   W_NONE },
-    [TOKEN_VAR] = { NULL,   NULL,   W_NONE },
-    [TOKEN_WHILE] = { NULL,   NULL,   W_NONE },
-    [TOKEN_ERROR] = { NULL,   NULL,   W_NONE },
-    [TOKEN_EOF] = { NULL,   NULL,   W_NONE }
+    [TOKEN_GROUP_OPEN]      = { __GRP,  __CAL,  W_CALL },
+    [TOKEN_GROUP_CLOSE]     = { NULL,   NULL,   W_NONE },
+    [TOKEN_CONTEXT_OPEN]    = { NULL,   NULL,   W_NONE },
+    [TOKEN_CONTEXT_CLOSE]   = { NULL,   NULL,   W_NONE },
+    [TOKEN_COMMA]           = { NULL,   NULL,   W_NONE },
+    [TOKEN_DOT]             = { NULL,   __DOT,  W_CALL },
+    [TOKEN_MINUS]           = { __MOD,  __BIN,  W_TERM },
+    [TOKEN_PLUS]            = { NULL,   __BIN,  W_TERM },
+    [TOKEN_BITWISE_AND]     = { NULL,   __BIN,  W_TERM },
+    [TOKEN_BITWISE_OR]      = { NULL,   __BIN,  W_TERM },
+    [TOKEN_BITWISE_XOR]     = { NULL,   __BIN,  W_TERM },
+    [TOKEN_BITWISE_NOT]     = { __MOD,  NULL,   W_TERM },
+    [TOKEN_SEMICOLON]       = { NULL,   NULL,   W_NONE },
+    [TOKEN_SLASH]           = { NULL,   __BIN,  W_FACTOR },
+    [TOKEN_STAR]            = { NULL,   __BIN,  W_FACTOR },
+    [TOKEN_BANG]            = { __MOD,  NULL,   W_NONE },
+    [TOKEN_BANG_EQUAL]      = { NULL,   __BIN,  W_EQUALITY },
+    [TOKEN_EQUAL]           = { NULL,   NULL,   W_NONE },
+    [TOKEN_EQUAL_EQUAL]     = { NULL,   __BIN,  W_EQUALITY },
+    [TOKEN_GREATER]         = { NULL,   __BIN,  W_COMPARISON },
+    [TOKEN_GREATER_EQUAL]   = { NULL,   __BIN,  W_COMPARISON },
+    [TOKEN_LESS]            = { NULL,   __BIN,  W_COMPARISON },
+    [TOKEN_LESS_EQUAL]      = { NULL,   __BIN,  W_COMPARISON },
+    [TOKEN_IDENTIFIER]      = { __REF,  NULL,   W_NONE },
+    [TOKEN_STRING]          = { __STR,  NULL,   W_NONE },
+    [TOKEN_NUMBER]          = { __NUM,  NULL,   W_NONE },
+    [TOKEN_AND]             = { NULL,   __AND,  W_AND },
+    [TOKEN_CLASS]           = { NULL,   NULL,   W_NONE },
+    [TOKEN_ELSE]            = { NULL,   NULL,   W_NONE },
+    [TOKEN_FALSE]           = { __LIT,  NULL,   W_NONE },
+    [TOKEN_FOR]             = { NULL,   NULL,   W_NONE },
+    [TOKEN_FUNCTION]        = { NULL,   NULL,   W_NONE },
+    [TOKEN_IF]              = { NULL,   NULL,   W_NONE },
+    [TOKEN_NULL]            = { __LIT,  NULL,   W_NONE },
+    [TOKEN_OR]              = { NULL,   __OR,   W_OR },
+    [TOKEN_PRINT]           = { NULL,   NULL,   W_NONE },
+    [TOKEN_RETURN]          = { NULL,   NULL,   W_NONE },
+    [TOKEN_SUPER]           = { __SUP,  NULL,   W_NONE },
+    [TOKEN_THIS]            = { __CUR,  NULL,   W_NONE },
+    [TOKEN_TRUE]            = { __LIT,  NULL,   W_NONE },
+    [TOKEN_VAR]             = { NULL,   NULL,   W_NONE },
+    [TOKEN_WHILE]           = { NULL,   NULL,   W_NONE },
+    [TOKEN_ERROR]           = { NULL,   NULL,   W_NONE },
+    [TOKEN_EOF]             = { NULL,   NULL,   W_NONE }
 };
 
 static void digestWeight(Weight precedence) {
-    advance();
+    next();
     WeightCallback prefixRule = getRule(digester.previous.type)->prefix;
     if (prefixRule == NULL) {
         error("Expect expression.");
         return;
     }
 
-
     bool canAssign = precedence <= W_ASSIGNMENT;
     prefixRule(canAssign);
 
     while (precedence <= getRule(digester.current.type)->weight) {
-        advance();
-        WeightCallback infixRule = getRule(digester.previous.type)->infix;
-
-        infixRule(canAssign);
+        next();
+        WeightCallback fn = getRule(digester.previous.type)->infix;
+        fn(canAssign);
     }
 
     if (canAssign && match(TOKEN_EQUAL)) {
@@ -768,15 +766,16 @@ static void varDeclaration() {
     } else {
         emitByte(OP_NULL);
     }
-    consume(TOKEN_SEMICOLON,
-            "Expect ';' after variable declaration.");
+    if (digester.current.type != TOKEN_EOF)
+        consume(TOKEN_SEMICOLON, "Expect ';' after variable declaration.");
 
     defineVariable(global);
 }
 
 static void expressionStatement() {
     expression();
-    consume(TOKEN_SEMICOLON, "Expect ';' after expression.");
+    if (digester.current.type != TOKEN_EOF)
+        consume(TOKEN_SEMICOLON, "Expect ';' after expression.");
     emitByte(OP_POP);
 }
 
@@ -797,7 +796,9 @@ static void forStatement() {
     int exitJump = -1;
     if (!match(TOKEN_SEMICOLON)) {
         expression();
-        consume(TOKEN_SEMICOLON, "Expect ';' after loop condition.");
+
+        if (digester.current.type != TOKEN_EOF)
+            consume(TOKEN_SEMICOLON, "Expect ';' after loop condition.");
 
         // Jump out of the loop if the condition is false.
         exitJump = emitJump(OP_JUMP_IF_FALSE);
@@ -848,7 +849,8 @@ static void ifStatement() {
 
 static void printStatement() {
     expression();
-    consume(TOKEN_SEMICOLON, "Expect ';' after value.");
+    if (digester.current.type != TOKEN_EOF)
+        consume(TOKEN_SEMICOLON, "Expect ';' after value.");
     emitByte(OP_PRINT);
 }
 
@@ -892,7 +894,7 @@ static void synchronize() {
         if (digester.previous.type == TOKEN_SEMICOLON) return;
         switch (digester.current.type) {
             case TOKEN_CLASS:
-            case TOKEN_FUN:
+            case TOKEN_FUNCTION:
             case TOKEN_VAR:
             case TOKEN_FOR:
             case TOKEN_IF:
@@ -905,7 +907,7 @@ static void synchronize() {
                 ; // Do nothing.
         }
 
-        advance();
+        next();
     }
 }
 
@@ -913,7 +915,7 @@ static void declaration() {
     if (match(TOKEN_CLASS)) {
         classDeclaration();
 
-    } else if (match(TOKEN_FUN)) {
+    } else if (match(TOKEN_FUNCTION)) {
         funDeclaration();
 
     } else if (match(TOKEN_VAR)) {
@@ -973,7 +975,7 @@ ObjFunction* compile(const char* source) {
     digester.failed = false;
     digester.panic = false;
 
-    advance();
+    next();
 
 
     while (!match(TOKEN_EOF)) {
