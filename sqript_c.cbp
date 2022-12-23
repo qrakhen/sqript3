@@ -35,16 +35,21 @@
 		<Unit filename="compiler.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="compiler.h" />
+		<Unit filename="console.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="console.h" />
+		<Unit filename="debug.c">
+			<Option compilerVar="CC" />
+		</Unit>
 		<Unit filename="debug.h" />
 		<Unit filename="digest.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="digest.h" />
-		<Unit filename="log.c">
+		<Unit filename="digester.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="log.h" />
+		<Unit filename="digester.h" />
 		<Unit filename="main.c">
 			<Option compilerVar="CC" />
 		</Unit>
@@ -52,16 +57,26 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="memory.h" />
-		<Unit filename="operation.h" />
-		<Unit filename="runtime.c">
+		<Unit filename="object.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="runtime.h" />
-		<Unit filename="scanner.h" />
+		<Unit filename="object.h" />
+		<Unit filename="reader.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="reader.h" />
+		<Unit filename="runner.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="runner.h" />
 		<Unit filename="segment.c">
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="segment.h" />
+		<Unit filename="table.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="table.h" />
 		<Unit filename="value.c">
 			<Option compilerVar="CC" />
 		</Unit>
