@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdarg.h>
 
 #include "common.h"
 #include "runtime.h"
@@ -11,10 +12,37 @@ static void resetStack() {
     rt.cursor = rt.stack;
 }
 
+static Value peek(int offset) {
+    return rt.cursor[-1 - offset];
+}
+
+static void runtimeError(const char* format, ...) {
+    va_list args;
+    va_start(args, format);
+    vfprintf(stderr, format, args);
+    va_end(args);
+    fputs("\n", stderr);
+
+    size_t instruction = rt.ip - rt.segment->code - 1;
+    int line = rt.segment->lines[instruction];
+    fprintf(stderr, "[line %d] in script\n", line);
+
+    resetStack();
+}
+
 static InterpretResult run() {
     #define RBYTE() (*rt.ip++)
     #define CONST() (rt.segment->constants.values[RBYTE()])
-    #define OPBIN(op) do { Value b = pop(); Value a = pop(); push(a op b); } while(false);
+    #define OPBIN(typeFn, op) \
+        do { \
+            if (!IS_NUMBER(peek(0)) || !IS_NUMBER(peek(1))) { \
+                runtimeError("scalars expected"); \
+                return ERR_RUNTIME; \
+            } \
+            double b = AS_NUMBER(pop()); \
+            double a = AS_NUMBER(pop()); \
+            push(typeFn(a op b)); \
+        } while(false);
 
     do {
         #ifdef DEBUG_MODE
@@ -27,11 +55,23 @@ static InterpretResult run() {
         #endif
         byte ix;
         switch (ix = RBYTE()) {
-            case OP_NEG: push(-pop()); break;
-            case OP_ADD: OPBIN(+); break;
-            case OP_SUB: OPBIN(-); break;
-            case OP_MUL: OPBIN(*); break;
-            case OP_DIV: OPBIN(/); break;
+            case OP_NULL: push(VAL_NULL); break;
+            case OP_TRUE: push(VAL_BOOL(true)); break;
+            case OP_FALSE: push(VAL_BOOL(false)); break;
+
+            case OP_ADD: OPBIN(VAL_NUMBER, +); break;
+            case OP_SUB: OPBIN(VAL_NUMBER, -); break;
+            case OP_MUL: OPBIN(VAL_NUMBER, *); break;
+            case OP_DIV: OPBIN(VAL_NUMBER, /); break;
+
+            case OP_NEG:
+                if (!IS_NUMBER(peek(0))) {
+                    runtimeError("operand must be scalar");
+                    return ERR_RUNTIME;
+                }
+                push(VAL_NUMBER(-AS_NUMBER(pop())));
+                break;
+
             // OP_AND, OR
             case OP_CONSTANT: {
                 Value c = CONST();

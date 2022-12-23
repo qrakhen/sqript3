@@ -26,6 +26,12 @@ int digestInstruction(Segment* segment, int position)
         return basicInstruction("OP_MUL", position);
     case OP_DIV:
         return basicInstruction("OP_DIV", position);
+    case OP_NULL:
+        return basicInstruction("OP_NULL", position);
+    case OP_TRUE:
+        return basicInstruction("OP_TRUE", position);
+    case OP_FALSE:
+        return basicInstruction("OP_FALSE", position);
     case OP_CONSTANT:
         return constantInstruction("OP_CONSTANT", segment, position);
     case OP_RETURN:
