@@ -6,13 +6,17 @@
 #include "segment.h"
 #include "debug.h"
 #include "runner.h"
+#include "console.h"
+
+#define __C_PREFIX_INPUT " <: "
+#define __C_PREFIT_OUTPUT " :> "
 
 static void repl() {
     char line[1024];
     for (;;) {
-        printf(" :> ");
+        printf(__C_PREFIX_INPUT);
         if (!fgets(line, sizeof(line), stdin)) {
-            printf("\n");
+            consoleWriteLine("");
             break;
         }
         interpret(line);
@@ -58,10 +62,18 @@ static void runFile(const char* path) {
 }
 
 int main(int argc, const char* argv[]) {
+    consoleInit();
     initVM();
+    consoleWriteLine("test");
+    consoleSetColor(C_COLOR_RED);
+    consoleWriteLine("test");
+    consoleWriteColor("test", C_COLOR_CYAN);
     if (argc == 1) {
         repl();
-    } else if (argc == 2) {
+    } else if (argc >= 2) {
+        if (argc > 3) {
+            printf("options");
+        }
         runFile(argv[1]);
     } else {
         fprintf(stderr, "Usage: clox [path]\n");

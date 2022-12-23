@@ -24,7 +24,7 @@
     <ClCompile Include="digester.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="log.c">
+    <ClCompile Include="console.c">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="memory.c">
@@ -65,7 +65,7 @@
     <ClInclude Include="debug.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="log.h">
+    <ClInclude Include="console.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="reader.h">
