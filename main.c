@@ -8,8 +8,8 @@
 #include "runner.h"
 #include "console.h"
 
-#define __C_PREFIX_INPUT " <: "
-#define __C_PREFIT_OUTPUT " :> "
+#define __C_PREFIX_INPUT " <:  "
+#define __C_PREFIT_OUTPUT "  :> "
 
 static void repl() {
     char line[1024];
@@ -64,10 +64,6 @@ static void runFile(const char* path) {
 int main(int argc, const char* argv[]) {
     consoleInit();
     initVM();
-    consoleWriteLine("test");
-    consoleSetColor(C_COLOR_RED);
-    consoleWriteLine("test");
-    consoleWriteColor("test", C_COLOR_CYAN);
     if (argc == 1) {
         repl();
     } else if (argc >= 2) {

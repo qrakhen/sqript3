@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <time.h>
 #include <stdarg.h>
 
@@ -8,6 +9,10 @@
 static byte logLevel = LOG_LEVEL_SPAM;
 
 Console console;
+
+static void __setCursor(short x, short y) {
+    printf("%c[%d;%dH", 27, x, y);
+}
 
 void consoleInit() {
     console.background = C_COLOR_RESET;
@@ -24,11 +29,17 @@ void consoleSetBackground(const char* color) {
     console.background = color;
 }
 
+void consoleSetCursor(short x, short y) {
+    console.cursorX = x;
+    console.cursorY = y;
+}
+
 void consoleWrite(char* message) {
     printf(console.background);
     printf(console.color);
     printf(message);
     printf(C_COLOR_RESET);
+    console.cursorX += strlen(message);
 }
 
 void consoleWriteColor(char* message, const char* color) {
@@ -40,11 +51,21 @@ void consoleWriteColor(char* message, const char* color) {
 void consoleWriteLine(char* message) {
     consoleWrite(message);
     printf("\n");
+    console.cursorY++;
+    console.cursorX = 0;
 }
 
 void consoleResetColor() {
     console.color = C_COLOR_RESET;
     console.background = C_COLOR_RESET;
+}
+
+void consoleClear() {
+    #if OS_UNIX
+    system("clear");
+    #else
+    system("cls");
+    #endif
 }
 
 static void __logWrite(char* message, byte level, ...) {

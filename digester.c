@@ -349,7 +349,7 @@ static void declareVariable() {
     for (int i = current->localCount - 1; i >= 0; i--) {
         Local* local = &current->locals[i];
         if (local->depth != -1 && local->depth < current->scopeDepth) {
-            break; // [negative]
+            break;
         }
 
         if (identifiersEqual(name, &local->name)) {
@@ -903,8 +903,7 @@ static void synchronize() {
             case TOKEN_RETURN:
                 return;
 
-            default:
-                ; // Do nothing.
+            default:;
         }
 
         next();
@@ -923,7 +922,6 @@ static void declaration() {
     } else {
         statement();
     }
-
 
     if (digester.panic) synchronize();
 }
@@ -952,37 +950,17 @@ static void statement() {
 
 ObjFunction* compile(const char* source) {
     initScanner(source);
-    /* Scanning on Demand dump-tokens < Compiling Expressions compile-chunk
-      int line = -1;
-      for (;;) {
-        Token token = scanToken();
-        if (token.line != line) {
-          printf("%4d ", token.line);
-          line = token.line;
-         } else {
-          printf("   | ");
-         }
-        printf("%2d '%.*s'\n", token.type, token.length, token.start); // [format]
-
-        if (token.type == TOKEN_EOF) break;
-       }
-    */
     Compiler compiler;
-
     initCompiler(&compiler, TYPE_SCRIPT);
-
 
     digester.failed = false;
     digester.panic = false;
 
     next();
 
-
     while (!match(TOKEN_EOF)) {
         declaration();
     }
-
-
 
     ObjFunction* function = endCompiler();
     return digester.failed ? NULL : function;

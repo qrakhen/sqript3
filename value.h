@@ -14,14 +14,14 @@ typedef struct ObjString ObjString;
 
 #ifdef NAN_BOXING
 
-#define SIGN_BIT ((uint64_t)0x8000000000000000)
-#define QNAN     ((uint64_t)0x7ffc000000000000)
+#define SIGN_BIT ((int64)0x8000000000000000)
+#define QNAN     ((int64)0x7ffc000000000000)
 
 #define TAG_NULL   1
 #define TAG_FALSE 2
 #define TAG_TRUE  3
 
-typedef uint64_t Value;
+typedef int64 Value;
 
 #define IS_BOOL(value)      (((value) | 1) == TRUE_VAL)
 #define IS_NULL(value)       ((value) == NULL_VAL)
@@ -99,6 +99,7 @@ bool valuesEqual(Value a, Value b);
 void initValueArray(ValueArray* array);
 void writeValueArray(ValueArray* array, Value value);
 void freeValueArray(ValueArray* array);
+char* valueToString(Value value);
 void printValue(Value value);
 
 #endif

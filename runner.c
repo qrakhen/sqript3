@@ -419,6 +419,8 @@ static InterpretResult run() {
                 push(NUMBER_VAL(-AS_NUMBER(pop())));
                 break;
             case OP_PRINT: {
+                consoleWrite("  :> ");
+                //consoleWriteLine(valueToString(pop()));
                 printValue(pop());
                 printf("\n");
                 break;
