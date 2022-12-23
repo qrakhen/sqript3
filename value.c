@@ -1,37 +1,81 @@
-#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
 
-#include "value.h"
+#include "object.h"
 #include "memory.h"
+#include "value.h"
 
-void initValueArray(ValueArray* array)
-{
-    array->pos = 0;
-    array->size = 0;
+void initValueArray(ValueArray* array) {
     array->values = NULL;
+    array->capacity = 0;
+    array->count = 0;
 }
 
-void clearValueArray(ValueArray* array)
-{
-    FREE_ARRAY(Value, array->values, array->size);
+void writeValueArray(ValueArray* array, Value value) {
+    if (array->capacity < array->count + 1) {
+        int oldCapacity = array->capacity;
+        array->capacity = GROW_CAPACITY(oldCapacity);
+        array->values = GROW_ARRAY(Value, array->values,
+                                   oldCapacity, array->capacity);
+    }
+
+    array->values[array->count] = value;
+    array->count++;
+}
+
+void freeValueArray(ValueArray* array) {
+    FREE_ARRAY(Value, array->values, array->capacity);
     initValueArray(array);
 }
 
-void writeValueArray(ValueArray* array, Value value)
-{
-    if (array->size < array->pos + 1) {
-        int _limit = array->size;
-        array->size = SCALE_LIMIT(_limit);
-        array->values = SCALE_ARRAY(Value, array->values, _limit, array->size);
+void printValue(Value value) {
+#ifdef NAN_BOXING
+    if (IS_BOOL(value)) {
+        printf(AS_BOOL(value) ? "true" : "false");
+    } else if (IS_NULL(value)) {
+        printf("NULL");
+    } else if (IS_NUMBER(value)) {
+        printf("%g", AS_NUMBER(value));
+    } else if (IS_OBJ(value)) {
+        printObject(value);
     }
-    array->values[array->pos] = value;
-    array->pos++;
+#else
+
+
+    switch (value.type) {
+        case VAL_BOOL:
+            printf(AS_BOOL(value) ? "true" : "false");
+            break;
+        case VAL_NULL: printf("NULL"); break;
+        case VAL_NUMBER: printf("%g", AS_NUMBER(value)); break;
+        case VAL_OBJ: printObject(value); break;
+    }
+#endif
 }
 
-void printValue(Value value)
-{
-    switch (value.type) {
-        case T_BOOL: printf(AS_BOOL(value) ? "true" : "false"); break;
-        case T_NULL: printf("null"); break;
-        case T_NUMBER: printf("%g", AS_NUMBER(value)); break;
+bool valuesEqual(Value a, Value b) {
+#ifdef NAN_BOXING
+    if (IS_NUMBER(a) && IS_NUMBER(b)) {
+        return AS_NUMBER(a) == AS_NUMBER(b);
     }
+    return a == b;
+#else
+    if (a.type != b.type) return false;
+    switch (a.type) {
+        case VAL_BOOL:   return AS_BOOL(a) == AS_BOOL(b);
+        case VAL_NULL:    return true;
+        case VAL_NUMBER: return AS_NUMBER(a) == AS_NUMBER(b);
+            /* Strings strings-equal < Hash Tables equal
+                case VAL_OBJ: {
+                  ObjString* aString = AS_STRING(a);
+                  ObjString* bString = AS_STRING(b);
+                  return aString->length == bString->length &&
+                      memcmp(aString->chars, bString->chars,
+                             aString->length) == 0;
+                }
+             */
+        case VAL_OBJ:    return AS_OBJ(a) == AS_OBJ(b);
+        default:         return false; // Unreachable.
+    }
+#endif
 }

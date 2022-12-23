@@ -2,39 +2,39 @@
 
 #include "segment.h"
 #include "memory.h"
+#include "runner.h"
 
-void initSegment(Segment* segment)
-{
-    segment->pos = 0;
-    segment->size = 0;
-    segment->code = NULL;
-    segment->lines = NULL;
-    initValueArray(&segment->constants);
+void initSegment(Segment* chunk) {
+    chunk->count = 0;
+    chunk->capacity = 0;
+    chunk->code = NULL;
+    chunk->lines = NULL;
+    initValueArray(&chunk->constants);
 }
 
-void clearSegment(Segment* segment)
-{
-    FREE_ARRAY(uint8_t, segment->code, segment->size);
-    FREE_ARRAY(int, segment->lines, segment->size);
-    clearValueArray(&segment->constants);
-    initSegment(segment);
+void freeSegment(Segment* chunk) {
+    FREE_ARRAY(byte, chunk->code, chunk->capacity);
+    FREE_ARRAY(int, chunk->lines, chunk->capacity);
+    freeValueArray(&chunk->constants);
+    initSegment(chunk);
 }
 
-void writeSegment(Segment* segment, uint8_t byte, int line)
-{
-    if (segment->size < segment->pos + 1) {
-        int size = segment->size;
-        segment->size = SCALE_LIMIT(size);
-        segment->code = SCALE_ARRAY(uint8_t, segment->code, size, segment->size);
-        segment->lines = SCALE_ARRAY(int, segment->lines, size, segment->size);
+void writeSegment(Segment* chunk, byte value, int line) {
+    if (chunk->capacity < chunk->count + 1) {
+        int oldCapacity = chunk->capacity;
+        chunk->capacity = GROW_CAPACITY(oldCapacity);
+        chunk->code = GROW_ARRAY(byte, chunk->code, oldCapacity, chunk->capacity);
+        chunk->lines = GROW_ARRAY(int, chunk->lines, oldCapacity, chunk->capacity);
     }
-    segment->code[segment->pos] = byte;
-    segment->lines[segment->pos] = line;
-    segment->pos++;
+
+    chunk->code[chunk->count] = value;
+    chunk->lines[chunk->count] = line;
+    chunk->count++;
 }
 
-int registerConstant(Segment* segment, Value value)
-{
-    writeValueArray(&segment->constants, value);
-    return segment->constants.pos - 1;
+int registerConstant(Segment* chunk, Value value) {
+    push(value);
+    writeValueArray(&chunk->constants, value);
+    pop();
+    return chunk->constants.count - 1;
 }

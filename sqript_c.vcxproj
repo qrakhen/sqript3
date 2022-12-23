@@ -140,27 +140,29 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="debug.c" />
     <ClCompile Include="digester.c" />
-    <ClCompile Include="digest.c" />
     <ClCompile Include="log.c" />
     <ClCompile Include="main.c" />
     <ClCompile Include="memory.c" />
+    <ClCompile Include="object.c" />
     <ClCompile Include="reader.c" />
-    <ClCompile Include="runtime.c" />
+    <ClCompile Include="runner.c" />
     <ClCompile Include="segment.c" />
+    <ClCompile Include="table.c" />
     <ClCompile Include="value.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="common.h" />
     <ClInclude Include="digester.h" />
     <ClInclude Include="debug.h" />
-    <ClInclude Include="digest.h" />
     <ClInclude Include="log.h" />
     <ClInclude Include="memory.h" />
-    <ClInclude Include="operation.h" />
+    <ClInclude Include="object.h" />
     <ClInclude Include="reader.h" />
-    <ClInclude Include="runtime.h" />
+    <ClInclude Include="runner.h" />
     <ClInclude Include="segment.h" />
+    <ClInclude Include="table.h" />
     <ClInclude Include="value.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -24,9 +24,6 @@
     <ClCompile Include="digester.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="digest.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="log.c">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -36,18 +33,24 @@
     <ClCompile Include="reader.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="runtime.c">
+    <ClCompile Include="value.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="value.c">
+    <ClCompile Include="debug.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="object.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="runner.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="table.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="common.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="operation.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="segment.h">
@@ -62,19 +65,22 @@
     <ClInclude Include="debug.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="digest.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="log.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="reader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="runtime.h">
+    <ClInclude Include="value.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="value.h">
+    <ClInclude Include="object.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="runner.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="table.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

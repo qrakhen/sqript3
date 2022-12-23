@@ -1,0 +1,51 @@
+#ifndef sqript_runner_h
+#define sqript_runner_h
+
+#include "object.h"
+#include "table.h"
+#include "value.h"
+
+#define FRAMES_MAX 64
+#define STACK_MAX (FRAMES_MAX * UINT8_COUNT)
+
+typedef struct {
+    ObjClosure* closure;
+    byte* ip;
+    Value* slots;
+} CallFrame;
+
+typedef struct {
+    CallFrame frames[FRAMES_MAX];
+    int frameCount;
+
+    Value stack[STACK_MAX];
+    Value* stackTop;
+    Table globals;
+    Table strings;
+    ObjString* initString;
+    ObjUpvalue* openUpvalues;
+
+    size_t bytesAllocated;
+    size_t nextGC;
+    Obj* objects;
+    int grayCount;
+    int grayCapacity;
+    Obj** grayStack;
+} Runner;
+
+typedef enum {
+    SQR_INTRP_OK,
+    SQR_INTRP_ERROR_DIGEST,
+    SQR_INTRP_ERROR_RUNTIME
+} InterpretResult;
+
+extern Runner runner;
+
+void initVM();
+void freeVM();
+
+InterpretResult interpret(const char* source);
+void push(Value value);
+Value pop();
+
+#endif
