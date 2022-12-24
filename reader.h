@@ -74,6 +74,6 @@ typedef struct {
 } Token;
 
 void initScanner(const char* source);
-Token scanToken();
+Token readToken();
 
 #endif

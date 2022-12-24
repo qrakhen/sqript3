@@ -5,7 +5,7 @@
 
 #include "value.h"
 
-typedef Value(*ExtensionFunctionCallback)(void* caller, ...);
+typedef Value(*ExtensionFunctionCallback)(int argCount, Value* args);
 
 typedef struct {
     const char* name;
@@ -22,12 +22,13 @@ typedef struct {
 
 typedef struct {
     const char* name;
-    byte functionCount;
+    short functionCount;
     ExtensionFunction* functions;
 } Extension;
 
 Extension* registerExtension(const char* name);
 void registerExtensionFunction(Extension* extension, ExtensionFunction fn);
-void addExtensionFunctionParam(ExtensionFunction* fn, ExtensionFunctionParam param);
+void registerExtensionFunctionParam(ExtensionFunction* fn, ExtensionFunctionParam param);
+Value getParamValue(Value* args, int index);
 
 #endif

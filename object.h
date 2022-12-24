@@ -5,6 +5,7 @@
 #include "segment.h"
 #include "register.h"
 #include "value.h"
+#include "list.h"
 
 #define OBJ_TYPE(value)        (AS_OBJ(value)->type)
 
@@ -91,6 +92,11 @@ typedef struct {
     ObjClass* klass;
     Register fields;
 } ObjInstance;
+
+/*typedef struct {
+    Obj obj;
+    List list;
+} ObjList;*/
 
 typedef struct {
     Obj obj;

@@ -51,12 +51,12 @@ static void runtimeError(const char* format, ...) {
 static void defineNative(const char* name, NativeFn function) {
     push(OBJ_VAL(copyString(name, (int)strlen(name))));
     push(OBJ_VAL(newNative(function)));
-    tableSet(&runner.globals, AS_STRING(runner.stack[0]), runner.stack[1]);
+    registerSet(&runner.globals, AS_STRING(runner.stack[0]), runner.stack[1]);
     pop();
     pop();
 }
 
-void initVM() {
+void initRunner() {
     resetStack();
     runner.objects = NULL;
     runner.bytesAllocated = 0;
@@ -66,8 +66,8 @@ void initVM() {
     runner.grayCapacity = 0;
     runner.grayStack = NULL;
 
-    initTable(&runner.globals);
-    initTable(&runner.strings);
+    initRegister(&runner.globals);
+    initRegister(&runner.strings);
 
     runner.initString = NULL;
     runner.initString = copyString("init", 4);
@@ -75,9 +75,9 @@ void initVM() {
     defineNative("clock", clockNative);
 }
 
-void freeVM() {
-    freeTable(&runner.globals);
-    freeTable(&runner.strings);
+void freeRunner() {
+    freeRegister(&runner.globals);
+    freeRegister(&runner.strings);
     runner.initString = NULL;
     freeObjects();
 }
@@ -117,7 +117,7 @@ static bool callValue(Value callee, int argCount) {
                 ObjClass* klass = AS_CLASS(callee);
                 runner.stackTop[-argCount - 1] = OBJ_VAL(newInstance(klass));
                 Value initializer;
-                if (tableGet(&klass->methods, runner.initString,
+                if (registerGet(&klass->methods, runner.initString,
                     &initializer)) {
                     return call(AS_CLOSURE(initializer), argCount);
                 } else if (argCount != 0) {
@@ -147,7 +147,7 @@ static bool callValue(Value callee, int argCount) {
 static bool invokeFromClass(ObjClass* klass, ObjString* name,
                             int argCount) {
     Value method;
-    if (!tableGet(&klass->methods, name, &method)) {
+    if (!registerGet(&klass->methods, name, &method)) {
         runtimeError("Undefined property '%s'.", name->chars);
         return false;
     }
@@ -165,7 +165,7 @@ static bool invoke(ObjString* name, int argCount) {
     ObjInstance* instance = AS_INSTANCE(receiver);
 
     Value value;
-    if (tableGet(&instance->fields, name, &value)) {
+    if (registerGet(&instance->fields, name, &value)) {
         runner.stackTop[-argCount - 1] = value;
         return callValue(value, argCount);
     }
@@ -175,7 +175,7 @@ static bool invoke(ObjString* name, int argCount) {
 
 static bool bindMethod(ObjClass* klass, ObjString* name) {
     Value method;
-    if (!tableGet(&klass->methods, name, &method)) {
+    if (!registerGet(&klass->methods, name, &method)) {
         runtimeError("Undefined property '%s'.", name->chars);
         return false;
     }
@@ -224,12 +224,16 @@ static void closeUpvalues(Value* last) {
 static void defineMethod(ObjString* name) {
     Value method = peek(0);
     ObjClass* klass = AS_CLASS(peek(1));
-    tableSet(&klass->methods, name, method);
+    registerSet(&klass->methods, name, method);
     pop();
 }
 
 static bool isFalsey(Value value) {
-    return IS_NULL(value) || (IS_BOOL(value) && !AS_BOOL(value));
+    return (
+        IS_NULL(value) || 
+        (IS_BOOL(value) && !AS_BOOL(value)) || (
+        IS_NUMBER(value) && AS_NUMBER(value) == 0)
+   );
 }
 
 static void concatenate() {
@@ -309,7 +313,7 @@ static InterpretResult run() {
             case OP_GET_GLOBAL: {
                 ObjString* name = READ_STRING();
                 Value value;
-                if (!tableGet(&runner.globals, name, &value)) {
+                if (!registerGet(&runner.globals, name, &value)) {
                     runtimeError("Undefined variable '%s'.", name->chars);
                     return SQR_INTRP_ERROR_RUNTIME;
                 }
@@ -318,14 +322,14 @@ static InterpretResult run() {
             }
             case OP_DEFINE_GLOBAL: {
                 ObjString* name = READ_STRING();
-                tableSet(&runner.globals, name, peek(0));
+                registerSet(&runner.globals, name, peek(0));
                 pop();
                 break;
             }
             case OP_SET_GLOBAL: {
                 ObjString* name = READ_STRING();
-                if (tableSet(&runner.globals, name, peek(0))) {
-                    tableDelete(&runner.globals, name);
+                if (registerSet(&runner.globals, name, peek(0))) {
+                    registerDelete(&runner.globals, name);
                     runtimeError("Undefined variable '%s'.", name->chars);
                     return SQR_INTRP_ERROR_RUNTIME;
                 }
@@ -351,7 +355,7 @@ static InterpretResult run() {
                 ObjString* name = READ_STRING();
 
                 Value value;
-                if (tableGet(&instance->fields, name, &value)) {
+                if (registerGet(&instance->fields, name, &value)) {
                     pop();
                     push(value);
                     break;
@@ -368,7 +372,7 @@ static InterpretResult run() {
                 }
 
                 ObjInstance* instance = AS_INSTANCE(peek(1));
-                tableSet(&instance->fields, READ_STRING(), peek(0));
+                registerSet(&instance->fields, READ_STRING(), peek(0));
                 Value value = pop();
                 pop();
                 push(value);
@@ -512,7 +516,7 @@ static InterpretResult run() {
                 }
 
                 ObjClass* subclass = AS_CLASS(peek(0));
-                tableAddAll(&AS_CLASS(superclass)->methods,
+                registerAddAll(&AS_CLASS(superclass)->methods,
                             &subclass->methods);
                 pop();
                 break;
@@ -535,7 +539,7 @@ void hack(bool b) {
 }
 
 InterpretResult interpret(const char* source) {
-    ObjFunction* function = compile(source);
+    ObjFunction* function = digest(source);
     if (function == NULL) return SQR_INTRP_ERROR_DIGEST;
     push(OBJ_VAL(function));
     ObjClosure* closure = newClosure(function);

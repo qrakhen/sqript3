@@ -83,7 +83,7 @@ static void blackenObject(Obj* object) {
         case OBJ_CLASS: {
             ObjClass* klass = (ObjClass*)object;
             markObject((Obj*)klass->name);
-            markTable(&klass->methods);
+            markRegister(&klass->methods);
             break;
         }
         case OBJ_CLOSURE: {
@@ -103,7 +103,7 @@ static void blackenObject(Obj* object) {
         case OBJ_INSTANCE: {
             ObjInstance* instance = (ObjInstance*)object;
             markObject((Obj*)instance->klass);
-            markTable(&instance->fields);
+            markRegister(&instance->fields);
             break;
         }
         case OBJ_UPVALUE:
@@ -126,7 +126,7 @@ static void freeObject(Obj* object) {
             break;
         case OBJ_CLASS: {
             ObjClass* klass = (ObjClass*)object;
-            freeTable(&klass->methods);
+            freeRegister(&klass->methods);
             FREE(ObjClass, object);
             break;
         } // [braces]
@@ -145,7 +145,7 @@ static void freeObject(Obj* object) {
         }
         case OBJ_INSTANCE: {
             ObjInstance* instance = (ObjInstance*)object;
-            freeTable(&instance->fields);
+            freeRegister(&instance->fields);
             FREE(ObjInstance, object);
             break;
         }
@@ -179,7 +179,7 @@ static void markRoots() {
         markObject((Obj*)upvalue);
     }
 
-    markTable(&runner.globals);
+    markRegister(&runner.globals);
     markCompilerRoots();
     markObject((Obj*)runner.initString);
 }
@@ -223,7 +223,7 @@ void collectGarbage() {
 
     markRoots();
     traceReferences();
-    tableRemoveWhite(&runner.strings);
+    registerRemoveWhite(&runner.strings);
     sweep();
 
     runner.nextGC = runner.bytesAllocated * GC_HEAP_GROW_FACTOR;

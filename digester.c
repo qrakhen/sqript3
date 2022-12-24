@@ -111,7 +111,7 @@ static void next() {
     digester.previous = digester.current;
 
     for (;;) {
-        digester.current = scanToken();
+        digester.current = readToken();
         if (digester.current.type != TOKEN_ERROR) break;
 
         errorAtCurrent(digester.current.start);
@@ -646,17 +646,12 @@ static WeightRule* getRule(TokenType type) {
 }
 
 static void expression() {
-    /* Compiling Expressions expression < Compiling Expressions expression-body
-      // What goes here?
-    */
     digestWeight(W_ASSIGNMENT);
 }
 
 static void block() {
-    while (!check(TOKEN_CONTEXT_CLOSE) && !check(TOKEN_EOF)) {
+    while (!check(TOKEN_CONTEXT_CLOSE) && !check(TOKEN_EOF))
         declaration();
-    }
-
     consume(TOKEN_CONTEXT_CLOSE, "Expect ' }' after block.");
 }
 
@@ -946,9 +941,7 @@ static void statement() {
     }
 }
 
-
-
-ObjFunction* compile(const char* source) {
+ObjFunction* digest(const char* source) {
     initScanner(source);
     Compiler compiler;
     initCompiler(&compiler, TYPE_SCRIPT);
@@ -972,5 +965,4 @@ void markCompilerRoots() {
         markObject((Obj*)compiler->function);
         compiler = compiler->enclosing;
     }
-
 }

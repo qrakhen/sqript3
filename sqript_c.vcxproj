@@ -140,16 +140,18 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="core.list.c" />
     <ClCompile Include="debug.c" />
     <ClCompile Include="digester.c" />
     <ClCompile Include="console.c" />
+    <ClCompile Include="list.c" />
     <ClCompile Include="main.c" />
     <ClCompile Include="memory.c" />
     <ClCompile Include="object.c" />
     <ClCompile Include="reader.c" />
     <ClCompile Include="runner.c" />
     <ClCompile Include="segment.c" />
-    <ClCompile Include="table.c" />
+    <ClCompile Include="register.c" />
     <ClCompile Include="value.c" />
   </ItemGroup>
   <ItemGroup>
@@ -158,12 +160,13 @@
     <ClInclude Include="debug.h" />
     <ClInclude Include="console.h" />
     <ClInclude Include="extension.h" />
+    <ClInclude Include="list.h" />
     <ClInclude Include="memory.h" />
     <ClInclude Include="object.h" />
     <ClInclude Include="reader.h" />
     <ClInclude Include="runner.h" />
     <ClInclude Include="segment.h" />
-    <ClInclude Include="table.h" />
+    <ClInclude Include="register.h" />
     <ClInclude Include="value.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -18,7 +18,8 @@ typedef struct {
 } List;
 
 List* createList();
-void listAdd(Value value);
+void listPush(Value value);
+Value listPop();
 void listInsert(int index, Value value);
 void listDelete(int index, Value value);
 Value listGet(int index);

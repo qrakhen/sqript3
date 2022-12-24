@@ -8,15 +8,15 @@
 
 #define TABLE_MAX_LOAD 0.75
 
-void initTable(Register* table) {
+void initRegister(Register* table) {
     table->count = 0;
     table->capacity = 0;
     table->entries = NULL;
 }
 
-void freeTable(Register* table) {
+void freeRegister(Register* table) {
     FREE_ARRAY(Entry, table->entries, table->capacity);
-    initTable(table);
+    initRegister(table);
 }
 
 static Entry* findEntry(Entry* entries, int capacity,
@@ -40,7 +40,7 @@ static Entry* findEntry(Entry* entries, int capacity,
     }
 }
 
-bool tableGet(Register* table, ObjString* key, Value* value) {
+bool registerGet(Register* table, ObjString* key, Value* value) {
     if (table->count == 0) return false;
 
     Entry* entry = findEntry(table->entries, table->capacity, key);
@@ -73,7 +73,7 @@ static void adjustCapacity(Register* table, int capacity) {
     table->capacity = capacity;
 }
 
-bool tableSet(Register* table, ObjString* key, Value value) {
+bool registerSet(Register* table, ObjString* key, Value value) {
     if (table->count + 1 > table->capacity * TABLE_MAX_LOAD) {
         int capacity = GROW_CAPACITY(table->capacity);
         adjustCapacity(table, capacity);
@@ -89,7 +89,7 @@ bool tableSet(Register* table, ObjString* key, Value value) {
     return isNewKey;
 }
 
-bool tableDelete(Register* table, ObjString* key) {
+bool registerDelete(Register* table, ObjString* key) {
     if (table->count == 0) return false;
 
     // Find the entry.
@@ -102,16 +102,16 @@ bool tableDelete(Register* table, ObjString* key) {
     return true;
 }
 
-void tableAddAll(Register* from, Register* to) {
+void registerAddAll(Register* from, Register* to) {
     for (int i = 0; i < from->capacity; i++) {
         Entry* entry = &from->entries[i];
         if (entry->key != NULL) {
-            tableSet(to, entry->key, entry->value);
+            registerSet(to, entry->key, entry->value);
         }
     }
 }
 
-ObjString* tableFindString(
+ObjString* registerFindString(
     Register* table,
     const char* chars,
     int length,
@@ -137,16 +137,16 @@ ObjString* tableFindString(
     }
 }
 
-void tableRemoveWhite(Register* table) {
+void registerRemoveWhite(Register* table) {
     for (int i = 0; i < table->capacity; i++) {
         Entry* entry = &table->entries[i];
         if (entry->key != NULL && !entry->key->obj.isMarked) {
-            tableDelete(table, entry->key);
+            registerDelete(table, entry->key);
         }
     }
 }
 
-void markTable(Register* table) {
+void markRegister(Register* table) {
     for (int i = 0; i < table->capacity; i++) {
         Entry* entry = &table->entries[i];
         markObject((Obj*)entry->key);

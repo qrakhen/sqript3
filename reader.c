@@ -70,7 +70,7 @@ static Token errorToken(const char* message) {
     return token;
 }
 
-static void skipWhitespace() {
+static void skipVoid() {
     for (;;) {
         char c = current();
         switch (c) {
@@ -161,8 +161,8 @@ static Token string(char delimiter) {
     return makeToken(TOKEN_STRING);
 }
 
-Token scanToken() {
-    skipWhitespace();
+Token readToken() {
+    skipVoid();
     reader.start = reader.current;
 
     if (done()) return makeToken(TOKEN_EOF);
@@ -176,6 +176,8 @@ Token scanToken() {
         case ')': return makeToken(TOKEN_GROUP_CLOSE);
         case '{': return makeToken(TOKEN_CONTEXT_OPEN);
         case '}': return makeToken(TOKEN_CONTEXT_CLOSE);
+        case '[': return makeToken(TOKEN_COLLECTION_OPEN);
+        case ']': return makeToken(TOKEN_COLLECTION_CLOSE);
         case ';': return makeToken(TOKEN_SEMICOLON);
         case ',': return makeToken(TOKEN_COMMA);
         case '.': return makeToken(TOKEN_DOT);

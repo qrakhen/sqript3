@@ -18,9 +18,9 @@ static Obj* allocateObject(size_t size, ObjType type) {
     object->next = runner.objects;
     runner.objects = object;
 
-#ifdef DEBUG_LOG_GC
+    #ifdef DEBUG_LOG_GC
     printf("%p allocate %zu for %d\n", (void*)object, size, type);
-#endif
+    #endif
 
     return object;
 }
@@ -37,7 +37,7 @@ ObjBoundMethod* newBoundMethod(Value receiver,
 ObjClass* newClass(ObjString* name) {
     ObjClass* klass = ALLOCATE_OBJ(ObjClass, OBJ_CLASS);
     klass->name = name; // [klass]
-    initTable(&klass->methods);
+    initRegister(&klass->methods);
     return klass;
 }
 
@@ -67,7 +67,7 @@ ObjFunction* newFunction() {
 ObjInstance* newInstance(ObjClass* klass) {
     ObjInstance* instance = ALLOCATE_OBJ(ObjInstance, OBJ_INSTANCE);
     instance->klass = klass;
-    initTable(&instance->fields);
+    initRegister(&instance->fields);
     return instance;
 }
 
@@ -77,7 +77,6 @@ ObjNative* newNative(NativeFn function) {
     return native;
 }
 
-
 static ObjString* allocateString(char* chars, int length,
                                  uint32_t hash) {
     ObjString* string = ALLOCATE_OBJ(ObjString, OBJ_STRING);
@@ -86,7 +85,7 @@ static ObjString* allocateString(char* chars, int length,
     string->hash = hash;
 
     push(OBJ_VAL(string));
-    tableSet(&runner.strings, string, NULL_VAL);
+    registerSet(&runner.strings, string, NULL_VAL);
     pop();
 
     return string;
@@ -104,8 +103,8 @@ static uint32_t hashString(const char* key, int length) {
 ObjString* takeString(char* chars, int length) {
 
     uint32_t hash = hashString(chars, length);
-    ObjString* interned = tableFindString(&runner.strings, chars, length,
-                                          hash);
+    ObjString* interned = registerFindString(&runner.strings, chars, length,
+                                             hash);
     if (interned != NULL) {
         FREE_ARRAY(char, chars, length + 1);
         return interned;
@@ -116,8 +115,8 @@ ObjString* takeString(char* chars, int length) {
 
 ObjString* copyString(const char* chars, int length) {
     uint32_t hash = hashString(chars, length);
-    ObjString* interned = tableFindString(&runner.strings, chars, length,
-                                          hash);
+    ObjString* interned = registerFindString(&runner.strings, chars, length,
+                                             hash);
     if (interned != NULL) return interned;
 
     char* heapChars = ALLOCATE(char, length + 1);

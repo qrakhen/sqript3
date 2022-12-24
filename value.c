@@ -82,20 +82,11 @@ bool valuesEqual(Value a, Value b) {
     #else
     if (a.type != b.type) return false;
     switch (a.type) {
-        case T_BOOL:   return AS_BOOL(a) == AS_BOOL(b);
+        case T_BOOL:    return AS_BOOL(a) == AS_BOOL(b);
         case T_NULL:    return true;
-        case T_NUMBER: return AS_NUMBER(a) == AS_NUMBER(b);
-            /* Strings strings-equal < Hash Tables equal
-                case VAL_OBJ: {
-                  ObjString* aString = AS_STRING(a);
-                  ObjString* bString = AS_STRING(b);
-                  return aString->length == bString->length &&
-                      memcmp(aString->chars, bString->chars,
-                             aString->length) == 0;
-                }
-             */
-        case T_OBJ:    return AS_OBJ(a) == AS_OBJ(b);
-        default:         return false; // Unreachable.
+        case T_NUMBER:  return AS_NUMBER(a) == AS_NUMBER(b);
+        case T_OBJ:     return AS_OBJ(a) == AS_OBJ(b);
+        default:        return false;
     }
     #endif
 }

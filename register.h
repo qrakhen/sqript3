@@ -7,6 +7,7 @@
 typedef struct {
     ObjString* key;
     Value value;
+    bool typeStrict; // hier oder bei value???
 } Entry;
 
 typedef struct {
@@ -15,16 +16,16 @@ typedef struct {
     Entry* entries;
 } Register;
 
-void initTable(Register* table);
-void freeTable(Register* table);
-bool tableGet(Register* table, ObjString* key, Value* value);
-bool tableSet(Register* table, ObjString* key, Value value);
-bool tableDelete(Register* table, ObjString* key);
-void tableAddAll(Register* from, Register* to);
-ObjString* tableFindString(Register* table, const char* chars,
+void initRegister(Register* table);
+void freeRegister(Register* table);
+bool registerGet(Register* table, ObjString* key, Value* value);
+bool registerSet(Register* table, ObjString* key, Value value);
+bool registerDelete(Register* table, ObjString* key);
+void registerAddAll(Register* from, Register* to);
+ObjString* registerFindString(Register* table, const char* chars,
                            int length, uint32_t hash);
 
-void tableRemoveWhite(Register* table);
-void markTable(Register* table);
+void registerRemoveWhite(Register* table);
+void markRegister(Register* table);
 
 #endif

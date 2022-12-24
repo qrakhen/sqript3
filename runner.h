@@ -41,8 +41,8 @@ typedef enum {
 
 extern Runner runner;
 
-void initVM();
-void freeVM();
+void initRunner();
+void freeRunner();
 
 InterpretResult interpret(const char* source);
 void push(Value value);
