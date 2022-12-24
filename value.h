@@ -11,6 +11,7 @@ typedef uint32_t int32;
 typedef uint64_t int64;
 typedef struct Obj Obj;
 typedef struct List List;
+typedef struct Array Array;
 typedef struct ObjString ObjString;
 
 #ifdef NAN_BOXING
@@ -59,13 +60,13 @@ static inline Value numToValue(double num) {
 #else
 
 typedef enum {
+    T_ANY,
     T_BOOL,
     T_NULL,
     T_NUMBER,
     T_INTEGER,
     T_COLLECTION,
-    T_OBJ,
-    T_ANY
+    T_OBJ
 } ValueType;
 
 

@@ -7,23 +7,23 @@
 
 typedef struct {
     Value value;
-    int index;
     struct Node* next;
 } Node;
 
 struct List {
     int length;
+    ValueType type;
     Node* head;
     Node* current;
 };
 
-List* createList();
+List* createList(ValueType type);
 void listPush(Value value);
 Value listPop();
 void listInsert(int index, Value value);
 void listDelete(int index, Value value);
 Value listGet(int index);
-int listAt(Value value);
+int listFind(Value value);
 void freeList(List* list);
 
 #endif

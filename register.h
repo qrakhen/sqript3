@@ -1,5 +1,5 @@
-#ifndef sqript_table_h
-#define sqript_table_h
+#ifndef sqript_register_h
+#define sqript_register_h
 
 #include "common.h"
 #include "value.h"
