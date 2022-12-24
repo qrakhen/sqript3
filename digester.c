@@ -424,7 +424,11 @@ static void __BIN(bool canAssign) {
         case TOKEN_MINUS:         emitByte(OP_SUBTRACT); break;
         case TOKEN_STAR:          emitByte(OP_MULTIPLY); break;
         case TOKEN_SLASH:         emitByte(OP_DIVIDE); break;
-        default: return; // Unreachable.
+        case TOKEN_BITWISE_AND:   emitByte(OP_BITWISE_AND); break;
+        case TOKEN_BITWISE_OR :   emitByte(OP_BITWISE_OR); break;
+        case TOKEN_BITWISE_XOR:   emitByte(OP_BITWISE_XOR); break;
+        case TOKEN_BITWISE_NOT:   emitByte(OP_BITWISE_NOT); break;
+        default: return;
     }
 }
 

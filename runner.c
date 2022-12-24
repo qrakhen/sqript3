@@ -267,13 +267,24 @@ static InterpretResult run() {
 
     #define BINARY_OP(valueType, op) \
         do { \
-          if (!IS_NUMBER(peek(0)) || !IS_NUMBER(peek(1))) { \
-            runtimeError("Operands must be numbers."); \
-            return SQR_INTRP_ERROR_RUNTIME; \
-          } \
-          double b = AS_NUMBER(pop()); \
-          double a = AS_NUMBER(pop()); \
-          push(valueType(a op b)); \
+            if (!IS_NUMBER(peek(0)) || !IS_NUMBER(peek(1))) { \
+                runtimeError("Operands must be numbers."); \
+                return SQR_INTRP_ERROR_RUNTIME; \
+            } \
+            double b = AS_NUMBER(pop()); \
+            double a = AS_NUMBER(pop()); \
+            push(valueType(a op b)); \
+        } while (false)
+
+    #define BITWISE_OP(valueType, op) \
+        do { \
+            if (!IS_INTEGER(peek(0)) || !IS_INTEGER(peek(1))) { \
+                runtimeError("Operands must be numbers."); \
+                return SQR_INTRP_ERROR_RUNTIME; \
+            } \
+            int64 b = (int64)AS_NUMBER(pop()); \
+            int64 a = (int64)AS_NUMBER(pop()); \
+            push(valueType(a op b)); \
         } while (false)
 
     for (;;) {
@@ -409,9 +420,19 @@ static InterpretResult run() {
                 }
                 break;
             }
-            case OP_SUBTRACT: BINARY_OP(NUMBER_VAL, -); break;
-            case OP_MULTIPLY: BINARY_OP(NUMBER_VAL, *); break;
-            case OP_DIVIDE:   BINARY_OP(NUMBER_VAL, / ); break;
+            case OP_SUBTRACT:       BINARY_OP(NUMBER_VAL, -); break;
+            case OP_MULTIPLY:       BINARY_OP(NUMBER_VAL, *); break;
+            case OP_DIVIDE:         BINARY_OP(NUMBER_VAL, /); break;
+            case OP_BITWISE_AND:    BITWISE_OP(NUMBER_VAL, &); break;
+            case OP_BITWISE_OR:     BITWISE_OP(NUMBER_VAL, |); break;
+            case OP_BITWISE_XOR:    BITWISE_OP(NUMBER_VAL, ^); break;
+            case OP_BITWISE_NOT:
+                if (!IS_INTEGER(peek(0))) {
+                    runtimeError("operand must be an integer.");
+                    return SQR_INTRP_ERROR_RUNTIME;
+                }
+                push(NUMBER_VAL(~(int64)AS_NUMBER(pop())));
+                break;
             case OP_NOT:
                 push(BOOL_VAL(isFalsey(pop())));
                 break;
