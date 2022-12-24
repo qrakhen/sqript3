@@ -71,7 +71,6 @@ typedef enum {
 
 typedef struct {
     ValueType type;
-    bool strictTyped; // here or in register?? :|
     union {
         bool boolean;
         double number;

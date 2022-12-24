@@ -11,11 +11,11 @@ typedef struct {
     struct Node* next;
 } Node;
 
-typedef struct {
+struct List {
     int length;
     Node* head;
     Node* current;
-} List;
+};
 
 List* createList();
 void listPush(Value value);
