@@ -58,10 +58,10 @@ static inline Value numToValue(double num) {
 #else
 
 typedef enum {
-    VAL_BOOL,
-    VAL_NULL,
-    VAL_NUMBER,
-    VAL_OBJ
+    T_BOOL,
+    T_NULL,
+    T_NUMBER,
+    T_OBJ
 } ValueType;
 
 
@@ -74,20 +74,20 @@ typedef struct {
     } as;
 } Value;
 
-#define IS_BOOL(value)    ((value).type == VAL_BOOL)
-#define IS_NULL(value)    ((value).type == VAL_NULL)
-#define IS_NUMBER(value)  ((value).type == VAL_NUMBER)
-#define IS_OBJ(value)     ((value).type == VAL_OBJ)
+#define IS_BOOL(value)    ((value).type == T_BOOL)
+#define IS_NULL(value)    ((value).type == T_NULL)
+#define IS_NUMBER(value)  ((value).type == T_NUMBER)
+#define IS_OBJ(value)     ((value).type == T_OBJ)
 #define IS_INTEGER(value) (IS_NUMBER(value) && (abs(ceil(AS_NUMBER(value)) - floor(AS_NUMBER(value))) == 0))
 
 #define AS_OBJ(value)     ((value).as.obj)
 #define AS_BOOL(value)    ((value).as.boolean)
 #define AS_NUMBER(value)  ((value).as.number)
 
-#define BOOL_VAL(value)   ((Value){ VAL_BOOL, {.boolean = value} })
-#define NULL_VAL          ((Value){ VAL_NULL, {.number = 0} })
-#define NUMBER_VAL(value) ((Value){ VAL_NUMBER, {.number = value} })
-#define OBJ_VAL(object)   ((Value){ VAL_OBJ, {.obj = (Obj*)object} })
+#define BOOL_VAL(value)   ((Value){ T_BOOL, {.boolean = value} })
+#define NULL_VAL          ((Value){ T_NULL, {.number = 0} })
+#define NUMBER_VAL(value) ((Value){ T_NUMBER, {.number = value} })
+#define OBJ_VAL(object)   ((Value){ T_OBJ, {.obj = (Obj*)object} })
 
 #endif
 

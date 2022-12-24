@@ -7,11 +7,13 @@ typedef void(*ExtensionFunctionCallback)();
 
 typedef struct {
     const char* name;
-    const ValueType
+    const ValueType type;
 } ExtensionFunctionParam;
 
 typedef struct {
     const char* name;
+    const ValueType returnType;
+    ExtensionFunctionParam* params;
     ExtensionFunctionCallback* callback;
 } ExtensionFunction;
 
