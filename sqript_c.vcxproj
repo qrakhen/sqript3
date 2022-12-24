@@ -157,6 +157,7 @@
     <ClInclude Include="digester.h" />
     <ClInclude Include="debug.h" />
     <ClInclude Include="console.h" />
+    <ClInclude Include="extension.h" />
     <ClInclude Include="memory.h" />
     <ClInclude Include="object.h" />
     <ClInclude Include="reader.h" />

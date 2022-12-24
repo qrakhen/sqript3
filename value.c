@@ -50,7 +50,7 @@ void printValue(Value value) {
     } else if (IS_NULL(value)) {
         printf("NULL");
     } else if (IS_INTEGER(value)) {
-        printf("%d", (int64)AS_NUMBER(value));
+        printf("%0.lf", AS_NUMBER(value));
     } else if (IS_NUMBER(value)) {
         printf("%g", AS_NUMBER(value));
     } else if (IS_OBJ(value)) {
@@ -62,7 +62,12 @@ void printValue(Value value) {
             printf(AS_BOOL(value) ? "true" : "false");
             break;
         case VAL_NULL: printf("NULL"); break;
-        case VAL_NUMBER: printf("%g", AS_NUMBER(value)); break;
+        case VAL_NUMBER: 
+            if (IS_INTEGER(value))
+                printf("%0.lf", AS_NUMBER(value));
+            else
+                printf("%g", AS_NUMBER(value));
+            break;
         case VAL_OBJ: printObject(value); break;
     }
     #endif

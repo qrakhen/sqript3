@@ -83,5 +83,8 @@
     <ClInclude Include="table.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="extension.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
