@@ -61,6 +61,8 @@ typedef enum {
     T_BOOL,
     T_NULL,
     T_NUMBER,
+    T_INTEGER,
+    T_COLLECTION,
     T_OBJ
 } ValueType;
 

@@ -3,7 +3,7 @@
 
 #include "memory.h"
 #include "object.h"
-#include "table.h"
+#include "register.h"
 #include "value.h"
 #include "runner.h"
 
@@ -137,7 +137,7 @@ ObjUpvalue* newUpvalue(Value* slot) {
 
 static void printFunction(ObjFunction* function) {
     if (function->name == NULL) {
-        printf("<script>");
+        printf("<sqript>");
         return;
     }
     printf("<fn %s>", function->name->chars);

@@ -2,7 +2,7 @@
 #define sqript_runner_h
 
 #include "object.h"
-#include "table.h"
+#include "register.h"
 #include "value.h"
 
 #define FRAMES_MAX 64
@@ -20,8 +20,8 @@ typedef struct {
 
     Value stack[STACK_MAX];
     Value* stackTop;
-    Table globals;
-    Table strings;
+    Register globals;
+    Register strings;
     ObjString* initString;
     ObjUpvalue* openUpvalues;
 

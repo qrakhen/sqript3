@@ -58,17 +58,17 @@ void printValue(Value value) {
     }
     #else
     switch (value.type) {
-        case VAL_BOOL:
+        case T_BOOL:
             printf(AS_BOOL(value) ? "true" : "false");
             break;
-        case VAL_NULL: printf("NULL"); break;
-        case VAL_NUMBER: 
+        case T_NULL: printf("NULL"); break;
+        case T_NUMBER: 
             if (IS_INTEGER(value))
                 printf("%0.lf", AS_NUMBER(value));
             else
                 printf("%g", AS_NUMBER(value));
             break;
-        case VAL_OBJ: printObject(value); break;
+        case T_OBJ: printObject(value); break;
     }
     #endif
 }
@@ -82,9 +82,9 @@ bool valuesEqual(Value a, Value b) {
     #else
     if (a.type != b.type) return false;
     switch (a.type) {
-        case VAL_BOOL:   return AS_BOOL(a) == AS_BOOL(b);
-        case VAL_NULL:    return true;
-        case VAL_NUMBER: return AS_NUMBER(a) == AS_NUMBER(b);
+        case T_BOOL:   return AS_BOOL(a) == AS_BOOL(b);
+        case T_NULL:    return true;
+        case T_NUMBER: return AS_NUMBER(a) == AS_NUMBER(b);
             /* Strings strings-equal < Hash Tables equal
                 case VAL_OBJ: {
                   ObjString* aString = AS_STRING(a);
@@ -94,7 +94,7 @@ bool valuesEqual(Value a, Value b) {
                              aString->length) == 0;
                 }
              */
-        case VAL_OBJ:    return AS_OBJ(a) == AS_OBJ(b);
+        case T_OBJ:    return AS_OBJ(a) == AS_OBJ(b);
         default:         return false; // Unreachable.
     }
     #endif

@@ -45,17 +45,18 @@ typedef struct {
     int depth;
     bool isCaptured;
 } Local;
+
 typedef struct {
     byte index;
     bool isLocal;
 } Upvalue;
+
 typedef enum {
     TYPE_FUNCTION,
     TYPE_INITIALIZER,
     TYPE_METHOD,
     TYPE_SCRIPT
 } FunctionType;
-
 
 typedef struct Compiler {
     struct Compiler* enclosing;
@@ -188,7 +189,6 @@ static void emitConstant(Value value) {
 }
 
 static void patchJump(int offset) {
-    // -2 to adjust for the bytecode for the jump offset itself.
     int jump = currentChunk()->count - offset - 2;
 
     if (jump > UINT16_MAX) {
