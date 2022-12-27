@@ -51,7 +51,7 @@ void printValue(Value value) {
             break;
         case T_NULL: printf("NULL"); break;
         case T_NUMBER: 
-            if (IS_INTEGER(value))
+            if (IS_INT(value))
                 printf("%0.lf", AS_NUMBER(value));
             else
                 printf("%g", AS_NUMBER(value));
@@ -77,7 +77,7 @@ void printType(Value value) {
         case T_BOOL: printf("bool"); break;
         case T_NULL: printf("null"); break;
         case T_BYTE: printf("byte"); break;
-        case T_INTEGER: printf("int"); break;
+        case T_INT: printf("int"); break;
         case T_NUMBER: printf("number"); break;
         case T_PTR:
             switch (AS_OBJ(value)->type) {

@@ -279,7 +279,7 @@ static InterpretResult run() {
 
     #define BITWISE_OP(valueType, op) \
         do { \
-            if (!IS_INTEGER(peek(0)) || !IS_INTEGER(peek(1))) { \
+            if (!IS_INT(peek(0)) || !IS_INT(peek(1))) { \
                 runtimeError("Operands must be numbers."); \
                 return SQR_INTRP_ERROR_RUNTIME; \
             } \
@@ -428,7 +428,7 @@ static InterpretResult run() {
             case OP_BITWISE_OR:     BITWISE_OP(NUMBER_VAL, |); break;
             case OP_BITWISE_XOR:    BITWISE_OP(NUMBER_VAL, ^); break;
             case OP_BITWISE_NOT:
-                if (!IS_INTEGER(peek(0))) {
+                if (!IS_INT(peek(0))) {
                     runtimeError("operand must be an integer.");
                     return SQR_INTRP_ERROR_RUNTIME;
                 }
