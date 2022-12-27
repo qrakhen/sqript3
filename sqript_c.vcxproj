@@ -173,6 +173,9 @@
     <ClInclude Include="register.h" />
     <ClInclude Include="value.h" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="test.sqr" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

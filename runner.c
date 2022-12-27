@@ -25,6 +25,10 @@ static Value lengthNative(int argCount, Value* args) {
     else return NULL_VAL;
 }
 
+static Value runFile() {
+
+}
+
 static void resetStack() {
     runner.cursor = runner.stack;
     runner.qc = 0;

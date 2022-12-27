@@ -8,8 +8,8 @@
 #include "debug.h"
 #include "runner.h"
 
-static char* __read(const char* path) {
-    FILE* file = fopen(path, "rb");
+static char* __read(char* path) {
+    FILE* file = fopen((const char*)path, "rb");
     if (file == NULL) {
         fprintf(stderr, "file not found or not readable \"%s\".\n", path);
         exit(E_ERR_IO_NOFILE);
@@ -37,7 +37,7 @@ static char* __read(const char* path) {
     return buffer;
 }
 
-void runFile(const char* path) {
+void runFile(char* path, int flags) {
     char* source = __read(path);
     InterpretResult result = interpret(source);
     free(source);

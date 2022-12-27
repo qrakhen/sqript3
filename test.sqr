@@ -1,0 +1,17 @@
+*~ a <~ 5;
+typeof a;
+var b = 20;
+fq add(a, b) { <: a + b; }
+print add(a, b);
+*~ c <~ [ 1, 5, [ 3 * 3, 5, time() ]];
+print length(c);
+class X { init(v) { this:v <~ v; }};
+*~ x <~ X(c[2]);
+print x:v;
+var s = "hello" + "world";
+typeof s;
+print s;
+var f = time;
+typeof f;
+print f;
+print f();
