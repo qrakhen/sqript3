@@ -36,7 +36,7 @@ PtrMethod* newBoundMethod(Value receiver,
 
 PtrQlass* newClass(PtrString* name) {
     PtrQlass* klass = ALLOCATE_OBJ(PtrQlass, PTR_QLASS);
-    klass->name = name; // [klass]
+    klass->name = name;
     initRegister(&klass->methods);
     return klass;
 }
@@ -71,7 +71,7 @@ PtrInstance* newInstance(PtrQlass* klass) {
     return instance;
 }
 
-PtrNative* newNative(NativeFn function) {
+PtrNative* newNative(NativeFunq function) {
     PtrNative* native = ALLOCATE_OBJ(PtrNative, PTR_NATIVE);
     native->function = function;
     return native;

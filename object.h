@@ -52,11 +52,11 @@ typedef struct {
     PtrString* name;
 } PtrFunq;
 
-typedef Value(*NativeFn)(int argCount, Value* args);
+typedef Value(*NativeFunq)(int argCount, Value* args);
 
 typedef struct {
     Ptr ptr;
-    NativeFn function;
+    NativeFunq function;
 } PtrNative;
 
 struct PtrString {
@@ -105,7 +105,7 @@ PtrQlass* newClass(PtrString* name);
 PtrQlosure* newClosure(PtrFunq* function);
 PtrFunq* newFunction();
 PtrInstance* newInstance(PtrQlass* klass);
-PtrNative* newNative(NativeFn function);
+PtrNative* newNative(NativeFunq function);
 PtrString* takeString(char* chars, int length);
 PtrString* copyString(const char* chars, int length);
 PtrPreval* newUpvalue(Value* slot);

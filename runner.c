@@ -18,6 +18,13 @@ static Value clockNative(int argCount, Value* args) {
     return NUMBER_VAL((double)clock() / CLOCKS_PER_SEC);
 }
 
+static Value lengthNative(int argCount, Value* args) {
+    if (argCount != 1) return NULL_VAL;
+    if (matchPtrType(args[0], PTR_STRING)) return NUMBER_VAL(AS_STRING(args[0])->length);
+    if (matchPtrType(args[0], PTR_ARRAY)) return NUMBER_VAL(AS_ARRAY(args[0])->length);
+    else return NULL_VAL;
+}
+
 static void resetStack() {
     runner.stackTop = runner.stack;
     runner.frameCount = 0;
@@ -49,7 +56,7 @@ static void runtimeError(const char* format, ...) {
     resetStack();
 }
 
-static void defineNative(const char* name, NativeFn function) {
+static void defineNative(const char* name, NativeFunq function) {
     push(OBJ_VAL(copyString(name, (int)strlen(name))));
     push(OBJ_VAL(newNative(function)));
     registerSet(&runner.globals, AS_STRING(runner.stack[0]), runner.stack[1]);
@@ -73,7 +80,8 @@ void initRunner() {
     runner.initString = NULL;
     runner.initString = copyString("init", 4);
 
-    defineNative("clock", clockNative);
+    defineNative("time", clockNative);
+    defineNative("length", lengthNative);
 }
 
 void freeRunner() {
@@ -131,7 +139,7 @@ static bool callValue(Value callee, int argCount) {
             case PTR_QLOSURE:
                 return call(AS_CLOSURE(callee), argCount);
             case PTR_NATIVE: {
-                NativeFn native = AS_NATIVE(callee);
+                NativeFunq native = AS_NATIVE(callee);
                 Value result = native(argCount, runner.stackTop - argCount);
                 runner.stackTop -= argCount + 1;
                 push(result);
@@ -141,7 +149,8 @@ static bool callValue(Value callee, int argCount) {
                 break;
         }
     }
-    runtimeError("Can only call functions and classes.");
+    printType(callee);
+    runtimeError("can not call value of that type");
     return false;
 }
 

@@ -50,8 +50,9 @@ void printValue(Value value) {
             printf(AS_BOOL(value) ? "true" : "false");
             break;
         case T_NULL: printf("NULL"); break;
+        //case T_INT:printf("%ld", AS_INT(value));
         case T_NUMBER: 
-            if (IS_INT(value))
+            if (MAYBE_INT(value))
                 printf("%0.lf", AS_NUMBER(value));
             else
                 printf("%g", AS_NUMBER(value));
