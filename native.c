@@ -12,8 +12,8 @@ PtrTargetedNativeMethod* bindNativeMethod(Value target, PtrString* name) {
     if (!registerGet(&nativeMethods[target.type], name, &fn)) {
         return NULL;
     }
-    //PtrTargetedNativeMethod* method = newTargetedNativeMethod(target, )n 
-    return NULL;
+    PtrTargetedNativeMethod* method = newTargetedNativeMethod(target, (PtrNativeMethod*)AS_PTR(fn));
+    return method;
 }
 
 void initNativeMethods() {

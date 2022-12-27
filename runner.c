@@ -111,7 +111,7 @@ static bool callValue(Value callee, int argCount) {
             case PTR_METHOD: {
                 PtrMethod* bound = AS_BOUND_METHOD(callee);
                 runner.cursor[-argCount - 1] = bound->target;
-                return call(bound->member, argCount);
+                return call(bound->method, argCount);
             }
             case PTR_QLASS: {
                 PtrQlass* qlass = AS_CLASS(callee);

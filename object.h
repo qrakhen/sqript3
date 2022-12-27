@@ -96,18 +96,18 @@ typedef struct {
 typedef struct {
     Ptr ptr;
     Value target;
-    PtrQlosure* member;
+    PtrQlosure* method;
 } PtrMethod;
 
 typedef struct {
     Ptr ptr;
-    NativeMethod member;
+    NativeMethod method;
 } PtrNativeMethod;
 
 typedef struct {
     Ptr ptr;
     Value target;
-    NativeMethod* member;
+    NativeMethod* method;
 } PtrTargetedNativeMethod;
 
 

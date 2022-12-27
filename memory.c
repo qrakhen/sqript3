@@ -76,7 +76,7 @@ static void blackenObject(Ptr* ptr) {
         case PTR_METHOD: {
             PtrMethod* bound = (PtrMethod*)ptr;
             __gcTargetValue(bound->target);
-            __gcTargetPtr((Ptr*)bound->member);
+            __gcTargetPtr((Ptr*)bound->method);
             break;
         }
         case PTR_QLASS: {

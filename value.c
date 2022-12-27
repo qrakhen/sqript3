@@ -6,6 +6,11 @@
 #include "memory.h"
 #include "value.h"
 #include "array.h"
+#include "native.h"
+
+static Value toString(Value target, int argc, Value* params) {
+
+}
 
 void initValueArray(ValueArray* array) {
     array->values = NULL;

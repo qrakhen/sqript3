@@ -25,23 +25,23 @@ Ptr* allocatePtr(size_t size, PtrType type) {
     return object;
 }
 
-PtrTargetedNativeMethod* newTargetedNativeMethod(Value target, PtrNativeMethod* member) {
+PtrTargetedNativeMethod* newTargetedNativeMethod(Value target, PtrNativeMethod* method) {
     PtrTargetedNativeMethod* fn = ALLOCATE_PTR(PtrTargetedNativeMethod, PTR_METHOD);
     fn->target = target;
-    fn->member = member->member;
+    fn->method = method->method;
     return fn;
 }
 
-PtrNativeMethod* newNativeMethod(Value target, NativeMethod member) {
+PtrNativeMethod* newNativeMethod(Value target, NativeMethod method) {
     PtrNativeMethod* fn = ALLOCATE_PTR(PtrNativeMethod, PTR_METHOD);
-    fn->member = member;
+    fn->method = method;
     return fn;
 }
 
 PtrMethod* newBoundMethod(Value target, PtrQlosure* member) {
     PtrMethod* bound = ALLOCATE_PTR(PtrMethod, PTR_METHOD);
     bound->target = target;
-    bound->member = member;
+    bound->method = member;
     return bound;
 }
 
@@ -156,7 +156,7 @@ static void printFunction(PtrFunq* function) {
 void printObject(Value value) {
     switch (PTR_TYPE(value)) {
         case PTR_METHOD:
-            printFunction(AS_BOUND_METHOD(value)->member->function);
+            printFunction(AS_BOUND_METHOD(value)->method->function);
             break;
         case PTR_QLASS:
             printf("%s", AS_CLASS(value)->name->chars);
