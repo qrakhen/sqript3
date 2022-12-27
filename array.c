@@ -2,6 +2,7 @@
 #include "memory.h"
 
 PtrArray* createArray(int length, ValueType type) {
+
     Value* values = ALLOCATE(Value, length);
     for (int i = 0; i < length; i++)
         values[i] = NULL_VAL;

@@ -140,7 +140,7 @@ PtrString* registerFindString(
 void registerRemoveWhite(Register* table) {
     for (int i = 0; i < table->capacity; i++) {
         Entry* entry = &table->entries[i];
-        if (entry->key != NULL && !entry->key->ptr.isMarked) {
+        if (entry->key != NULL && !entry->key->ptr.__gcFree) {
             registerDelete(table, entry->key);
         }
     }

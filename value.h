@@ -47,7 +47,7 @@ struct Value {
 #define IS_NUMBER(v)        ((v).type == T_NUMBER)
 #define IS_INT(v)           ((v).type == T_INT)
 #define MAYBE_INT(v)        (IS_NUMBER(v) && (abs(ceil(AS_NUMBER(v)) - floor(AS_NUMBER(v))) == 0))
-#define IS_OBJ(v)           ((v).type == T_PTR)
+#define IS_PTR(v)           ((v).type == T_PTR)
 #define IS_ANY(v)           ((v).type == T_ANY)
 
 #define AS_OBJ(value)       ((value).as.ptr)

@@ -5,32 +5,35 @@
 #include "register.h"
 #include "value.h"
 
-#define FRAMES_MAX 64
-#define STACK_MAX (FRAMES_MAX * UINT8_COUNT)
+#define MAX_QALLS 64
+#define STACK_MAX (MAX_QALLS * UINT8_COUNT)
 
 typedef struct {
-    PtrQlosure* closure;
+    PtrQlosure* qlosure;
     Byte* ip;
     Value* slots;
-} CallFrame;
+} Qall;
 
 typedef struct {
-    CallFrame frames[FRAMES_MAX];
-    int frameCount;
+    Qall qalls[MAX_QALLS];
+    int qc;
 
     Value stack[STACK_MAX];
-    Value* stackTop;
+    Value* cursor;
+
     Register globals;
     Register strings;
-    PtrString* initString;
-    PtrPreval* openUpvalues;
 
+    PtrString* __initString;
+    PtrPreval* __openPrevals;
+
+    Ptr* pointers;
     size_t bytesAllocated;
-    size_t nextGC;
-    Ptr* objects;
-    int grayCount;
-    int grayCapacity;
-    Ptr** grayStack;
+
+    size_t __gcTrigger;
+    int __gcCount;
+    int __gcLimit;
+    Ptr** __gcStack;
 } Runner;
 
 typedef enum {

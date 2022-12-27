@@ -13,16 +13,24 @@
 Ptr* allocatePtr(size_t size, PtrType type) {
     Ptr* object = (Ptr*)reallocate(NULL, 0, size);
     object->type = type;
-    object->isMarked = false;
+    object->__gcFree = false;
 
-    object->next = runner.objects;
-    runner.objects = object;
+    object->next = runner.pointers;
+    runner.pointers = object;
 
     #ifdef DEBUG_LOG_GC
     printf("%p allocate %zu for %d\n", (void*)object, size, type);
     #endif
 
     return object;
+}
+
+PtrNativeMethod* newNativeMethod(Value target, PtrString* name, NativeMethod* method) {
+    PtrNativeMethod* bound = ALLOCATE_OBJ(PtrNativeMethod, PTR_METHOD);
+    bound->name = name;
+    bound->target = target;
+    bound->method = method;
+    return bound;
 }
 
 PtrMethod* newBoundMethod(Value receiver,

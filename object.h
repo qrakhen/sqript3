@@ -40,7 +40,7 @@ typedef enum {
 
 struct Ptr {
     PtrType type;
-    bool isMarked;
+    bool __gcFree;
     struct Ptr* next;
 };
 
@@ -53,6 +53,7 @@ typedef struct {
 } PtrFunq;
 
 typedef Value(*NativeFunq)(int argCount, Value* args);
+typedef Value(*NativeMethod)(Value target, int argCount, Value* args);
 
 typedef struct {
     Ptr ptr;
@@ -99,20 +100,31 @@ typedef struct {
     PtrQlosure* method;
 } PtrMethod;
 
+typedef struct {
+    Ptr ptr;
+    Value target;
+    PtrString* name;
+    NativeMethod* method;
+} PtrNativeMethod;
+
+
 Ptr* allocatePtr(size_t size, PtrType type);
-PtrMethod* newBoundMethod(Value receiver, PtrQlosure* method);
-PtrQlass* newClass(PtrString* name);
 PtrQlosure* newClosure(PtrFunq* function);
 PtrFunq* newFunction();
+PtrQlass* newClass(PtrString* name);
 PtrInstance* newInstance(PtrQlass* klass);
+PtrMethod* newBoundMethod(Value receiver, PtrQlosure* method);
+
 PtrNative* newNative(NativeFunq function);
+PtrNativeMethod* newNativeMethod(PtrType type, PtrString* name);
+
 PtrString* takeString(char* chars, int length);
 PtrString* copyString(const char* chars, int length);
 PtrPreval* newUpvalue(Value* slot);
 void printObject(Value value);
 
 static inline bool matchPtrType(Value value, PtrType type) {
-    return IS_OBJ(value) && AS_OBJ(value)->type == type;
+    return IS_PTR(value) && AS_OBJ(value)->type == type;
 }
 
 #endif

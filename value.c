@@ -38,7 +38,7 @@ char* valueToString(Value value) {
         sprintf(buffer, "NULL");
     } else if (IS_NUMBER(value)) {
         sprintf(buffer, "%g", AS_NUMBER(value));
-    } else if (IS_OBJ(value)) {
+    } else if (IS_PTR(value)) {
         printObject(value);
     }
     return buffer;

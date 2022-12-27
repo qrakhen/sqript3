@@ -26,8 +26,8 @@ static Value lengthNative(int argCount, Value* args) {
 }
 
 static void resetStack() {
-    runner.stackTop = runner.stack;
-    runner.frameCount = 0;
+    runner.cursor = runner.stack;
+    runner.contextCount = 0;
     runner.openUpvalues = NULL;
 }
 
@@ -39,8 +39,8 @@ static void runtimeError(const char* format, ...) {
     va_end(args);
     fputs("\n", stderr);
 
-    for (int i = runner.frameCount - 1; i >= 0; i--) {
-        CallFrame* frame = &runner.frames[i];
+    for (int i = runner.contextCount - 1; i >= 0; i--) {
+        Context* frame = &runner.contextStack[i];
         PtrFunq* function = frame->closure->function;
         size_t instruction = frame->ip - function->segment.code - 1;
         fprintf(stderr, "[line %d] in ", // [minus]
@@ -66,13 +66,13 @@ static void defineNative(const char* name, NativeFunq function) {
 
 void initRunner() {
     resetStack();
-    runner.objects = NULL;
+    runner.pointers = NULL;
     runner.bytesAllocated = 0;
-    runner.nextGC = 1024 * 1024;
+    runner.__gcTrigger = 1024 * 1024;
 
-    runner.grayCount = 0;
-    runner.grayCapacity = 0;
-    runner.grayStack = NULL;
+    runner.__gcCount = 0;
+    runner.__gcLimit = 0;
+    runner.__gcStack = NULL;
 
     initRegister(&runner.globals);
     initRegister(&runner.strings);
@@ -91,9 +91,9 @@ void freeRunner() {
     freeObjects();
 }
 
-void push(Value value) { *(runner.stackTop++) = value; }
-Value pop() { return *(--runner.stackTop); }
-static Value peek(int distance) { return runner.stackTop[-1 - distance]; }
+void push(Value value) { *(runner.cursor++) = value; }
+Value pop() { return *(--runner.cursor); }
+static Value peek(int distance) { return runner.cursor[-1 - distance]; }
 
 static bool call(PtrQlosure* closure, int argCount) {
     if (argCount != closure->function->argc) {
@@ -102,29 +102,29 @@ static bool call(PtrQlosure* closure, int argCount) {
         return false;
     }
 
-    if (runner.frameCount == FRAMES_MAX) {
+    if (runner.contextCount == FRAMES_MAX) {
         runtimeError("Stack overflow.");
         return false;
     }
 
-    CallFrame* frame = &runner.frames[runner.frameCount++];
+    Context* frame = &runner.contextStack[runner.contextCount++];
     frame->closure = closure;
     frame->ip = closure->function->segment.code;
-    frame->slots = runner.stackTop - argCount - 1;
+    frame->slots = runner.cursor - argCount - 1;
     return true;
 }
 
 static bool callValue(Value callee, int argCount) {
-    if (IS_OBJ(callee)) {
+    if (IS_PTR(callee)) {
         switch (OBJ_TYPE(callee)) {
             case PTR_METHOD: {
                 PtrMethod* bound = AS_BOUND_METHOD(callee);
-                runner.stackTop[-argCount - 1] = bound->receiver;
+                runner.cursor[-argCount - 1] = bound->receiver;
                 return call(bound->method, argCount);
             }
             case PTR_QLASS: {
                 PtrQlass* klass = AS_CLASS(callee);
-                runner.stackTop[-argCount - 1] = OBJ_VAL(newInstance(klass));
+                runner.cursor[-argCount - 1] = OBJ_VAL(newInstance(klass));
                 Value initializer;
                 if (registerGet(&klass->methods, runner.initString,
                     &initializer)) {
@@ -140,8 +140,8 @@ static bool callValue(Value callee, int argCount) {
                 return call(AS_CLOSURE(callee), argCount);
             case PTR_NATIVE: {
                 NativeFunq native = AS_NATIVE(callee);
-                Value result = native(argCount, runner.stackTop - argCount);
-                runner.stackTop -= argCount + 1;
+                Value result = native(argCount, runner.cursor - argCount);
+                runner.cursor -= argCount + 1;
                 push(result);
                 return true;
             }
@@ -176,7 +176,7 @@ static bool invoke(PtrString* name, int argCount) {
 
     Value value;
     if (registerGet(&instance->fields, name, &value)) {
-        runner.stackTop[-argCount - 1] = value;
+        runner.cursor[-argCount - 1] = value;
         return callValue(value, argCount);
     }
 
@@ -263,7 +263,7 @@ static void concatenate() {
 }
 
 static InterpretResult run() {
-    CallFrame* frame = &runner.frames[runner.frameCount - 1];
+    Context* frame = &runner.contextStack[runner.contextCount - 1];
 
     #define READ_BYTE() (*frame->ip++)
     #define READ_SHORT() \
@@ -486,7 +486,7 @@ static InterpretResult run() {
                 if (!callValue(peek(argCount), argCount)) {
                     return SQR_INTRP_ERROR_RUNTIME;
                 }
-                frame = &runner.frames[runner.frameCount - 1];
+                frame = &runner.contextStack[runner.contextCount - 1];
                 break;
             }
             case OP_INVOKE: {
@@ -495,7 +495,7 @@ static InterpretResult run() {
                 if (!invoke(method, argCount)) {
                     return SQR_INTRP_ERROR_RUNTIME;
                 }
-                frame = &runner.frames[runner.frameCount - 1];
+                frame = &runner.contextStack[runner.contextCount - 1];
                 break;
             }
             case OP_SUPER_INVOKE: {
@@ -505,7 +505,7 @@ static InterpretResult run() {
                 if (!invokeFromClass(superclass, method, argCount)) {
                     return SQR_INTRP_ERROR_RUNTIME;
                 }
-                frame = &runner.frames[runner.frameCount - 1];
+                frame = &runner.contextStack[runner.contextCount - 1];
                 break;
             }
             case OP_ARRAY: {
@@ -547,21 +547,21 @@ static InterpretResult run() {
                 break;
             }
             case OP_CLOSE_UPVALUE:
-                closeUpvalues(runner.stackTop - 1);
+                closeUpvalues(runner.cursor - 1);
                 pop();
                 break;
             case OP_RETURN: {
                 Value result = pop();
                 closeUpvalues(frame->slots);
-                runner.frameCount--;
-                if (runner.frameCount == 0) {
+                runner.contextCount--;
+                if (runner.contextCount == 0) {
                     pop();
                     return SQR_INTRP_OK;
                 }
 
-                runner.stackTop = frame->slots;
+                runner.cursor = frame->slots;
                 push(result);
-                frame = &runner.frames[runner.frameCount - 1];
+                frame = &runner.contextStack[runner.contextCount - 1];
                 break;
             }
             case OP_CLASS:

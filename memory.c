@@ -18,7 +18,7 @@ void* reallocate(void* pointer, size_t oldSize, size_t newSize) {
         collectGarbage();
     #endif
 
-        if (runner.bytesAllocated > runner.nextGC) {
+        if (runner.bytesAllocated > runner.__gcTrigger) {
             collectGarbage();
         }
     }
@@ -35,7 +35,7 @@ void* reallocate(void* pointer, size_t oldSize, size_t newSize) {
 
 void markObject(Ptr* object) {
     if (object == NULL) return;
-    if (object->isMarked) return;
+    if (object->__gcFree) return;
 
 #ifdef DEBUG_LOG_GC
     printf("%p mark ", (void*)object);
@@ -43,21 +43,20 @@ void markObject(Ptr* object) {
     printf("\n");
 #endif
 
-    object->isMarked = true;
+    object->__gcFree = true;
 
-    if (runner.grayCapacity < runner.grayCount + 1) {
-        runner.grayCapacity = GROW_CAPACITY(runner.grayCapacity);
-        runner.grayStack = (Ptr**)realloc(runner.grayStack,
-                                      sizeof(Ptr*) * runner.grayCapacity);
-
-        if (runner.grayStack == NULL) exit(1);
+    if (runner.__gcLimit < runner.__gcCount + 1) {
+        runner.__gcLimit = GROW_CAPACITY(runner.__gcLimit);
+        runner.__gcStack = (Ptr**)realloc(runner.__gcStack,
+                                      sizeof(Ptr*) * runner.__gcLimit);
+        if (runner.__gcStack == NULL) exit(1);
     }
 
-    runner.grayStack[runner.grayCount++] = object;
+    runner.__gcStack[runner.__gcCount++] = object;
 }
 
 void markValue(Value value) {
-    if (IS_OBJ(value)) markObject(AS_OBJ(value));
+    if (IS_PTR(value)) markObject(AS_OBJ(value));
 }
 
 static void markArray(ValueArray* array) {
@@ -165,12 +164,12 @@ static void freeObject(Ptr* object) {
 }
 
 static void markRoots() {
-    for (Value* slot = runner.stack; slot < runner.stackTop; slot++) {
+    for (Value* slot = runner.stack; slot < runner.cursor; slot++) {
         markValue(*slot);
     }
 
-    for (int i = 0; i < runner.frameCount; i++) {
-        markObject((Ptr*)runner.frames[i].closure);
+    for (int i = 0; i < runner.contextCount; i++) {
+        markObject((Ptr*)runner.contextStack[i].closure);
     }
 
     for (PtrPreval* upvalue = runner.openUpvalues;
@@ -185,18 +184,18 @@ static void markRoots() {
 }
 
 static void traceReferences() {
-    while (runner.grayCount > 0) {
-        Ptr* object = runner.grayStack[--runner.grayCount];
+    while (runner.__gcCount > 0) {
+        Ptr* object = runner.__gcStack[--runner.__gcCount];
         blackenObject(object);
     }
 }
 
 static void sweep() {
     Ptr* previous = NULL;
-    Ptr* object = runner.objects;
+    Ptr* object = runner.pointers;
     while (object != NULL) {
-        if (object->isMarked) {
-            object->isMarked = false;
+        if (object->__gcFree) {
+            object->__gcFree = false;
             previous = object;
             object = object->next;
         }
@@ -207,7 +206,7 @@ static void sweep() {
                 previous->next = object;
             }
             else {
-                runner.objects = object;
+                runner.pointers = object;
             }
 
             freeObject(unreached);
@@ -226,7 +225,7 @@ void collectGarbage() {
     registerRemoveWhite(&runner.strings);
     sweep();
 
-    runner.nextGC = runner.bytesAllocated * GC_HEAP_GROW_FACTOR;
+    runner.__gcTrigger = runner.bytesAllocated * GC_HEAP_GROW_FACTOR;
 
 #ifdef DEBUG_LOG_GC
     printf("-- gc end\n");
@@ -237,12 +236,12 @@ void collectGarbage() {
 }
 
 void freeObjects() {
-    Ptr* object = runner.objects;
+    Ptr* object = runner.pointers;
     while (object != NULL) {
         Ptr* next = object->next;
         freeObject(object);
         object = next;
     }
 
-    free(runner.grayStack);
+    free(runner.__gcStack);
 }
