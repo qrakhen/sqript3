@@ -91,7 +91,6 @@ static void errorAt(Token* token, const char* message) {
     if (token->type == TOKEN_EOF) {
         fprintf(stderr, " at end");
     } else if (token->type == TOKEN_ERROR) {
-        // Nothing.
     } else {
         fprintf(stderr, " at '%.*s'", token->length, token->start);
     }
@@ -675,8 +674,15 @@ static void expression() {
 static void block() {
     while (!check(TOKEN_CONTEXT_CLOSE) && !check(TOKEN_EOF))
         declaration();
-    consume(TOKEN_CONTEXT_CLOSE, "missing } after block.");
+    consume(TOKEN_CONTEXT_CLOSE, "missing } after bracket block");
 }
+
+static void inlineBlock() {
+    while (!check(TOKEN_SEMICOLON) && !check(TOKEN_EOF))
+        statement();
+    consume(TOKEN_SEMICOLON, "missing ; after inline block");
+}
+
 
 static void array(ValueType type) {
 
@@ -712,10 +718,7 @@ static void function(FunctionType type) {
     }
 }
 
-static void method() {
-    consume(TOKEN_IDENTIFIER, "Expect method name.");
-    Byte constant = identifierConstant(&digester.previous);
-
+static void method(Byte constant) {
     FunctionType type = F_INST;
     if (digester.previous.length == 4 &&
         memcmp(digester.previous.start, "init", 4) == 0) {
@@ -726,8 +729,27 @@ static void method() {
     emitBytes(OP_METHOD, constant);
 }
 
+static void field(Byte constant) {
+    if (check(TOKEN_EQUAL)) {
+        next();
+        expression();
+    } else consume(TOKEN_SEMICOLON, "missing ; after qlass property declaration");
+    emitBytes(OP_PROPERTY, constant);
+}
+
+static void member() {
+    consume(TOKEN_IDENTIFIER, "missing method or property name");
+    Byte constant = identifierConstant(&digester.previous);
+
+    if (check(TOKEN_GROUP_OPEN)) {
+        method(constant);
+    } else {
+        field(constant);
+    }
+}
+
 static void classDeclaration() {
-    consume(TOKEN_IDENTIFIER, "Expect class name.");
+    consume(TOKEN_IDENTIFIER, "missing qlass name");
     Token className = digester.previous;
     Byte nameConstant = identifierConstant(&digester.previous);
     declareVariable();
@@ -758,11 +780,11 @@ static void classDeclaration() {
     }
 
     namedVariable(className, false);
-    consume(TOKEN_CONTEXT_OPEN, "Expect '{' before class body.");
+    consume(TOKEN_CONTEXT_OPEN, "missing { before qlass body");
     while (!check(TOKEN_CONTEXT_CLOSE) && !check(TOKEN_EOF)) {
-        method();
+        member();
     }
-    consume(TOKEN_CONTEXT_CLOSE, "Expect ' }' after class body.");
+    consume(TOKEN_CONTEXT_CLOSE, "missing } after qlass body");
     emitByte(OP_POP);
 
     if (classCompiler.inherited) {
@@ -802,10 +824,9 @@ static void expressionStatement() {
 
 static void forStatement() {
     beginScope();
-    consume(TOKEN_GROUP_OPEN, "Expect '(' after 'for'.");
+    consume(TOKEN_GROUP_OPEN, "missing ( after for");
 
-    if (match(TOKEN_SEMICOLON)) {
-        // No initializer.
+    if (match(TOKEN_SEMICOLON)) { // w.e.
     } else if (match(TOKEN_VAR)) {
         varDeclaration();
     } else {
@@ -819,20 +840,17 @@ static void forStatement() {
         expression();
 
         if (digester.current.type != TOKEN_EOF)
-            consume(TOKEN_SEMICOLON, "Expect ';' after loop condition.");
-
-        // Jump out of the loop if the condition is false.
+            consume(TOKEN_SEMICOLON, "missing ; after loop condition");
         exitJump = emitJump(OP_JUMP_IF_FALSE);
-        emitByte(OP_POP); // Condition.
+        emitByte(OP_POP);
     }
-
 
     if (!match(TOKEN_GROUP_CLOSE)) {
         int bodyJump = emitJump(OP_JUMP);
         int incrementStart = currentSegment()->count;
         expression();
         emitByte(OP_POP);
-        consume(TOKEN_GROUP_CLOSE, "Expect ')' after for clauses.");
+        consume(TOKEN_GROUP_CLOSE, "missing ) after for-loop clauses");
 
         emitLoop(loopStart);
         loopStart = incrementStart;
@@ -841,31 +859,26 @@ static void forStatement() {
 
     statement();
     emitLoop(loopStart);
-
     if (exitJump != -1) {
         patchJump(exitJump);
-        emitByte(OP_POP); // Condition.
+        emitByte(OP_POP);
     }
-
     endScope();
 }
 
 static void ifStatement() {
-    consume(TOKEN_GROUP_OPEN, "Expect '(' after 'if'.");
+    consume(TOKEN_GROUP_OPEN, "missing ( after if");
     expression();
-    consume(TOKEN_GROUP_CLOSE, "Expect ')' after condition."); // [paren]
+    consume(TOKEN_GROUP_CLOSE, "missing ) after condition");
 
-    int thenJump = emitJump(OP_JUMP_IF_FALSE);
+    int jmpT = emitJump(OP_JUMP_IF_FALSE);
     emitByte(OP_POP);
     statement();
-
-    int elseJump = emitJump(OP_JUMP);
-
-    patchJump(thenJump);
+    int jmpF = emitJump(OP_JUMP);
+    patchJump(jmpT);
     emitByte(OP_POP);
-
     if (match(TOKEN_ELSE)) statement();
-    patchJump(elseJump);
+    patchJump(jmpF);
 }
 
 static void printType() {
@@ -884,27 +897,27 @@ static void printStatement() {
 
 static void returnStatement() {
     if (current->type == F_CODE) {
-        error("Can't return from top-level code.");
+        error("interesting approach, but that does not work.");
     }
 
     if (match(TOKEN_SEMICOLON)) {
         emitReturn();
     } else {
         if (current->type == F_INIT) {
-            error("Can't return a value from an initializer.");
+            error("we're not returning values from init() here");
         }
 
         expression();
-        consume(TOKEN_SEMICOLON, "Expect ';' after return value.");
+        consume(TOKEN_SEMICOLON, "missing ; after return value.");
         emitByte(OP_RETURN);
     }
 }
 
 static void whileStatement() {
     int loopStart = currentSegment()->count;
-    consume(TOKEN_GROUP_OPEN, "Expect '(' after 'while'.");
+    consume(TOKEN_GROUP_OPEN, "missing ( after while");
     expression();
-    consume(TOKEN_GROUP_CLOSE, "Expect ')' after condition.");
+    consume(TOKEN_GROUP_CLOSE, "misssing ) after while condition");
 
     int exitJump = emitJump(OP_JUMP_IF_FALSE);
     emitByte(OP_POP);

@@ -89,8 +89,7 @@ static Value peek(int distance) { return runner.cursor[-1 - distance]; }
 
 static bool call(PtrQlosure* qlosure, int argCount) {
     if (argCount != qlosure->function->argc) {
-        runtimeError("Expected %d arguments but got %d.",
-                     qlosure->function->argc, argCount);
+        runtimeError("Expected %d arguments but got %d.", qlosure->function->argc, argCount);
         return false;
     }
 
@@ -112,18 +111,16 @@ static bool callValue(Value callee, int argCount) {
             case PTR_METHOD: {
                 PtrMethod* bound = AS_BOUND_METHOD(callee);
                 runner.cursor[-argCount - 1] = bound->target;
-                return call(bound->method, argCount);
+                return call(bound->member, argCount);
             }
             case PTR_QLASS: {
                 PtrQlass* qlass = AS_CLASS(callee);
                 runner.cursor[-argCount - 1] = PTR_VAL(newInstance(qlass));
                 Value initializer;
-                if (registerGet(&qlass->methods, runner.__initString,
-                    &initializer)) {
+                if (registerGet(&qlass->methods, runner.__initString, &initializer)) {
                     return call(AS_CLOSURE(initializer), argCount);
                 } else if (argCount != 0) {
-                    runtimeError("Expected 0 arguments but got %d.",
-                                 argCount);
+                    runtimeError("Expected 0 arguments but got %d.", argCount);
                     return false;
                 }
                 return true;
@@ -146,21 +143,20 @@ static bool callValue(Value callee, int argCount) {
     return false;
 }
 
-static bool invokeFromClass(PtrQlass* qlass, PtrString* name,
-                            int argCount) {
-    Value method;
-    if (!registerGet(&qlass->methods, name, &method)) {
-        runtimeError("Undefined property '%s'.", name->chars);
+static bool invokeFromClass(PtrQlass* qlass, PtrString* name, int argCount) {
+    Value member;
+    if (!registerGet(&qlass->methods, name, &member)) {
+        runtimeError("unknown member '%s'.", name->chars);
         return false;
     }
-    return call(AS_CLOSURE(method), argCount);
+    return call(AS_CLOSURE(member), argCount);
 }
 
 static bool invoke(PtrString* name, int argCount) {
     Value target = peek(argCount);
 
     if (!IS_INSTANCE(target)) {
-        runtimeError("Only instances have methods.");
+        runtimeError("only instances have methods.");
         return false;
     }
 
@@ -176,13 +172,13 @@ static bool invoke(PtrString* name, int argCount) {
 }
 
 static bool bindMethod(PtrQlass* qlass, PtrString* name) {
-    Value method;
-    if (!registerGet(&qlass->methods, name, &method)) {
+    Value member;
+    if (!registerGet(&qlass->methods, name, &member)) {
         runtimeError("Undefined property '%s'.", name->chars);
         return false;
     }
 
-    PtrMethod* bound = newBoundMethod(peek(0), AS_CLOSURE(method));
+    PtrMethod* bound = newBoundMethod(peek(0), AS_CLOSURE(member));
     pop();
     push(PTR_VAL(bound));
     return true;
@@ -223,9 +219,16 @@ static void closeUpvalues(Value* last) {
 }
 
 static void defineMethod(PtrString* name) {
-    Value method = peek(0);
+    Value member = peek(0);
     PtrQlass* qlass = AS_CLASS(peek(1));
-    registerSet(&qlass->methods, name, method);
+    registerSet(&qlass->methods, name, member);
+    pop();
+}
+
+static void defineProperty(PtrString* name) {
+    Value member = peek(0);
+    PtrQlass* qlass = AS_CLASS(peek(1));
+    registerSet(&qlass->properties, name, member);
     pop();
 }
 
@@ -481,19 +484,19 @@ static InterpretResult run() {
                 break;
             }
             case OP_INVOKE: {
-                PtrString* method = READ_STRING();
+                PtrString* member = READ_STRING();
                 int argCount = READ_BYTE();
-                if (!invoke(method, argCount)) {
+                if (!invoke(member, argCount)) {
                     return SQR_INTRP_ERROR_RUNTIME;
                 }
                 frame = &runner.qalls[runner.qc - 1];
                 break;
             }
             case OP_SUPER_INVOKE: {
-                PtrString* method = READ_STRING();
+                PtrString* member = READ_STRING();
                 int argCount = READ_BYTE();
                 PtrQlass* superclass = AS_CLASS(pop());
-                if (!invokeFromClass(superclass, method, argCount)) {
+                if (!invokeFromClass(superclass, member, argCount)) {
                     return SQR_INTRP_ERROR_RUNTIME;
                 }
                 frame = &runner.qalls[runner.qc - 1];
@@ -573,6 +576,9 @@ static InterpretResult run() {
             }
             case OP_METHOD:
                 defineMethod(READ_STRING());
+                break;
+            case OP_PROPERTY:
+                defineProperty(READ_STRING());
                 break;
         }
     }

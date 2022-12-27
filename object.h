@@ -96,18 +96,18 @@ typedef struct {
 typedef struct {
     Ptr ptr;
     Value target;
-    PtrQlosure* method;
+    PtrQlosure* member;
 } PtrMethod;
 
 typedef struct {
     Ptr ptr;
-    NativeMethod method;
+    NativeMethod member;
 } PtrNativeMethod;
 
 typedef struct {
     Ptr ptr;
     Value target;
-    NativeMethod* method;
+    NativeMethod* member;
 } PtrTargetedNativeMethod;
 
 
@@ -116,11 +116,11 @@ PtrQlosure* newClosure(PtrFunq* function);
 PtrFunq* newFunction();
 PtrQlass* newClass(PtrString* name);
 PtrInstance* newInstance(PtrQlass* qlass);
-PtrMethod* newBoundMethod(Value target, PtrQlosure* method);
+PtrMethod* newBoundMethod(Value target, PtrQlosure* member);
 
 PtrNative* newNative(NativeFunq function);
-PtrNativeMethod* newNativeMethod(NativeMethod method);
-PtrTargetedNativeMethod* newTargetedNativeMethod(Value target, PtrNativeMethod* method);
+PtrNativeMethod* newNativeMethod(NativeMethod member);
+PtrTargetedNativeMethod* newTargetedNativeMethod(Value target, PtrNativeMethod* member);
 
 PtrString* takeString(char* chars, int length);
 PtrString* copyString(const char* chars, int length);

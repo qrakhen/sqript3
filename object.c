@@ -25,23 +25,23 @@ Ptr* allocatePtr(size_t size, PtrType type) {
     return object;
 }
 
-PtrTargetedNativeMethod* newTargetedNativeMethod(Value target, PtrNativeMethod* method) {
+PtrTargetedNativeMethod* newTargetedNativeMethod(Value target, PtrNativeMethod* member) {
     PtrTargetedNativeMethod* fn = ALLOCATE_PTR(PtrTargetedNativeMethod, PTR_METHOD);
     fn->target = target;
-    fn->method = method->method;
+    fn->member = member->member;
     return fn;
 }
 
-PtrNativeMethod* newNativeMethod(Value target, NativeMethod method) {
+PtrNativeMethod* newNativeMethod(Value target, NativeMethod member) {
     PtrNativeMethod* fn = ALLOCATE_PTR(PtrNativeMethod, PTR_METHOD);
-    fn->method = method;
+    fn->member = member;
     return fn;
 }
 
-PtrMethod* newBoundMethod(Value target, PtrQlosure* method) {
+PtrMethod* newBoundMethod(Value target, PtrQlosure* member) {
     PtrMethod* bound = ALLOCATE_PTR(PtrMethod, PTR_METHOD);
     bound->target = target;
-    bound->method = method;
+    bound->member = member;
     return bound;
 }
 
@@ -49,6 +49,7 @@ PtrQlass* newClass(PtrString* name) {
     PtrQlass* qlass = ALLOCATE_PTR(PtrQlass, PTR_QLASS);
     qlass->name = name;
     initRegister(&qlass->methods);
+    initRegister(&qlass->properties);
     return qlass;
 }
 
@@ -155,7 +156,7 @@ static void printFunction(PtrFunq* function) {
 void printObject(Value value) {
     switch (PTR_TYPE(value)) {
         case PTR_METHOD:
-            printFunction(AS_BOUND_METHOD(value)->method->function);
+            printFunction(AS_BOUND_METHOD(value)->member->function);
             break;
         case PTR_QLASS:
             printf("%s", AS_CLASS(value)->name->chars);

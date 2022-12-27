@@ -2,8 +2,8 @@
 
 Register nativeMethods[16];
 
-void registerNativeMethod(ValueType type, PtrString* name, NativeMethod method) {
-    PtrNativeMethod* fn = newNativeMethod(method);
+void registerNativeMethod(ValueType type, PtrString* name, NativeMethod member) {
+    PtrNativeMethod* fn = newNativeMethod(member);
     registerSet(&nativeMethods[type], name, PTR_VAL(fn));
 }
 

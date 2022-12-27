@@ -10,7 +10,7 @@
 
 Register nativeMethods[16];
 
-void registerNativeMethod(ValueType type, PtrString* name, NativeMethod method);
+void registerNativeMethod(ValueType type, PtrString* name, NativeMethod member);
 PtrTargetedNativeMethod* bindNativeMethod(Value target, PtrString* name);
 void initNativeMethods();
 
