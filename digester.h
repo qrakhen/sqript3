@@ -4,7 +4,7 @@
 #include "object.h"
 #include "runner.h"
 
-ObjFunction* digest(const char* source);
+PtrFunq* digest(const char* source);
 void markCompilerRoots();
 
 #endif

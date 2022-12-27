@@ -60,7 +60,7 @@ typedef enum {
 
 typedef struct Compiler {
     struct Compiler* enclosing;
-    ObjFunction* function;
+    PtrFunq* function;
     FunctionType type;
 
     Local locals[UINT8_COUNT];
@@ -150,7 +150,7 @@ static void emitLoop(int loopStart) {
     emitByte(OP_LOOP);
 
     int offset = currentSegment()->count - loopStart + 2;
-    if (offset > UINT16_MAX) error("Loop body too large.");
+    if (offset > UINT16_MAX) error("loop size (way) over 9000.");
 
     emitByte((offset >> 8) & 0xff);
     emitByte(offset & 0xff);
@@ -208,8 +208,7 @@ static void initCompiler(Compiler* compiler, FunctionType type) {
     compiler->function = newFunction();
     current = compiler;
     if (type != F_CODE) {
-        current->function->name = copyString(digester.previous.start,
-                                             digester.previous.length);
+        current->function->name = copyString(digester.previous.start, digester.previous.length);
     }
 
     Local* local = &current->locals[current->localCount++];
@@ -225,9 +224,9 @@ static void initCompiler(Compiler* compiler, FunctionType type) {
     }
 }
 
-static ObjFunction* endCompiler() {
+static PtrFunq* endCompiler() {
     emitReturn();
-    ObjFunction* function = current->function;
+    PtrFunq* function = current->function;
 
     #ifdef DEBUG_PRINT_CODE
     if (!parser.failed) {
@@ -458,7 +457,7 @@ static void __LIT(bool canAssign) {
         case TOKEN_FALSE: emitByte(OP_FALSE); break;
         case TOKEN_NULL: emitByte(OP_NULL); break;
         case TOKEN_TRUE: emitByte(OP_TRUE); break;
-        default: return; // Unreachable.
+        default: ;
     }
 }
 
@@ -467,9 +466,16 @@ static void __GRP(bool canAssign) {
     consume(TOKEN_GROUP_CLOSE, "Expect ')' after expression.");
 }
 
+static void __ARR(bool canAssign) {
+    expression();
+    if (check(TOKEN_COMMA)) {
+        next();
+        __ARR(canAssign);
+    } else consume(TOKEN_ARRAY_CLOSE, "expected , or ] after array definition");
+}
+
 static void __NUM(bool canAssign) {
     double value = strtod(digester.previous.start, NULL);
-
     emitConstant(NUMBER_VAL(value));
 }
 
@@ -490,7 +496,6 @@ static void __STR(bool canAssign) {
 }
 
 static void namedVariable(Token name, bool canAssign) {
-
     byte getOp, setOp;
     int arg = resolveLocal(current, &name);
     if (arg != -1) {
@@ -504,8 +509,6 @@ static void namedVariable(Token name, bool canAssign) {
         getOp = OP_GET_GLOBAL;
         setOp = OP_SET_GLOBAL;
     }
-
-
 
     if (canAssign && match(TOKEN_EQUAL)) {
         expression();
@@ -554,25 +557,20 @@ static void __SUP(bool canAssign) {
 
 static void __CUR(bool canAssign) {
     if (currentClass == NULL) {
-        error("Can't use 'this' outside of a class.");
+        error("this only works inside a qlass context");
         return;
     }
 
     __REF(false);
-} // [this]
+}
 
 static void __MOD(bool canAssign) {
     TokenType operatorType = digester.previous.type;
-
-    // Compile the operand.
-
     digestWeight(W_UNARY);
-
-    // Emit the operator instruction.
     switch (operatorType) {
         case TOKEN_BANG: emitByte(OP_NOT); break;
         case TOKEN_MINUS: emitByte(OP_NEGATE); break;
-        default: return; // Unreachable.
+        default: ;
     }
 }
 
@@ -581,6 +579,8 @@ WeightRule rules[] = {
     [TOKEN_GROUP_CLOSE]     = { NULL,   NULL,   W_NONE },
     [TOKEN_CONTEXT_OPEN]    = { NULL,   NULL,   W_NONE },
     [TOKEN_CONTEXT_CLOSE]   = { NULL,   NULL,   W_NONE },
+    [TOKEN_ARRAY_OPEN]      = { __ARR,  NULL,   W_NONE },
+    [TOKEN_ARRAY_CLOSE]     = { NULL,   NULL,   W_NONE },
     [TOKEN_COMMA]           = { NULL,   NULL,   W_NONE },
     [TOKEN_DOT]             = { NULL,   __DOT,  W_CALL },
     [TOKEN_MINUS]           = { __MOD,  __BIN,  W_TERM },
@@ -613,6 +613,7 @@ WeightRule rules[] = {
     [TOKEN_NULL]            = { __LIT,  NULL,   W_NONE },
     [TOKEN_OR]              = { NULL,   __OR,   W_OR },
     [TOKEN_PRINT]           = { NULL,   NULL,   W_NONE },
+    [TOKEN_TYPEOF]          = { NULL,   NULL,   W_NONE },
     [TOKEN_RETURN]          = { NULL,   NULL,   W_NONE },
     [TOKEN_SUPER]           = { __SUP,  NULL,   W_NONE },
     [TOKEN_THIS]            = { __CUR,  NULL,   W_NONE },
@@ -627,7 +628,7 @@ static void digestWeight(Weight precedence) {
     next();
     WeightCallback prefixRule = getRule(digester.previous.type)->prefix;
     if (prefixRule == NULL) {
-        error("Expect expression.");
+        error("expecting expression");
         return;
     }
 
@@ -659,6 +660,10 @@ static void block() {
     consume(TOKEN_CONTEXT_CLOSE, "Expect ' }' after block.");
 }
 
+static void array(ValueType type) {
+    
+}
+
 static void function(FunctionType type) {
     Compiler compiler;
     initCompiler(&compiler, type);
@@ -679,7 +684,7 @@ static void function(FunctionType type) {
     consume(TOKEN_CONTEXT_OPEN, "Expect '{' before function body.");
     block();
 
-    ObjFunction* function = endCompiler();
+    PtrFunq* function = endCompiler();
 
     emitBytes(OP_CLOSURE, makeConstant(OBJ_VAL(function)));
 
@@ -750,7 +755,7 @@ static void classDeclaration() {
     currentClass = currentClass->enclosing;
 }
 
-static void funDeclaration() {
+static void funqDeclaration() {
     byte global = parseVariable("Expect function name.");
     markInitialized();
     function(F_FUNC);
@@ -758,7 +763,7 @@ static void funDeclaration() {
 }
 
 static void varDeclaration() {
-    byte global = parseVariable("Expect variable name.");
+    byte global = parseVariable("provide your variable with a name");
 
     if (match(TOKEN_EQUAL)) {
         expression();
@@ -766,7 +771,7 @@ static void varDeclaration() {
         emitByte(OP_NULL);
     }
     if (digester.current.type != TOKEN_EOF)
-        consume(TOKEN_SEMICOLON, "Expect ';' after variable declaration.");
+        consume(TOKEN_SEMICOLON, "missing ; after variable declaration");
 
     defineVariable(global);
 }
@@ -774,7 +779,7 @@ static void varDeclaration() {
 static void expressionStatement() {
     expression();
     if (digester.current.type != TOKEN_EOF)
-        consume(TOKEN_SEMICOLON, "Expect ';' after expression.");
+        consume(TOKEN_SEMICOLON, "missing ; after expression");
     emitByte(OP_POP);
 }
 
@@ -846,10 +851,17 @@ static void ifStatement() {
     patchJump(elseJump);
 }
 
+static void printType() {
+    expression();
+    if (digester.current.type != TOKEN_EOF)
+        consume(TOKEN_SEMICOLON, "missing ; after expression");
+    emitByte(OP_TYPEOF);
+}
+
 static void printStatement() {
     expression();
     if (digester.current.type != TOKEN_EOF)
-        consume(TOKEN_SEMICOLON, "Expect ';' after value.");
+        consume(TOKEN_SEMICOLON, "missing ; after expression");
     emitByte(OP_PRINT);
 }
 
@@ -899,6 +911,7 @@ static void synchronize() {
             case TOKEN_IF:
             case TOKEN_WHILE:
             case TOKEN_PRINT:
+            case TOKEN_TYPEOF:
             case TOKEN_RETURN:
                 return;
 
@@ -914,7 +927,7 @@ static void declaration() {
         classDeclaration();
 
     } else if (match(TOKEN_FUNCTION)) {
-        funDeclaration();
+        funqDeclaration();
 
     } else if (match(TOKEN_VAR)) {
         varDeclaration();
@@ -928,6 +941,8 @@ static void declaration() {
 static void statement() {
     if (match(TOKEN_PRINT)) {
         printStatement();
+    } else if (match(TOKEN_TYPEOF)) {
+        printType();
     } else if (match(TOKEN_FOR)) {
         forStatement();
     } else if (match(TOKEN_IF)) {
@@ -945,7 +960,7 @@ static void statement() {
     }
 }
 
-ObjFunction* digest(const char* source) {
+PtrFunq* digest(const char* source) {
     initScanner(source);
     Compiler compiler;
     initCompiler(&compiler, F_CODE);
@@ -959,14 +974,14 @@ ObjFunction* digest(const char* source) {
         declaration();
     }
 
-    ObjFunction* function = endCompiler();
+    PtrFunq* function = endCompiler();
     return digester.failed ? NULL : function;
 }
 
 void markCompilerRoots() {
     Compiler* compiler = current;
     while (compiler != NULL) {
-        markObject((Obj*)compiler->function);
+        markObject((Ptr*)compiler->function);
         compiler = compiler->enclosing;
     }
 }

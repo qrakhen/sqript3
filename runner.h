@@ -9,7 +9,7 @@
 #define STACK_MAX (FRAMES_MAX * UINT8_COUNT)
 
 typedef struct {
-    ObjClosure* closure;
+    PtrQlosure* closure;
     byte* ip;
     Value* slots;
 } CallFrame;
@@ -22,15 +22,15 @@ typedef struct {
     Value* stackTop;
     Register globals;
     Register strings;
-    ObjString* initString;
-    ObjUpvalue* openUpvalues;
+    PtrString* initString;
+    PtrPreval* openUpvalues;
 
     size_t bytesAllocated;
     size_t nextGC;
-    Obj* objects;
+    Ptr* objects;
     int grayCount;
     int grayCapacity;
-    Obj** grayStack;
+    Ptr** grayStack;
 } Runner;
 
 typedef enum {

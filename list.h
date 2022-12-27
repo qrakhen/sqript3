@@ -4,7 +4,7 @@
 #include <stdlib.h>
 
 #include "value.h"
-
+typedef struct List List;
 typedef struct {
     Value value;
     struct Node* next;

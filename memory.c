@@ -33,7 +33,7 @@ void* reallocate(void* pointer, size_t oldSize, size_t newSize) {
     return result;
 }
 
-void markObject(Obj* object) {
+void markObject(Ptr* object) {
     if (object == NULL) return;
     if (object->isMarked) return;
 
@@ -47,8 +47,8 @@ void markObject(Obj* object) {
 
     if (runner.grayCapacity < runner.grayCount + 1) {
         runner.grayCapacity = GROW_CAPACITY(runner.grayCapacity);
-        runner.grayStack = (Obj**)realloc(runner.grayStack,
-                                      sizeof(Obj*) * runner.grayCapacity);
+        runner.grayStack = (Ptr**)realloc(runner.grayStack,
+                                      sizeof(Ptr*) * runner.grayCapacity);
 
         if (runner.grayStack == NULL) exit(1);
     }
@@ -66,7 +66,7 @@ static void markArray(ValueArray* array) {
     }
 }
 
-static void blackenObject(Obj* object) {
+static void blackenObject(Ptr* object) {
 #ifdef DEBUG_LOG_GC
     printf("%p blacken ", (void*)object);
     printValue(OBJ_VAL(object));
@@ -74,92 +74,92 @@ static void blackenObject(Obj* object) {
 #endif
 
     switch (object->type) {
-        case OBJ_BOUND_METHOD: {
-            ObjBoundMethod* bound = (ObjBoundMethod*)object;
+        case PTR_METHOD: {
+            PtrMethod* bound = (PtrMethod*)object;
             markValue(bound->receiver);
-            markObject((Obj*)bound->method);
+            markObject((Ptr*)bound->method);
             break;
         }
-        case OBJ_CLASS: {
-            ObjClass* klass = (ObjClass*)object;
-            markObject((Obj*)klass->name);
+        case PTR_QLASS: {
+            PtrQlass* klass = (PtrQlass*)object;
+            markObject((Ptr*)klass->name);
             markRegister(&klass->methods);
             break;
         }
-        case OBJ_CLOSURE: {
-            ObjClosure* closure = (ObjClosure*)object;
-            markObject((Obj*)closure->function);
+        case PTR_QLOSURE: {
+            PtrQlosure* closure = (PtrQlosure*)object;
+            markObject((Ptr*)closure->function);
             for (int i = 0; i < closure->upvalueCount; i++) {
-                markObject((Obj*)closure->upvalues[i]);
+                markObject((Ptr*)closure->upvalues[i]);
             }
             break;
         }
-        case OBJ_FUNCTION: {
-            ObjFunction* function = (ObjFunction*)object;
-            markObject((Obj*)function->name);
+        case PTR_FUNQ: {
+            PtrFunq* function = (PtrFunq*)object;
+            markObject((Ptr*)function->name);
             markArray(&function->segment.constants);
             break;
         }
-        case OBJ_INSTANCE: {
-            ObjInstance* instance = (ObjInstance*)object;
-            markObject((Obj*)instance->klass);
+        case PTR_INSTANCE: {
+            PtrInstance* instance = (PtrInstance*)object;
+            markObject((Ptr*)instance->klass);
             markRegister(&instance->fields);
             break;
         }
-        case OBJ_UPVALUE:
-            markValue(((ObjUpvalue*)object)->closed);
+        case PTR_PREVAL:
+            markValue(((PtrPreval*)object)->closed);
             break;
-        case OBJ_NATIVE:
-        case OBJ_STRING:
+        case PTR_NATIVE:
+        case PTR_STRING:
             break;
     }
 }
 
-static void freeObject(Obj* object) {
+static void freeObject(Ptr* object) {
 #ifdef DEBUG_LOG_GC
     printf("%p free type %d\n", (void*)object, object->type);
 #endif
 
     switch (object->type) {
-        case OBJ_BOUND_METHOD:
-            FREE(ObjBoundMethod, object);
+        case PTR_METHOD:
+            FREE(PtrMethod, object);
             break;
-        case OBJ_CLASS: {
-            ObjClass* klass = (ObjClass*)object;
+        case PTR_QLASS: {
+            PtrQlass* klass = (PtrQlass*)object;
             freeRegister(&klass->methods);
-            FREE(ObjClass, object);
+            FREE(PtrQlass, object);
             break;
         } // [braces]
-        case OBJ_CLOSURE: {
-            ObjClosure* closure = (ObjClosure*)object;
-            FREE_ARRAY(ObjUpvalue*, closure->upvalues,
+        case PTR_QLOSURE: {
+            PtrQlosure* closure = (PtrQlosure*)object;
+            FREE_ARRAY(PtrPreval*, closure->upvalues,
                        closure->upvalueCount);
-            FREE(ObjClosure, object);
+            FREE(PtrQlosure, object);
             break;
         }
-        case OBJ_FUNCTION: {
-            ObjFunction* function = (ObjFunction*)object;
+        case PTR_FUNQ: {
+            PtrFunq* function = (PtrFunq*)object;
             freeSegment(&function->segment);
-            FREE(ObjFunction, object);
+            FREE(PtrFunq, object);
             break;
         }
-        case OBJ_INSTANCE: {
-            ObjInstance* instance = (ObjInstance*)object;
+        case PTR_INSTANCE: {
+            PtrInstance* instance = (PtrInstance*)object;
             freeRegister(&instance->fields);
-            FREE(ObjInstance, object);
+            FREE(PtrInstance, object);
             break;
         }
-        case OBJ_NATIVE:
-            FREE(ObjNative, object);
+        case PTR_NATIVE:
+            FREE(PtrNative, object);
             break;
-        case OBJ_STRING: {
-            ObjString* string = (ObjString*)object;
+        case PTR_STRING: {
+            PtrString* string = (PtrString*)object;
             FREE_ARRAY(char, string->chars, string->length + 1);
-            FREE(ObjString, object);
+            FREE(PtrString, object);
             break;
         }
-        case OBJ_UPVALUE:
-            FREE(ObjUpvalue, object);
+        case PTR_PREVAL:
+            FREE(PtrPreval, object);
             break;
     }
 }
@@ -170,30 +170,30 @@ static void markRoots() {
     }
 
     for (int i = 0; i < runner.frameCount; i++) {
-        markObject((Obj*)runner.frames[i].closure);
+        markObject((Ptr*)runner.frames[i].closure);
     }
 
-    for (ObjUpvalue* upvalue = runner.openUpvalues;
+    for (PtrPreval* upvalue = runner.openUpvalues;
          upvalue != NULL;
          upvalue = upvalue->next) {
-        markObject((Obj*)upvalue);
+        markObject((Ptr*)upvalue);
     }
 
     markRegister(&runner.globals);
     markCompilerRoots();
-    markObject((Obj*)runner.initString);
+    markObject((Ptr*)runner.initString);
 }
 
 static void traceReferences() {
     while (runner.grayCount > 0) {
-        Obj* object = runner.grayStack[--runner.grayCount];
+        Ptr* object = runner.grayStack[--runner.grayCount];
         blackenObject(object);
     }
 }
 
 static void sweep() {
-    Obj* previous = NULL;
-    Obj* object = runner.objects;
+    Ptr* previous = NULL;
+    Ptr* object = runner.objects;
     while (object != NULL) {
         if (object->isMarked) {
             object->isMarked = false;
@@ -201,7 +201,7 @@ static void sweep() {
             object = object->next;
         }
         else {
-            Obj* unreached = object;
+            Ptr* unreached = object;
             object = object->next;
             if (previous != NULL) {
                 previous->next = object;
@@ -237,9 +237,9 @@ void collectGarbage() {
 }
 
 void freeObjects() {
-    Obj* object = runner.objects;
+    Ptr* object = runner.objects;
     while (object != NULL) {
-        Obj* next = object->next;
+        Ptr* next = object->next;
         freeObject(object);
         object = next;
     }

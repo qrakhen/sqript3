@@ -44,19 +44,6 @@ char* valueToString(Value value) {
 }
 
 void printValue(Value value) {
-    #ifdef NAN_BOXING
-    if (IS_BOOL(value)) {
-        printf(AS_BOOL(value) ? "true" : "false");
-    } else if (IS_NULL(value)) {
-        printf("NULL");
-    } else if (IS_INTEGER(value)) {
-        printf("%0.lf", AS_NUMBER(value));
-    } else if (IS_NUMBER(value)) {
-        printf("%g", AS_NUMBER(value));
-    } else if (IS_OBJ(value)) {
-        printObject(value);
-    }
-    #else
     switch (value.type) {
         case T_BOOL:
             printf(AS_BOOL(value) ? "true" : "false");
@@ -68,9 +55,31 @@ void printValue(Value value) {
             else
                 printf("%g", AS_NUMBER(value));
             break;
-        case T_OBJ: printObject(value); break;
+        case T_PTR: printObject(value); break;
     }
-    #endif
+}
+
+void printType(Value value) {
+    switch (value.type) {
+        case T_BOOL: printf("bool"); break;
+        case T_NULL: printf("null"); break;
+        case T_BYTE: printf("byte"); break;
+        case T_INTEGER: printf("int"); break;
+        case T_NUMBER: printf("number"); break;
+        case T_PTR:
+            switch (AS_OBJ(value)->type) {
+                case PTR_METHOD: printf("method"); break;
+                case PTR_QLASS: printf("qlass<%s>", AS_CLASS(value)->name->chars); break;
+                case PTR_QLOSURE: printf("qlosure"); break;
+                case PTR_FUNQ: printf("funqtion"); break;
+                case PTR_INSTANCE: printf("instance<%s>", AS_INSTANCE(value)->klass->name->chars); break;
+                case PTR_ARRAY: printf("array<...>"); break;
+                case PTR_NATIVE: printf("native"); break;
+                case PTR_STRING: printf("string"); break;
+                case PTR_PREVAL: printf("preval"); break;
+            }
+            break;
+    }
 }
 
 bool valuesEqual(Value a, Value b) {
@@ -85,7 +94,7 @@ bool valuesEqual(Value a, Value b) {
         case T_BOOL:    return AS_BOOL(a) == AS_BOOL(b);
         case T_NULL:    return true;
         case T_NUMBER:  return AS_NUMBER(a) == AS_NUMBER(b);
-        case T_OBJ:     return AS_OBJ(a) == AS_OBJ(b);
+        case T_PTR:     return AS_OBJ(a) == AS_OBJ(b);
         default:        return false;
     }
     #endif

@@ -20,7 +20,7 @@ void freeRegister(Register* table) {
 }
 
 static Entry* findEntry(Entry* entries, int capacity,
-                        ObjString* key) {
+                        PtrString* key) {
 
     uint32_t index = key->hash & (capacity - 1);
     Entry* tombstone = NULL;
@@ -40,7 +40,7 @@ static Entry* findEntry(Entry* entries, int capacity,
     }
 }
 
-bool registerGet(Register* table, ObjString* key, Value* value) {
+bool registerGet(Register* table, PtrString* key, Value* value) {
     if (table->count == 0) return false;
 
     Entry* entry = findEntry(table->entries, table->capacity, key);
@@ -73,7 +73,7 @@ static void adjustCapacity(Register* table, int capacity) {
     table->capacity = capacity;
 }
 
-bool registerSet(Register* table, ObjString* key, Value value) {
+bool registerSet(Register* table, PtrString* key, Value value) {
     if (table->count + 1 > table->capacity * TABLE_MAX_LOAD) {
         int capacity = GROW_CAPACITY(table->capacity);
         adjustCapacity(table, capacity);
@@ -89,7 +89,7 @@ bool registerSet(Register* table, ObjString* key, Value value) {
     return isNewKey;
 }
 
-bool registerDelete(Register* table, ObjString* key) {
+bool registerDelete(Register* table, PtrString* key) {
     if (table->count == 0) return false;
 
     // Find the entry.
@@ -111,7 +111,7 @@ void registerAddAll(Register* from, Register* to) {
     }
 }
 
-ObjString* registerFindString(
+PtrString* registerFindString(
     Register* table,
     const char* chars,
     int length,
@@ -140,7 +140,7 @@ ObjString* registerFindString(
 void registerRemoveWhite(Register* table) {
     for (int i = 0; i < table->capacity; i++) {
         Entry* entry = &table->entries[i];
-        if (entry->key != NULL && !entry->key->obj.isMarked) {
+        if (entry->key != NULL && !entry->key->ptr.isMarked) {
             registerDelete(table, entry->key);
         }
     }
@@ -149,7 +149,7 @@ void registerRemoveWhite(Register* table) {
 void markRegister(Register* table) {
     for (int i = 0; i < table->capacity; i++) {
         Entry* entry = &table->entries[i];
-        markObject((Obj*)entry->key);
+        markObject((Ptr*)entry->key);
         markValue(entry->value);
     }
 }

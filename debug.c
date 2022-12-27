@@ -134,7 +134,7 @@ int disassembleInstruction(Segment* segment, int offset) {
             printValue(segment->constants.values[constant]);
             printf("\n");
 
-            ObjFunction* function = AS_FUNCTION(
+            PtrFunq* function = AS_FUNCTION(
                 segment->constants.values[constant]);
             for (int j = 0; j < function->upvalueCount; j++) {
                 int isLocal = segment->code[offset++];

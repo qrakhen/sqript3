@@ -4,19 +4,19 @@
 #include "value.h"
 #include "object.h"
 
-#define IS_ARRAY(value) isObjType(value, OBJ_ARRAY)
-#define AS_ARRAY(value) ((ObjArray*)AS_OBJ(value))
+#define IS_ARRAY(value) matchPtrType(value, PTR_ARRAY)
+#define AS_ARRAY(value) ((PtrArray*)AS_OBJ(value))
 
 typedef struct {
-    Obj obj;
+    Ptr ptr;
     int length;
     ValueType type;
     Value* values;
-} ObjArray;
+} PtrArray;
 
-ObjArray* createArray(int length, ValueType type);
-Value arrayGet(int index);
-void arraySet(int index, Value value);
-void freeArray(ObjArray* array);
+PtrArray* createArray(int length, ValueType type);
+Value arrayGet(PtrArray* array, int index);
+bool arraySet(PtrArray* array, int index, Value value);
+void freeArray(PtrArray* array);
 
 #endif

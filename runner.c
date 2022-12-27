@@ -33,7 +33,7 @@ static void runtimeError(const char* format, ...) {
 
     for (int i = runner.frameCount - 1; i >= 0; i--) {
         CallFrame* frame = &runner.frames[i];
-        ObjFunction* function = frame->closure->function;
+        PtrFunq* function = frame->closure->function;
         size_t instruction = frame->ip - function->segment.code - 1;
         fprintf(stderr, "[line %d] in ", // [minus]
                 function->segment.lines[instruction]);
@@ -86,7 +86,7 @@ void push(Value value) { *(runner.stackTop++) = value; }
 Value pop() { return *(--runner.stackTop); }
 static Value peek(int distance) { return runner.stackTop[-1 - distance]; }
 
-static bool call(ObjClosure* closure, int argCount) {
+static bool call(PtrQlosure* closure, int argCount) {
     if (argCount != closure->function->argc) {
         runtimeError("Expected %d arguments but got %d.",
                      closure->function->argc, argCount);
@@ -108,13 +108,13 @@ static bool call(ObjClosure* closure, int argCount) {
 static bool callValue(Value callee, int argCount) {
     if (IS_OBJ(callee)) {
         switch (OBJ_TYPE(callee)) {
-            case OBJ_BOUND_METHOD: {
-                ObjBoundMethod* bound = AS_BOUND_METHOD(callee);
+            case PTR_METHOD: {
+                PtrMethod* bound = AS_BOUND_METHOD(callee);
                 runner.stackTop[-argCount - 1] = bound->receiver;
                 return call(bound->method, argCount);
             }
-            case OBJ_CLASS: {
-                ObjClass* klass = AS_CLASS(callee);
+            case PTR_QLASS: {
+                PtrQlass* klass = AS_CLASS(callee);
                 runner.stackTop[-argCount - 1] = OBJ_VAL(newInstance(klass));
                 Value initializer;
                 if (registerGet(&klass->methods, runner.initString,
@@ -127,9 +127,9 @@ static bool callValue(Value callee, int argCount) {
                 }
                 return true;
             }
-            case OBJ_CLOSURE:
+            case PTR_QLOSURE:
                 return call(AS_CLOSURE(callee), argCount);
-            case OBJ_NATIVE: {
+            case PTR_NATIVE: {
                 NativeFn native = AS_NATIVE(callee);
                 Value result = native(argCount, runner.stackTop - argCount);
                 runner.stackTop -= argCount + 1;
@@ -144,7 +144,7 @@ static bool callValue(Value callee, int argCount) {
     return false;
 }
 
-static bool invokeFromClass(ObjClass* klass, ObjString* name,
+static bool invokeFromClass(PtrQlass* klass, PtrString* name,
                             int argCount) {
     Value method;
     if (!registerGet(&klass->methods, name, &method)) {
@@ -154,7 +154,7 @@ static bool invokeFromClass(ObjClass* klass, ObjString* name,
     return call(AS_CLOSURE(method), argCount);
 }
 
-static bool invoke(ObjString* name, int argCount) {
+static bool invoke(PtrString* name, int argCount) {
     Value receiver = peek(argCount);
 
     if (!IS_INSTANCE(receiver)) {
@@ -162,7 +162,7 @@ static bool invoke(ObjString* name, int argCount) {
         return false;
     }
 
-    ObjInstance* instance = AS_INSTANCE(receiver);
+    PtrInstance* instance = AS_INSTANCE(receiver);
 
     Value value;
     if (registerGet(&instance->fields, name, &value)) {
@@ -173,23 +173,23 @@ static bool invoke(ObjString* name, int argCount) {
     return invokeFromClass(instance->klass, name, argCount);
 }
 
-static bool bindMethod(ObjClass* klass, ObjString* name) {
+static bool bindMethod(PtrQlass* klass, PtrString* name) {
     Value method;
     if (!registerGet(&klass->methods, name, &method)) {
         runtimeError("Undefined property '%s'.", name->chars);
         return false;
     }
 
-    ObjBoundMethod* bound = newBoundMethod(peek(0),
+    PtrMethod* bound = newBoundMethod(peek(0),
                                            AS_CLOSURE(method));
     pop();
     push(OBJ_VAL(bound));
     return true;
 }
 
-static ObjUpvalue* captureUpvalue(Value* local) {
-    ObjUpvalue* prevUpvalue = NULL;
-    ObjUpvalue* upvalue = runner.openUpvalues;
+static PtrPreval* captureUpvalue(Value* local) {
+    PtrPreval* prevUpvalue = NULL;
+    PtrPreval* upvalue = runner.openUpvalues;
     while (upvalue != NULL && upvalue->location > local) {
         prevUpvalue = upvalue;
         upvalue = upvalue->next;
@@ -199,7 +199,7 @@ static ObjUpvalue* captureUpvalue(Value* local) {
         return upvalue;
     }
 
-    ObjUpvalue* createdUpvalue = newUpvalue(local);
+    PtrPreval* createdUpvalue = newUpvalue(local);
     createdUpvalue->next = upvalue;
 
     if (prevUpvalue == NULL) {
@@ -214,16 +214,16 @@ static ObjUpvalue* captureUpvalue(Value* local) {
 static void closeUpvalues(Value* last) {
     while (runner.openUpvalues != NULL &&
            runner.openUpvalues->location >= last) {
-        ObjUpvalue* upvalue = runner.openUpvalues;
+        PtrPreval* upvalue = runner.openUpvalues;
         upvalue->closed = *upvalue->location;
         upvalue->location = &upvalue->closed;
         runner.openUpvalues = upvalue->next;
     }
 }
 
-static void defineMethod(ObjString* name) {
+static void defineMethod(PtrString* name) {
     Value method = peek(0);
-    ObjClass* klass = AS_CLASS(peek(1));
+    PtrQlass* klass = AS_CLASS(peek(1));
     registerSet(&klass->methods, name, method);
     pop();
 }
@@ -237,8 +237,8 @@ static bool isFalsey(Value value) {
 }
 
 static void concatenate() {
-    ObjString* b = AS_STRING(peek(0));
-    ObjString* a = AS_STRING(peek(1));
+    PtrString* b = AS_STRING(peek(0));
+    PtrString* a = AS_STRING(peek(1));
 
     int length = a->length + b->length;
     char* chars = ALLOCATE(char, length + 1);
@@ -246,7 +246,7 @@ static void concatenate() {
     memcpy(chars + a->length, b->chars, b->length);
     chars[length] = '\0';
 
-    ObjString* result = takeString(chars, length);
+    PtrString* result = takeString(chars, length);
     pop();
     pop();
     push(OBJ_VAL(result));
@@ -322,7 +322,7 @@ static InterpretResult run() {
                 break;
             }
             case OP_GET_GLOBAL: {
-                ObjString* name = READ_STRING();
+                PtrString* name = READ_STRING();
                 Value value;
                 if (!registerGet(&runner.globals, name, &value)) {
                     runtimeError("Undefined variable '%s'.", name->chars);
@@ -332,13 +332,13 @@ static InterpretResult run() {
                 break;
             }
             case OP_DEFINE_GLOBAL: {
-                ObjString* name = READ_STRING();
+                PtrString* name = READ_STRING();
                 registerSet(&runner.globals, name, peek(0));
                 pop();
                 break;
             }
             case OP_SET_GLOBAL: {
-                ObjString* name = READ_STRING();
+                PtrString* name = READ_STRING();
                 if (registerSet(&runner.globals, name, peek(0))) {
                     registerDelete(&runner.globals, name);
                     runtimeError("Undefined variable '%s'.", name->chars);
@@ -362,8 +362,8 @@ static InterpretResult run() {
                     return SQR_INTRP_ERROR_RUNTIME;
                 }
 
-                ObjInstance* instance = AS_INSTANCE(peek(0));
-                ObjString* name = READ_STRING();
+                PtrInstance* instance = AS_INSTANCE(peek(0));
+                PtrString* name = READ_STRING();
 
                 Value value;
                 if (registerGet(&instance->fields, name, &value)) {
@@ -382,7 +382,7 @@ static InterpretResult run() {
                     return SQR_INTRP_ERROR_RUNTIME;
                 }
 
-                ObjInstance* instance = AS_INSTANCE(peek(1));
+                PtrInstance* instance = AS_INSTANCE(peek(1));
                 registerSet(&instance->fields, READ_STRING(), peek(0));
                 Value value = pop();
                 pop();
@@ -390,8 +390,8 @@ static InterpretResult run() {
                 break;
             }
             case OP_GET_SUPER: {
-                ObjString* name = READ_STRING();
-                ObjClass* superclass = AS_CLASS(pop());
+                PtrString* name = READ_STRING();
+                PtrQlass* superclass = AS_CLASS(pop());
 
                 if (!bindMethod(superclass, name)) {
                     return SQR_INTRP_ERROR_RUNTIME;
@@ -450,6 +450,12 @@ static InterpretResult run() {
                 printf("\n");
                 break;
             }
+            case OP_TYPEOF: {
+                printf(" :> ");
+                printType(pop());
+                printf("\n");
+                break;
+            }
             case OP_JUMP: {
                 uint16_t offset = READ_SHORT();
                 frame->ip += offset;
@@ -474,7 +480,7 @@ static InterpretResult run() {
                 break;
             }
             case OP_INVOKE: {
-                ObjString* method = READ_STRING();
+                PtrString* method = READ_STRING();
                 int argCount = READ_BYTE();
                 if (!invoke(method, argCount)) {
                     return SQR_INTRP_ERROR_RUNTIME;
@@ -483,9 +489,9 @@ static InterpretResult run() {
                 break;
             }
             case OP_SUPER_INVOKE: {
-                ObjString* method = READ_STRING();
+                PtrString* method = READ_STRING();
                 int argCount = READ_BYTE();
-                ObjClass* superclass = AS_CLASS(pop());
+                PtrQlass* superclass = AS_CLASS(pop());
                 if (!invokeFromClass(superclass, method, argCount)) {
                     return SQR_INTRP_ERROR_RUNTIME;
                 }
@@ -493,8 +499,8 @@ static InterpretResult run() {
                 break;
             }
             case OP_CLOSURE: {
-                ObjFunction* function = AS_FUNCTION(READ_CONSTANT());
-                ObjClosure* closure = newClosure(function);
+                PtrFunq* function = AS_FUNCTION(READ_CONSTANT());
+                PtrQlosure* closure = newClosure(function);
                 push(OBJ_VAL(closure));
                 for (int i = 0; i < closure->upvalueCount; i++) {
                     byte isLocal = READ_BYTE();
@@ -536,7 +542,7 @@ static InterpretResult run() {
                     return SQR_INTRP_ERROR_RUNTIME;
                 }
 
-                ObjClass* subclass = AS_CLASS(peek(0));
+                PtrQlass* subclass = AS_CLASS(peek(0));
                 registerAddAll(&AS_CLASS(superclass)->methods,
                             &subclass->methods);
                 pop();
@@ -560,10 +566,10 @@ void hack(bool b) {
 }
 
 InterpretResult interpret(const char* source) {
-    ObjFunction* function = digest(source);
+    PtrFunq* function = digest(source);
     if (function == NULL) return SQR_INTRP_ERROR_DIGEST;
     push(OBJ_VAL(function));
-    ObjClosure* closure = newClosure(function);
+    PtrQlosure* closure = newClosure(function);
     pop();
     push(OBJ_VAL(closure));
     call(closure, 0);

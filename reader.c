@@ -127,6 +127,7 @@ static TokenType identifierType() {
                 switch (reader.start[1]) {
                     case 'h': return checkKeyword(2, 2, "is", TOKEN_THIS);
                     case 'r': return checkKeyword(2, 2, "ue", TOKEN_TRUE);
+                    case 'y': return checkKeyword(2, 4, "peof", TOKEN_TYPEOF);
                 }
             }
             break;
@@ -176,8 +177,8 @@ Token readToken() {
         case ')': return makeToken(TOKEN_GROUP_CLOSE);
         case '{': return makeToken(TOKEN_CONTEXT_OPEN);
         case '}': return makeToken(TOKEN_CONTEXT_CLOSE);
-        case '[': return makeToken(TOKEN_COLLECTION_OPEN);
-        case ']': return makeToken(TOKEN_COLLECTION_CLOSE);
+        case '[': return makeToken(TOKEN_ARRAY_OPEN);
+        case ']': return makeToken(TOKEN_ARRAY_CLOSE);
         case ';': return makeToken(TOKEN_SEMICOLON);
         case ',': return makeToken(TOKEN_COMMA);
         case '.': return makeToken(TOKEN_DOT);

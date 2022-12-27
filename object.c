@@ -8,10 +8,10 @@
 #include "runner.h"
 
 #define ALLOCATE_OBJ(type, objectType) \
-    (type*)allocateObject(sizeof(type), objectType)
+    (type*)allocatePtr(sizeof(type), objectType)
 
-static Obj* allocateObject(size_t size, ObjType type) {
-    Obj* object = (Obj*)reallocate(NULL, 0, size);
+Ptr* allocatePtr(size_t size, PtrType type) {
+    Ptr* object = (Ptr*)reallocate(NULL, 0, size);
     object->type = type;
     object->isMarked = false;
 
@@ -25,38 +25,38 @@ static Obj* allocateObject(size_t size, ObjType type) {
     return object;
 }
 
-ObjBoundMethod* newBoundMethod(Value receiver,
-                               ObjClosure* method) {
-    ObjBoundMethod* bound = ALLOCATE_OBJ(ObjBoundMethod,
-                                         OBJ_BOUND_METHOD);
+PtrMethod* newBoundMethod(Value receiver,
+                               PtrQlosure* method) {
+    PtrMethod* bound = ALLOCATE_OBJ(PtrMethod,
+                                         PTR_METHOD);
     bound->receiver = receiver;
     bound->method = method;
     return bound;
 }
 
-ObjClass* newClass(ObjString* name) {
-    ObjClass* klass = ALLOCATE_OBJ(ObjClass, OBJ_CLASS);
+PtrQlass* newClass(PtrString* name) {
+    PtrQlass* klass = ALLOCATE_OBJ(PtrQlass, PTR_QLASS);
     klass->name = name; // [klass]
     initRegister(&klass->methods);
     return klass;
 }
 
-ObjClosure* newClosure(ObjFunction* function) {
-    ObjUpvalue** upvalues = ALLOCATE(ObjUpvalue*,
+PtrQlosure* newClosure(PtrFunq* function) {
+    PtrPreval** upvalues = ALLOCATE(PtrPreval*,
                                      function->upvalueCount);
     for (int i = 0; i < function->upvalueCount; i++) {
         upvalues[i] = NULL;
     }
 
-    ObjClosure* closure = ALLOCATE_OBJ(ObjClosure, OBJ_CLOSURE);
+    PtrQlosure* closure = ALLOCATE_OBJ(PtrQlosure, PTR_QLOSURE);
     closure->function = function;
     closure->upvalues = upvalues;
     closure->upvalueCount = function->upvalueCount;
     return closure;
 }
 
-ObjFunction* newFunction() {
-    ObjFunction* function = ALLOCATE_OBJ(ObjFunction, OBJ_FUNCTION);
+PtrFunq* newFunction() {
+    PtrFunq* function = ALLOCATE_OBJ(PtrFunq, PTR_FUNQ);
     function->argc = 0;
     function->upvalueCount = 0;
     function->name = NULL;
@@ -64,22 +64,22 @@ ObjFunction* newFunction() {
     return function;
 }
 
-ObjInstance* newInstance(ObjClass* klass) {
-    ObjInstance* instance = ALLOCATE_OBJ(ObjInstance, OBJ_INSTANCE);
+PtrInstance* newInstance(PtrQlass* klass) {
+    PtrInstance* instance = ALLOCATE_OBJ(PtrInstance, PTR_INSTANCE);
     instance->klass = klass;
     initRegister(&instance->fields);
     return instance;
 }
 
-ObjNative* newNative(NativeFn function) {
-    ObjNative* native = ALLOCATE_OBJ(ObjNative, OBJ_NATIVE);
+PtrNative* newNative(NativeFn function) {
+    PtrNative* native = ALLOCATE_OBJ(PtrNative, PTR_NATIVE);
     native->function = function;
     return native;
 }
 
-static ObjString* allocateString(char* chars, int length,
+static PtrString* allocateString(char* chars, int length,
                                  uint32_t hash) {
-    ObjString* string = ALLOCATE_OBJ(ObjString, OBJ_STRING);
+    PtrString* string = ALLOCATE_OBJ(PtrString, PTR_STRING);
     string->length = length;
     string->chars = chars;
     string->hash = hash;
@@ -100,10 +100,10 @@ static uint32_t hashString(const char* key, int length) {
     return hash;
 }
 
-ObjString* takeString(char* chars, int length) {
+PtrString* takeString(char* chars, int length) {
 
     uint32_t hash = hashString(chars, length);
-    ObjString* interned = registerFindString(&runner.strings, chars, length,
+    PtrString* interned = registerFindString(&runner.strings, chars, length,
                                              hash);
     if (interned != NULL) {
         FREE_ARRAY(char, chars, length + 1);
@@ -113,9 +113,9 @@ ObjString* takeString(char* chars, int length) {
     return allocateString(chars, length, hash);
 }
 
-ObjString* copyString(const char* chars, int length) {
+PtrString* copyString(const char* chars, int length) {
     uint32_t hash = hashString(chars, length);
-    ObjString* interned = registerFindString(&runner.strings, chars, length,
+    PtrString* interned = registerFindString(&runner.strings, chars, length,
                                              hash);
     if (interned != NULL) return interned;
 
@@ -126,15 +126,15 @@ ObjString* copyString(const char* chars, int length) {
     return allocateString(heapChars, length, hash);
 }
 
-ObjUpvalue* newUpvalue(Value* slot) {
-    ObjUpvalue* upvalue = ALLOCATE_OBJ(ObjUpvalue, OBJ_UPVALUE);
+PtrPreval* newUpvalue(Value* slot) {
+    PtrPreval* upvalue = ALLOCATE_OBJ(PtrPreval, PTR_PREVAL);
     upvalue->closed = NULL_VAL;
     upvalue->location = slot;
     upvalue->next = NULL;
     return upvalue;
 }
 
-static void printFunction(ObjFunction* function) {
+static void printFunction(PtrFunq* function) {
     if (function->name == NULL) {
         printf("<sqript>");
         return;
@@ -144,29 +144,29 @@ static void printFunction(ObjFunction* function) {
 
 void printObject(Value value) {
     switch (OBJ_TYPE(value)) {
-        case OBJ_BOUND_METHOD:
+        case PTR_METHOD:
             printFunction(AS_BOUND_METHOD(value)->method->function);
             break;
-        case OBJ_CLASS:
+        case PTR_QLASS:
             printf("%s", AS_CLASS(value)->name->chars);
             break;
-        case OBJ_CLOSURE:
+        case PTR_QLOSURE:
             printFunction(AS_CLOSURE(value)->function);
             break;
-        case OBJ_FUNCTION:
+        case PTR_FUNQ:
             printFunction(AS_FUNCTION(value));
             break;
-        case OBJ_INSTANCE:
+        case PTR_INSTANCE:
             printf("%s instance",
                    AS_INSTANCE(value)->klass->name->chars);
             break;
-        case OBJ_NATIVE:
+        case PTR_NATIVE:
             printf("<native fn>");
             break;
-        case OBJ_STRING:
+        case PTR_STRING:
             printf("%s", AS_CSTRING(value));
             break;
-        case OBJ_UPVALUE:
+        case PTR_PREVAL:
             printf("upvalue");
             break;
     }
