@@ -34,6 +34,8 @@ typedef enum {
     OP_NOT,
     OP_NEGATE,
     OP_ARRAY,
+    OP_ARRAY_GET,
+    OP_ARRAY_SET,
     OP_PRINT,
     OP_TYPEOF,
     OP_JUMP,
@@ -53,7 +55,7 @@ typedef enum {
 typedef struct {
     int count;
     int capacity;
-    byte* code;
+    Byte* code;
     int* lines;
     ValueArray constants;
 } Segment;
@@ -61,7 +63,7 @@ typedef struct {
 void initSegment(Segment* s);
 void freeSegment(Segment* s);
 
-void writeSegment(Segment* s, byte byte, int line);
+void writeSegment(Segment* s, Byte Byte, int line);
 int registerConstant(Segment* s, Value value);
 
 #endif

@@ -14,7 +14,7 @@ void disassembleChunk(Segment* segment, const char* name) {
 
 static int constantInstruction(const char* name, Segment* segment,
                                int offset) {
-    byte constant = segment->code[offset + 1];
+    Byte constant = segment->code[offset + 1];
     printf("%-16s %4d '", name, constant);
     printValue(segment->constants.values[constant]);
     printf("'\n");
@@ -23,8 +23,8 @@ static int constantInstruction(const char* name, Segment* segment,
 
 static int invokeInstruction(const char* name, Segment* segment,
                              int offset) {
-    byte constant = segment->code[offset + 1];
-    byte argCount = segment->code[offset + 2];
+    Byte constant = segment->code[offset + 1];
+    Byte argCount = segment->code[offset + 2];
     printf("%-16s (%d args) %4d '", name, argCount, constant);
     printValue(segment->constants.values[constant]);
     printf("'\n");
@@ -38,7 +38,7 @@ static int simpleInstruction(const char* name, int offset) {
 
 static int byteInstruction(const char* name, Segment* segment,
                            int offset) {
-    byte slot = segment->code[offset + 1];
+    Byte slot = segment->code[offset + 1];
     printf("%-16s %4d\n", name, slot);
     return offset + 2; // [debug]
 }
@@ -62,7 +62,7 @@ int disassembleInstruction(Segment* segment, int offset) {
         printf("%4d ", segment->lines[offset]);
     }
 
-    byte instruction = segment->code[offset];
+    Byte instruction = segment->code[offset];
     switch (instruction) {
         case OP_CONSTANT:
             return constantInstruction("OP_CONSTANT", segment, offset);
@@ -129,7 +129,7 @@ int disassembleInstruction(Segment* segment, int offset) {
             return invokeInstruction("OP_SUPER_INVOKE", segment, offset);
         case OP_CLOSURE: {
             offset++;
-            byte constant = segment->code[offset++];
+            Byte constant = segment->code[offset++];
             printf("%-16s %4d ", "OP_CLOSURE", constant);
             printValue(segment->constants.values[constant]);
             printf("\n");

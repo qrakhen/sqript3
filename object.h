@@ -46,7 +46,7 @@ struct Ptr {
 
 typedef struct {
     Ptr ptr;
-    byte argc;
+    Byte argc;
     int upvalueCount;
     Segment segment;
     PtrString* name;

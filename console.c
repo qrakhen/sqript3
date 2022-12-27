@@ -6,7 +6,7 @@
 #include "console.h"
 #include "common.h"
 
-static byte logLevel = LOG_LEVEL_SPAM;
+static Byte logLevel = LOG_LEVEL_SPAM;
 
 Console console;
 
@@ -68,7 +68,7 @@ void consoleClear() {
     #endif
 }
 
-static void __logWrite(char* message, byte level, ...) {
+static void __logWrite(char* message, Byte level, ...) {
     if (level > logLevel)
         return;
 

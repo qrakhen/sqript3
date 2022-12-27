@@ -5,19 +5,20 @@
 
 #include "common.h"
 
-typedef uint8_t byte;
-typedef uint16_t int16;
-typedef uint32_t int32;
-typedef uint64_t int64;
+typedef bool Bool;
+typedef uint8_t Byte;
+typedef int64_t Int;
+typedef double Number;
+
 typedef struct Value Value;
 typedef struct Ptr Ptr;
 typedef struct PtrString PtrString;
 
 typedef enum {
     T_ANY,
+    T_NULL,
     T_BOOL,
     T_BYTE,
-    T_NULL,
     T_NUMBER,
     T_INTEGER,
     T_PTR,
@@ -26,10 +27,10 @@ typedef enum {
 struct Value {
     ValueType type;
     union {
-        bool boolean;
-        byte byte;
-        double number;
-        long integer;
+        Bool boolean;
+        Byte byte;
+        Int integer;
+        Number number;
         Ptr* ptr;
     } as;
 };
@@ -44,7 +45,7 @@ struct Value {
 #define AS_OBJ(value)       ((value).as.ptr)
 #define AS_BOOL(value)      ((value).as.boolean)
 #define AS_NUMBER(value)    ((value).as.number)
-#define AS_INTEGER(value)   ((value).as.integer)
+#define AS_INTEGER(value)   ((value).as.Int)
 
 #define BOOL_VAL(value)   ((Value){ T_BOOL,     { .boolean = value }})
 #define NULL_VAL          ((Value){ T_NULL,     { .ptr = NULL }})

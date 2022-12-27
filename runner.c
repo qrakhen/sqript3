@@ -283,8 +283,8 @@ static InterpretResult run() {
                 runtimeError("Operands must be numbers."); \
                 return SQR_INTRP_ERROR_RUNTIME; \
             } \
-            int64 b = (int64)AS_NUMBER(pop()); \
-            int64 a = (int64)AS_NUMBER(pop()); \
+            Int b = (Int)AS_NUMBER(pop()); \
+            Int a = (Int)AS_NUMBER(pop()); \
             push(valueType(a op b)); \
         } while (false)
 
@@ -301,7 +301,7 @@ static InterpretResult run() {
                                (int)(frame->ip - frame->closure->function->segment.code));
         #endif
 
-        byte instruction;
+        Byte instruction;
         switch (instruction = READ_BYTE()) {
             case OP_CONSTANT: {
                 Value constant = READ_CONSTANT();
@@ -313,12 +313,12 @@ static InterpretResult run() {
             case OP_FALSE: push(BOOL_VAL(false)); break;
             case OP_POP: pop(); break;
             case OP_GET_LOCAL: {
-                byte slot = READ_BYTE();
+                Byte slot = READ_BYTE();
                 push(frame->slots[slot]);
                 break;
             }
             case OP_SET_LOCAL: {
-                byte slot = READ_BYTE();
+                Byte slot = READ_BYTE();
                 frame->slots[slot] = peek(0);
                 break;
             }
@@ -348,18 +348,18 @@ static InterpretResult run() {
                 break;
             }
             case OP_GET_UPVALUE: {
-                byte slot = READ_BYTE();
+                Byte slot = READ_BYTE();
                 push(*frame->closure->upvalues[slot]->location);
                 break;
             }
             case OP_SET_UPVALUE: {
-                byte slot = READ_BYTE();
+                Byte slot = READ_BYTE();
                 *frame->closure->upvalues[slot]->location = peek(0);
                 break;
             }
             case OP_GET_PROPERTY: {
                 if (!IS_INSTANCE(peek(0))) {
-                    runtimeError("Only instances have properties.");
+                    runtimeError("only instances have properties.");
                     return SQR_INTRP_ERROR_RUNTIME;
                 }
 
@@ -432,7 +432,7 @@ static InterpretResult run() {
                     runtimeError("operand must be an integer.");
                     return SQR_INTRP_ERROR_RUNTIME;
                 }
-                push(NUMBER_VAL(~(int64)AS_NUMBER(pop())));
+                push(NUMBER_VAL(~(Int)AS_NUMBER(pop())));
                 break;
             case OP_NOT:
                 push(BOOL_VAL(isFalsey(pop())));
@@ -508,13 +508,26 @@ static InterpretResult run() {
                 push(OBJ_VAL(arr));
                 break;
             }
+            case OP_ARRAY_GET: {
+                int index = AS_NUMBER(pop());
+                PtrArray* arr = AS_ARRAY(pop());
+                push(arr->values[index]);
+                break;
+            }
+            case OP_ARRAY_SET: {
+                Value value = pop();
+                int index = AS_NUMBER(pop());
+                PtrArray* arr = AS_ARRAY(peek(0));
+                arr->values[index] = value;
+                break;
+            }
             case OP_CLOSURE: {
                 PtrFunq* function = AS_FUNCTION(READ_CONSTANT());
                 PtrQlosure* closure = newClosure(function);
                 push(OBJ_VAL(closure));
                 for (int i = 0; i < closure->upvalueCount; i++) {
-                    byte isLocal = READ_BYTE();
-                    byte index = READ_BYTE();
+                    Byte isLocal = READ_BYTE();
+                    Byte index = READ_BYTE();
                     if (isLocal) {
                         closure->upvalues[i] =
                             captureUpvalue(frame->slots + index);

@@ -10,7 +10,7 @@
 
 typedef struct {
     PtrQlosure* closure;
-    byte* ip;
+    Byte* ip;
     Value* slots;
 } CallFrame;
 

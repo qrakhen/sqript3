@@ -15,7 +15,7 @@ typedef struct {
 typedef struct {
     const char* name;
     const ValueType returnType;
-    byte paramCount;
+    Byte paramCount;
     ExtensionFunctionParam* params;
     ExtensionFunctionCallback* callback;
 } ExtensionFunction;

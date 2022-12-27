@@ -13,17 +13,17 @@ void initSegment(Segment* segment) {
 }
 
 void freeSegment(Segment* segment) {
-    FREE_ARRAY(byte, segment->code, segment->capacity);
+    FREE_ARRAY(Byte, segment->code, segment->capacity);
     FREE_ARRAY(int, segment->lines, segment->capacity);
     freeValueArray(&segment->constants);
     initSegment(segment);
 }
 
-void writeSegment(Segment* segment, byte value, int line) {
+void writeSegment(Segment* segment, Byte value, int line) {
     if (segment->capacity < segment->count + 1) {
         int oldCapacity = segment->capacity;
         segment->capacity = GROW_CAPACITY(oldCapacity);
-        segment->code = GROW_ARRAY(byte, segment->code, oldCapacity, segment->capacity);
+        segment->code = GROW_ARRAY(Byte, segment->code, oldCapacity, segment->capacity);
         segment->lines = GROW_ARRAY(int, segment->lines, oldCapacity, segment->capacity);
     }
 

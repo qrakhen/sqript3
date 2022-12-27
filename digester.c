@@ -48,7 +48,7 @@ typedef struct {
 } Local;
 
 typedef struct {
-    byte index;
+    Byte index;
     bool isLocal;
 } Upvalue;
 
@@ -138,11 +138,11 @@ static bool match(TokenType type) {
     return true;
 }
 
-static void emitByte(byte byte) {
-    writeSegment(currentSegment(), byte, digester.previous.line);
+static void emitByte(Byte Byte) {
+    writeSegment(currentSegment(), Byte, digester.previous.line);
 }
 
-static void emitBytes(byte byte1, byte byte2) {
+static void emitBytes(Byte byte1, Byte byte2) {
     emitByte(byte1);
     emitByte(byte2);
 }
@@ -157,7 +157,7 @@ static void emitLoop(int loopStart) {
     emitByte(offset & 0xff);
 }
 
-static int emitJump(byte instruction) {
+static int emitJump(Byte instruction) {
     emitByte(instruction);
     emitByte(0xff);
     emitByte(0xff);
@@ -175,14 +175,14 @@ static void emitReturn() {
     emitByte(OP_RETURN);
 }
 
-static byte makeConstant(Value value) {
+static Byte makeConstant(Value value) {
     int constant = registerConstant(currentSegment(), value);
     if (constant > UINT8_MAX) {
         error("Too many constants in one chunk.");
         return 0;
     }
 
-    return (byte)constant;
+    return (Byte)constant;
 }
 
 static void emitConstant(Value value) {
@@ -266,7 +266,7 @@ static void declaration();
 static WeightRule* getRule(TokenType type);
 static void digestWeight(Weight precedence);
 
-static byte identifierConstant(Token* name) {
+static Byte identifierConstant(Token* name) {
     return makeConstant(OBJ_VAL(copyString(name->start,
                         name->length)));
 }
@@ -290,7 +290,7 @@ static int resolveLocal(Compiler* compiler, Token* name) {
     return -1;
 }
 
-static int addUpvalue(Compiler* compiler, byte index,
+static int addUpvalue(Compiler* compiler, Byte index,
                       bool isLocal) {
     int upvalueCount = compiler->function->upvalueCount;
 
@@ -317,12 +317,12 @@ static int resolveUpvalue(Compiler* compiler, Token* name) {
     int local = resolveLocal(compiler->enclosing, name);
     if (local != -1) {
         compiler->enclosing->locals[local].isCaptured = true;
-        return addUpvalue(compiler, (byte)local, true);
+        return addUpvalue(compiler, (Byte)local, true);
     }
 
     int upvalue = resolveUpvalue(compiler->enclosing, name);
     if (upvalue != -1) {
-        return addUpvalue(compiler, (byte)upvalue, false);
+        return addUpvalue(compiler, (Byte)upvalue, false);
     }
 
     return -1;
@@ -359,7 +359,7 @@ static void declareVariable() {
     addLocal(*name);
 }
 
-static byte parseVariable(const char* errorMessage) {
+static Byte parseVariable(const char* errorMessage) {
     consume(TOKEN_IDENTIFIER, errorMessage);
 
     declareVariable();
@@ -374,7 +374,7 @@ static void markInitialized() {
         current->scopeDepth;
 }
 
-static void defineVariable(byte global) {
+static void defineVariable(Byte global) {
     if (current->scopeDepth > 0) {
         markInitialized();
         return;
@@ -383,8 +383,8 @@ static void defineVariable(byte global) {
     emitBytes(OP_DEFINE_GLOBAL, global);
 }
 
-static byte argumentList() {
-    byte argCount = 0;
+static Byte argumentList() {
+    Byte argCount = 0;
     if (!check(TOKEN_GROUP_CLOSE)) {
         do {
             expression();
@@ -432,19 +432,19 @@ static void __BIN(bool canAssign) {
 }
 
 static void __CAL(bool canAssign) {
-    byte argCount = argumentList();
+    Byte argCount = argumentList();
     emitBytes(OP_CALL, argCount);
 }
 
 static void __DOT(bool canAssign) {
     consume(TOKEN_IDENTIFIER, "Expect property name after '.'.");
-    byte name = identifierConstant(&digester.previous);
+    Byte name = identifierConstant(&digester.previous);
 
     if (canAssign && match(TOKEN_EQUAL)) {
         expression();
         emitBytes(OP_SET_PROPERTY, name);
     } else if (match(TOKEN_GROUP_OPEN)) {
-        byte argCount = argumentList();
+        Byte argCount = argumentList();
         emitBytes(OP_INVOKE, name);
         emitByte(argCount);
     } else {
@@ -480,6 +480,17 @@ static void __ARR(bool canAssign) {
     emitBytes(OP_ARRAY, makeConstant(NUMBER_VAL(length)));
 }
 
+static void __IDX(bool canAssign) {
+    expression();
+    consume(TOKEN_ARRAY_CLOSE, "expected ] after array accessor");
+    if (canAssign && match(TOKEN_EQUAL)) {
+        expression();
+        emitByte(OP_ARRAY_SET);
+    } else {
+        emitByte(OP_ARRAY_GET);
+    }
+}
+
 static void __NUM(bool canAssign) {
     double value = strtod(digester.previous.start, NULL);
     emitConstant(NUMBER_VAL(value));
@@ -502,7 +513,7 @@ static void __STR(bool canAssign) {
 }
 
 static void namedVariable(Token name, bool canAssign) {
-    byte getOp, setOp;
+    Byte getOp, setOp;
     int arg = resolveLocal(current, &name);
     if (arg != -1) {
         getOp = OP_GET_LOCAL;
@@ -519,10 +530,10 @@ static void namedVariable(Token name, bool canAssign) {
     if (canAssign && match(TOKEN_EQUAL)) {
         expression();
 
-        emitBytes(setOp, (byte)arg);
+        emitBytes(setOp, (Byte)arg);
     } else {
 
-        emitBytes(getOp, (byte)arg);
+        emitBytes(getOp, (Byte)arg);
     }
 }
 
@@ -546,12 +557,12 @@ static void __SUP(bool canAssign) {
 
     consume(TOKEN_DOT, "Expect '.' after 'super'.");
     consume(TOKEN_IDENTIFIER, "Expect superclass method name.");
-    byte name = identifierConstant(&digester.previous);
+    Byte name = identifierConstant(&digester.previous);
 
     namedVariable(syntheticToken("this"), false);
 
     if (match(TOKEN_GROUP_OPEN)) {
-        byte argCount = argumentList();
+        Byte argCount = argumentList();
         namedVariable(syntheticToken("super"), false);
         emitBytes(OP_SUPER_INVOKE, name);
         emitByte(argCount);
@@ -585,8 +596,9 @@ WeightRule rules[] = {
     [TOKEN_GROUP_CLOSE]     = { NULL,   NULL,   W_NONE },
     [TOKEN_CONTEXT_OPEN]    = { NULL,   NULL,   W_NONE },
     [TOKEN_CONTEXT_CLOSE]   = { NULL,   NULL,   W_NONE },
-    [TOKEN_ARRAY_OPEN]      = { __ARR,  NULL,   W_NONE },
+    [TOKEN_ARRAY_OPEN]      = { __ARR,  __IDX,  W_CALL },
     [TOKEN_ARRAY_CLOSE]     = { NULL,   NULL,   W_NONE },
+    [TOKEN_COLON]           = { NULL,   __DOT,  W_CALL },
     [TOKEN_COMMA]           = { NULL,   NULL,   W_NONE },
     [TOKEN_DOT]             = { NULL,   __DOT,  W_CALL },
     [TOKEN_MINUS]           = { __MOD,  __BIN,  W_TERM },
@@ -682,7 +694,7 @@ static void function(FunctionType type) {
             if (current->function->argc > 255) {
                 errorAtCurrent("Can't have more than 255 parameters.");
             }
-            byte constant = parseVariable("Expect parameter name.");
+            Byte constant = parseVariable("Expect parameter name.");
             defineVariable(constant);
         } while (match(TOKEN_COMMA));
     }
@@ -702,7 +714,7 @@ static void function(FunctionType type) {
 
 static void method() {
     consume(TOKEN_IDENTIFIER, "Expect method name.");
-    byte constant = identifierConstant(&digester.previous);
+    Byte constant = identifierConstant(&digester.previous);
 
     FunctionType type = F_INST;
     if (digester.previous.length == 4 &&
@@ -717,7 +729,7 @@ static void method() {
 static void classDeclaration() {
     consume(TOKEN_IDENTIFIER, "Expect class name.");
     Token className = digester.previous;
-    byte nameConstant = identifierConstant(&digester.previous);
+    Byte nameConstant = identifierConstant(&digester.previous);
     declareVariable();
 
     emitBytes(OP_CLASS, nameConstant);
@@ -761,14 +773,14 @@ static void classDeclaration() {
 }
 
 static void funqDeclaration() {
-    byte global = parseVariable("missing funqtion name");
+    Byte global = parseVariable("missing funqtion name");
     markInitialized();
     function(F_FUNC);
     defineVariable(global);
 }
 
 static void varDeclaration() {
-    byte global = parseVariable("provide your variable with a name");
+    Byte global = parseVariable("provide your variable with a name");
 
     if (match(TOKEN_EQUAL)) {
         expression();
