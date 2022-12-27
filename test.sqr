@@ -5,7 +5,7 @@ fq add(a, b) { <: a + b; }
 print add(a, b);
 *~ c <~ [ 1, 5, [ 3 * 3, 5, time() ]];
 print length(c);
-class X { init(v) { this:v <~ v; }};
+class X { init(v) { this:v <~ v; }}
 *~ x <~ X(c[2]);
 print x:v;
 var s = "hello" + "world";
