@@ -97,7 +97,7 @@ static void blackenObject(Obj* object) {
         case OBJ_FUNCTION: {
             ObjFunction* function = (ObjFunction*)object;
             markObject((Obj*)function->name);
-            markArray(&function->chunk.constants);
+            markArray(&function->segment.constants);
             break;
         }
         case OBJ_INSTANCE: {
@@ -139,7 +139,7 @@ static void freeObject(Obj* object) {
         }
         case OBJ_FUNCTION: {
             ObjFunction* function = (ObjFunction*)object;
-            freeSegment(&function->chunk);
+            freeSegment(&function->segment);
             FREE(ObjFunction, object);
             break;
         }

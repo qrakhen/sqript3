@@ -13,6 +13,7 @@ typedef enum {
 
     TOKEN_COMMA, 
     TOKEN_DOT, 
+    TOKEN_COLON,
     TOKEN_SEMICOLON,
     
     TOKEN_MINUS, 

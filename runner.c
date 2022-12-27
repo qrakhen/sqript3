@@ -34,9 +34,9 @@ static void runtimeError(const char* format, ...) {
     for (int i = runner.frameCount - 1; i >= 0; i--) {
         CallFrame* frame = &runner.frames[i];
         ObjFunction* function = frame->closure->function;
-        size_t instruction = frame->ip - function->chunk.code - 1;
+        size_t instruction = frame->ip - function->segment.code - 1;
         fprintf(stderr, "[line %d] in ", // [minus]
-                function->chunk.lines[instruction]);
+                function->segment.lines[instruction]);
         if (function->name == NULL) {
             fprintf(stderr, "script\n");
         } else {
@@ -87,9 +87,9 @@ Value pop() { return *(--runner.stackTop); }
 static Value peek(int distance) { return runner.stackTop[-1 - distance]; }
 
 static bool call(ObjClosure* closure, int argCount) {
-    if (argCount != closure->function->arity) {
+    if (argCount != closure->function->argc) {
         runtimeError("Expected %d arguments but got %d.",
-                     closure->function->arity, argCount);
+                     closure->function->argc, argCount);
         return false;
     }
 
@@ -100,7 +100,7 @@ static bool call(ObjClosure* closure, int argCount) {
 
     CallFrame* frame = &runner.frames[runner.frameCount++];
     frame->closure = closure;
-    frame->ip = closure->function->chunk.code;
+    frame->ip = closure->function->segment.code;
     frame->slots = runner.stackTop - argCount - 1;
     return true;
 }
@@ -261,7 +261,7 @@ static InterpretResult run() {
         (uint16_t)((frame->ip[-2] << 8) | frame->ip[-1]))
 
     #define READ_CONSTANT() \
-        (frame->closure->function->chunk.constants.values[READ_BYTE()])
+        (frame->closure->function->segment.constants.values[READ_BYTE()])
 
     #define READ_STRING() AS_STRING(READ_CONSTANT())
 

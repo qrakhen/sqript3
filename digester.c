@@ -20,11 +20,11 @@ typedef struct {
 
 typedef enum {
     W_NONE,
-    W_ASSIGNMENT,
+    W_ASSIGN,
     W_OR,
     W_AND,
-    W_EQUALITY,
-    W_COMPARISON,
+    W_EQUALS,
+    W_COMPARE,
     W_TERM,
     W_FACTOR,
     W_UNARY,
@@ -52,10 +52,10 @@ typedef struct {
 } Upvalue;
 
 typedef enum {
-    TYPE_FUNCTION,
-    TYPE_INITIALIZER,
-    TYPE_METHOD,
-    TYPE_SCRIPT
+    F_FUNC,
+    F_INIT,
+    F_INST,
+    F_CODE
 } FunctionType;
 
 typedef struct Compiler {
@@ -71,15 +71,15 @@ typedef struct Compiler {
 
 typedef struct ClassCompiler {
     struct ClassCompiler* enclosing;
-    bool hasSuperclass;
+    bool inherited;
 } ClassCompiler;
 
 Digester digester;
 Compiler* current = NULL;
 ClassCompiler* currentClass = NULL;
 
-static Segment* currentChunk() {
-    return &current->function->chunk;
+static Segment* currentSegment() {
+    return &current->function->segment;
 }
 
 static void errorAt(Token* token, const char* message) {
@@ -138,7 +138,7 @@ static bool match(TokenType type) {
 }
 
 static void emitByte(byte byte) {
-    writeSegment(currentChunk(), byte, digester.previous.line);
+    writeSegment(currentSegment(), byte, digester.previous.line);
 }
 
 static void emitBytes(byte byte1, byte byte2) {
@@ -149,7 +149,7 @@ static void emitBytes(byte byte1, byte byte2) {
 static void emitLoop(int loopStart) {
     emitByte(OP_LOOP);
 
-    int offset = currentChunk()->count - loopStart + 2;
+    int offset = currentSegment()->count - loopStart + 2;
     if (offset > UINT16_MAX) error("Loop body too large.");
 
     emitByte((offset >> 8) & 0xff);
@@ -160,12 +160,12 @@ static int emitJump(byte instruction) {
     emitByte(instruction);
     emitByte(0xff);
     emitByte(0xff);
-    return currentChunk()->count - 2;
+    return currentSegment()->count - 2;
 }
 
 static void emitReturn() {
 
-    if (current->type == TYPE_INITIALIZER) {
+    if (current->type == F_INIT) {
         emitBytes(OP_GET_LOCAL, 0);
     } else {
         emitByte(OP_NULL);
@@ -175,7 +175,7 @@ static void emitReturn() {
 }
 
 static byte makeConstant(Value value) {
-    int constant = registerConstant(currentChunk(), value);
+    int constant = registerConstant(currentSegment(), value);
     if (constant > UINT8_MAX) {
         error("Too many constants in one chunk.");
         return 0;
@@ -189,14 +189,14 @@ static void emitConstant(Value value) {
 }
 
 static void patchJump(int offset) {
-    int jump = currentChunk()->count - offset - 2;
+    int jump = currentSegment()->count - offset - 2;
 
     if (jump > UINT16_MAX) {
         error("Too much code to jump over.");
     }
 
-    currentChunk()->code[offset] = (jump >> 8) & 0xff;
-    currentChunk()->code[offset + 1] = jump & 0xff;
+    currentSegment()->code[offset] = (jump >> 8) & 0xff;
+    currentSegment()->code[offset + 1] = jump & 0xff;
 }
 
 static void initCompiler(Compiler* compiler, FunctionType type) {
@@ -207,7 +207,7 @@ static void initCompiler(Compiler* compiler, FunctionType type) {
     compiler->scopeDepth = 0;
     compiler->function = newFunction();
     current = compiler;
-    if (type != TYPE_SCRIPT) {
+    if (type != F_CODE) {
         current->function->name = copyString(digester.previous.start,
                                              digester.previous.length);
     }
@@ -216,7 +216,7 @@ static void initCompiler(Compiler* compiler, FunctionType type) {
     local->depth = 0;
     local->isCaptured = false;
 
-    if (type != TYPE_FUNCTION) {
+    if (type != F_FUNC) {
         local->name.start = "this";
         local->name.length = 4;
     } else {
@@ -390,12 +390,12 @@ static byte argumentList() {
         do {
             expression();
             if (argCount == 255) {
-                error("Can't have more than 255 arguments.");
+                error("which function on this planet would require more than 255 arguments?");
             }
             argCount++;
         } while (match(TOKEN_COMMA));
     }
-    consume(TOKEN_GROUP_CLOSE, "Expect ')' after arguments.");
+    consume(TOKEN_GROUP_CLOSE, "expected ) after argument list");
     return argCount;
 }
 
@@ -531,7 +531,7 @@ static Token syntheticToken(const char* text) {
 static void __SUP(bool canAssign) {
     if (currentClass == NULL) {
         error("Can't use 'super' outside of a class.");
-    } else if (!currentClass->hasSuperclass) {
+    } else if (!currentClass->inherited) {
         error("Can't use 'super' in a class with no superclass.");
     }
 
@@ -593,13 +593,13 @@ WeightRule rules[] = {
     [TOKEN_SLASH]           = { NULL,   __BIN,  W_FACTOR },
     [TOKEN_STAR]            = { NULL,   __BIN,  W_FACTOR },
     [TOKEN_BANG]            = { __MOD,  NULL,   W_NONE },
-    [TOKEN_BANG_EQUAL]      = { NULL,   __BIN,  W_EQUALITY },
+    [TOKEN_BANG_EQUAL]      = { NULL,   __BIN,  W_EQUALS },
     [TOKEN_EQUAL]           = { NULL,   NULL,   W_NONE },
-    [TOKEN_EQUAL_EQUAL]     = { NULL,   __BIN,  W_EQUALITY },
-    [TOKEN_GREATER]         = { NULL,   __BIN,  W_COMPARISON },
-    [TOKEN_GREATER_EQUAL]   = { NULL,   __BIN,  W_COMPARISON },
-    [TOKEN_LESS]            = { NULL,   __BIN,  W_COMPARISON },
-    [TOKEN_LESS_EQUAL]      = { NULL,   __BIN,  W_COMPARISON },
+    [TOKEN_EQUAL_EQUAL]     = { NULL,   __BIN,  W_EQUALS },
+    [TOKEN_GREATER]         = { NULL,   __BIN,  W_COMPARE },
+    [TOKEN_GREATER_EQUAL]   = { NULL,   __BIN,  W_COMPARE },
+    [TOKEN_LESS]            = { NULL,   __BIN,  W_COMPARE },
+    [TOKEN_LESS_EQUAL]      = { NULL,   __BIN,  W_COMPARE },
     [TOKEN_IDENTIFIER]      = { __REF,  NULL,   W_NONE },
     [TOKEN_STRING]          = { __STR,  NULL,   W_NONE },
     [TOKEN_NUMBER]          = { __NUM,  NULL,   W_NONE },
@@ -631,7 +631,7 @@ static void digestWeight(Weight precedence) {
         return;
     }
 
-    bool canAssign = precedence <= W_ASSIGNMENT;
+    bool canAssign = precedence <= W_ASSIGN;
     prefixRule(canAssign);
 
     while (precedence <= getRule(digester.current.type)->weight) {
@@ -650,7 +650,7 @@ static WeightRule* getRule(TokenType type) {
 }
 
 static void expression() {
-    digestWeight(W_ASSIGNMENT);
+    digestWeight(W_ASSIGN);
 }
 
 static void block() {
@@ -662,13 +662,13 @@ static void block() {
 static void function(FunctionType type) {
     Compiler compiler;
     initCompiler(&compiler, type);
-    beginScope(); // [no-end-scope]
+    beginScope();
 
-    consume(TOKEN_GROUP_OPEN, "Expect '(' after function name.");
+    consume(TOKEN_GROUP_OPEN, "expected ( after funq declaration");
     if (!check(TOKEN_GROUP_CLOSE)) {
         do {
-            current->function->arity++;
-            if (current->function->arity > 255) {
+            current->function->argc++;
+            if (current->function->argc > 255) {
                 errorAtCurrent("Can't have more than 255 parameters.");
             }
             byte constant = parseVariable("Expect parameter name.");
@@ -694,10 +694,10 @@ static void method() {
     byte constant = identifierConstant(&digester.previous);
 
 
-    FunctionType type = TYPE_METHOD;
+    FunctionType type = F_INST;
     if (digester.previous.length == 4 &&
         memcmp(digester.previous.start, "init", 4) == 0) {
-        type = TYPE_INITIALIZER;
+        type = F_INIT;
     }
 
     function(type);
@@ -714,7 +714,7 @@ static void classDeclaration() {
     defineVariable(nameConstant);
 
     ClassCompiler classCompiler;
-    classCompiler.hasSuperclass = false;
+    classCompiler.inherited = false;
     classCompiler.enclosing = currentClass;
     currentClass = &classCompiler;
 
@@ -732,7 +732,7 @@ static void classDeclaration() {
 
         namedVariable(className, false);
         emitByte(OP_INHERIT);
-        classCompiler.hasSuperclass = true;
+        classCompiler.inherited = true;
     }
 
     namedVariable(className, false);
@@ -743,7 +743,7 @@ static void classDeclaration() {
     consume(TOKEN_CONTEXT_CLOSE, "Expect ' }' after class body.");
     emitByte(OP_POP);
 
-    if (classCompiler.hasSuperclass) {
+    if (classCompiler.inherited) {
         endScope();
     }
 
@@ -753,7 +753,7 @@ static void classDeclaration() {
 static void funDeclaration() {
     byte global = parseVariable("Expect function name.");
     markInitialized();
-    function(TYPE_FUNCTION);
+    function(F_FUNC);
     defineVariable(global);
 }
 
@@ -790,7 +790,7 @@ static void forStatement() {
         expressionStatement();
     }
 
-    int loopStart = currentChunk()->count;
+    int loopStart = currentSegment()->count;
 
     int exitJump = -1;
     if (!match(TOKEN_SEMICOLON)) {
@@ -807,7 +807,7 @@ static void forStatement() {
 
     if (!match(TOKEN_GROUP_CLOSE)) {
         int bodyJump = emitJump(OP_JUMP);
-        int incrementStart = currentChunk()->count;
+        int incrementStart = currentSegment()->count;
         expression();
         emitByte(OP_POP);
         consume(TOKEN_GROUP_CLOSE, "Expect ')' after for clauses.");
@@ -854,14 +854,14 @@ static void printStatement() {
 }
 
 static void returnStatement() {
-    if (current->type == TYPE_SCRIPT) {
+    if (current->type == F_CODE) {
         error("Can't return from top-level code.");
     }
 
     if (match(TOKEN_SEMICOLON)) {
         emitReturn();
     } else {
-        if (current->type == TYPE_INITIALIZER) {
+        if (current->type == F_INIT) {
             error("Can't return a value from an initializer.");
         }
 
@@ -872,7 +872,7 @@ static void returnStatement() {
 }
 
 static void whileStatement() {
-    int loopStart = currentChunk()->count;
+    int loopStart = currentSegment()->count;
     consume(TOKEN_GROUP_OPEN, "Expect '(' after 'while'.");
     expression();
     consume(TOKEN_GROUP_CLOSE, "Expect ')' after condition.");
@@ -948,7 +948,7 @@ static void statement() {
 ObjFunction* digest(const char* source) {
     initScanner(source);
     Compiler compiler;
-    initCompiler(&compiler, TYPE_SCRIPT);
+    initCompiler(&compiler, F_CODE);
 
     digester.failed = false;
     digester.panic = false;

@@ -57,6 +57,9 @@
     <ClCompile Include="core.list.c">
       <Filter>Source Files\CoreLib</Filter>
     </ClCompile>
+    <ClCompile Include="array.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="common.h">

@@ -11,7 +11,7 @@
 #define __C_PREFIX_INPUT " <: "
 #define __C_PREFIT_OUTPUT " :> "
 
-static void repl() {
+static void runConsole() {
     char line[1024];
     for (;;) {
         printf(__C_PREFIX_INPUT);
@@ -65,15 +65,12 @@ int main(int argc, const char* argv[]) {
     consoleInit();
     initRunner();
     if (argc == 1) {
-        repl();
+        runConsole();
     } else if (argc >= 2) {
         if (argc > 3) {
             printf("options");
         }
         runFile(argv[1]);
-    } else {
-        fprintf(stderr, "Usage: clox [path]\n");
-        exit(64);
     }
     freeRunner();
     return 0;

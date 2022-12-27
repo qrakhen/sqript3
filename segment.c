@@ -4,37 +4,37 @@
 #include "memory.h"
 #include "runner.h"
 
-void initSegment(Segment* chunk) {
-    chunk->count = 0;
-    chunk->capacity = 0;
-    chunk->code = NULL;
-    chunk->lines = NULL;
-    initValueArray(&chunk->constants);
+void initSegment(Segment* segment) {
+    segment->count = 0;
+    segment->capacity = 0;
+    segment->code = NULL;
+    segment->lines = NULL;
+    initValueArray(&segment->constants);
 }
 
-void freeSegment(Segment* chunk) {
-    FREE_ARRAY(byte, chunk->code, chunk->capacity);
-    FREE_ARRAY(int, chunk->lines, chunk->capacity);
-    freeValueArray(&chunk->constants);
-    initSegment(chunk);
+void freeSegment(Segment* segment) {
+    FREE_ARRAY(byte, segment->code, segment->capacity);
+    FREE_ARRAY(int, segment->lines, segment->capacity);
+    freeValueArray(&segment->constants);
+    initSegment(segment);
 }
 
-void writeSegment(Segment* chunk, byte value, int line) {
-    if (chunk->capacity < chunk->count + 1) {
-        int oldCapacity = chunk->capacity;
-        chunk->capacity = GROW_CAPACITY(oldCapacity);
-        chunk->code = GROW_ARRAY(byte, chunk->code, oldCapacity, chunk->capacity);
-        chunk->lines = GROW_ARRAY(int, chunk->lines, oldCapacity, chunk->capacity);
+void writeSegment(Segment* segment, byte value, int line) {
+    if (segment->capacity < segment->count + 1) {
+        int oldCapacity = segment->capacity;
+        segment->capacity = GROW_CAPACITY(oldCapacity);
+        segment->code = GROW_ARRAY(byte, segment->code, oldCapacity, segment->capacity);
+        segment->lines = GROW_ARRAY(int, segment->lines, oldCapacity, segment->capacity);
     }
 
-    chunk->code[chunk->count] = value;
-    chunk->lines[chunk->count] = line;
-    chunk->count++;
+    segment->code[segment->count] = value;
+    segment->lines[segment->count] = line;
+    segment->count++;
 }
 
-int registerConstant(Segment* chunk, Value value) {
+int registerConstant(Segment* segment, Value value) {
     push(value);
-    writeValueArray(&chunk->constants, value);
+    writeValueArray(&segment->constants, value);
     pop();
-    return chunk->constants.count - 1;
+    return segment->constants.count - 1;
 }

@@ -33,6 +33,7 @@ typedef enum {
     OBJ_CLOSURE,
     OBJ_FUNCTION,
     OBJ_INSTANCE,
+    OBJ_ARRAY,
     OBJ_NATIVE,
     OBJ_STRING,
     OBJ_UPVALUE
@@ -46,9 +47,9 @@ struct Obj {
 
 typedef struct {
     Obj obj;
-    int arity;
+    byte argc;
     int upvalueCount;
-    Segment chunk;
+    Segment segment;
     ObjString* name;
 } ObjFunction;
 
@@ -93,10 +94,10 @@ typedef struct {
     Register fields;
 } ObjInstance;
 
-/*typedef struct {
+typedef struct {
     Obj obj;
     List list;
-} ObjList;*/
+} ObjList;
 
 typedef struct {
     Obj obj;
@@ -104,8 +105,7 @@ typedef struct {
     ObjClosure* method;
 } ObjBoundMethod;
 
-ObjBoundMethod* newBoundMethod(Value receiver,
-                               ObjClosure* method);
+ObjBoundMethod* newBoundMethod(Value receiver, ObjClosure* method);
 ObjClass* newClass(ObjString* name);
 ObjClosure* newClosure(ObjFunction* function);
 ObjFunction* newFunction();
