@@ -64,9 +64,9 @@ typedef struct Compiler {
     PtrFunq* function;
     FunctionType type;
 
-    Local locals[UINT8_COUNT];
+    Local locals[BYTE_MAX];
     int localCount;
-    Upvalue upvalues[UINT8_COUNT];
+    Upvalue upvalues[BYTE_MAX];
     int scopeDepth;
 } Compiler;
 
@@ -292,23 +292,23 @@ static int resolveLocal(Compiler* compiler, Token* name) {
 
 static int addUpvalue(Compiler* compiler, Byte index,
                       bool isLocal) {
-    int upvalueCount = compiler->function->upvalueCount;
+    int revalCount = compiler->function->revalCount;
 
-    for (int i = 0; i < upvalueCount; i++) {
+    for (int i = 0; i < revalCount; i++) {
         Upvalue* upvalue = &compiler->upvalues[i];
         if (upvalue->index == index && upvalue->isLocal == isLocal) {
             return i;
         }
     }
 
-    if (upvalueCount == UINT8_COUNT) {
+    if (revalCount == BYTE_MAX) {
         error("Too many closure variables in function.");
         return 0;
     }
 
-    compiler->upvalues[upvalueCount].isLocal = isLocal;
-    compiler->upvalues[upvalueCount].index = index;
-    return compiler->function->upvalueCount++;
+    compiler->upvalues[revalCount].isLocal = isLocal;
+    compiler->upvalues[revalCount].index = index;
+    return compiler->function->revalCount++;
 }
 
 static int resolveUpvalue(Compiler* compiler, Token* name) {
@@ -329,7 +329,7 @@ static int resolveUpvalue(Compiler* compiler, Token* name) {
 }
 
 static void addLocal(Token name) {
-    if (current->localCount == UINT8_COUNT) {
+    if (current->localCount == BYTE_MAX) {
         error("too many local variables in function.");
         return;
     }
@@ -706,7 +706,7 @@ static void function(FunctionType type) {
 
     emitBytes(OP_CLOSURE, makeConstant(OBJ_VAL(function)));
 
-    for (int i = 0; i < function->upvalueCount; i++) {
+    for (int i = 0; i < function->revalCount; i++) {
         emitByte(compiler.upvalues[i].isLocal ? 1 : 0);
         emitByte(compiler.upvalues[i].index);
     }
@@ -996,7 +996,7 @@ PtrFunq* digest(const char* source) {
 void markCompilerRoots() {
     Compiler* compiler = current;
     while (compiler != NULL) {
-        markObject((Ptr*)compiler->function);
+        __gcTargetPtr((Ptr*)compiler->function);
         compiler = compiler->enclosing;
     }
 }

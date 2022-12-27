@@ -27,8 +27,8 @@ static Value lengthNative(int argCount, Value* args) {
 
 static void resetStack() {
     runner.cursor = runner.stack;
-    runner.contextCount = 0;
-    runner.openUpvalues = NULL;
+    runner.qc = 0;
+    runner.__openPrevals = NULL;
 }
 
 static void runtimeError(const char* format, ...) {
@@ -39,9 +39,9 @@ static void runtimeError(const char* format, ...) {
     va_end(args);
     fputs("\n", stderr);
 
-    for (int i = runner.contextCount - 1; i >= 0; i--) {
-        Context* frame = &runner.contextStack[i];
-        PtrFunq* function = frame->closure->function;
+    for (int i = runner.qc - 1; i >= 0; i--) {
+        Qall* frame = &runner.qalls[i];
+        PtrFunq* function = frame->qlosure->function;
         size_t instruction = frame->ip - function->segment.code - 1;
         fprintf(stderr, "[line %d] in ", // [minus]
                 function->segment.lines[instruction]);
@@ -67,8 +67,8 @@ static void defineNative(const char* name, NativeFunq function) {
 void initRunner() {
     resetStack();
     runner.pointers = NULL;
-    runner.bytesAllocated = 0;
-    runner.__gcTrigger = 1024 * 1024;
+    runner.bAlloc = 0;
+    runner.__gcNext = 1024 * 1024;
 
     runner.__gcCount = 0;
     runner.__gcLimit = 0;
@@ -77,8 +77,8 @@ void initRunner() {
     initRegister(&runner.globals);
     initRegister(&runner.strings);
 
-    runner.initString = NULL;
-    runner.initString = copyString("init", 4);
+    runner.__initString = NULL;
+    runner.__initString = copyString("init", 4);
 
     defineNative("time", clockNative);
     defineNative("length", lengthNative);
@@ -87,29 +87,29 @@ void initRunner() {
 void freeRunner() {
     freeRegister(&runner.globals);
     freeRegister(&runner.strings);
-    runner.initString = NULL;
-    freeObjects();
+    runner.__initString = NULL;
+    __freePointers();
 }
 
 void push(Value value) { *(runner.cursor++) = value; }
 Value pop() { return *(--runner.cursor); }
 static Value peek(int distance) { return runner.cursor[-1 - distance]; }
 
-static bool call(PtrQlosure* closure, int argCount) {
-    if (argCount != closure->function->argc) {
+static bool call(PtrQlosure* qlosure, int argCount) {
+    if (argCount != qlosure->function->argc) {
         runtimeError("Expected %d arguments but got %d.",
-                     closure->function->argc, argCount);
+                     qlosure->function->argc, argCount);
         return false;
     }
 
-    if (runner.contextCount == FRAMES_MAX) {
+    if (runner.qc == MAX_QALLS) {
         runtimeError("Stack overflow.");
         return false;
     }
 
-    Context* frame = &runner.contextStack[runner.contextCount++];
-    frame->closure = closure;
-    frame->ip = closure->function->segment.code;
+    Qall* frame = &runner.qalls[runner.qc++];
+    frame->qlosure = qlosure;
+    frame->ip = qlosure->function->segment.code;
     frame->slots = runner.cursor - argCount - 1;
     return true;
 }
@@ -126,7 +126,7 @@ static bool callValue(Value callee, int argCount) {
                 PtrQlass* klass = AS_CLASS(callee);
                 runner.cursor[-argCount - 1] = OBJ_VAL(newInstance(klass));
                 Value initializer;
-                if (registerGet(&klass->methods, runner.initString,
+                if (registerGet(&klass->methods, runner.__initString,
                     &initializer)) {
                     return call(AS_CLOSURE(initializer), argCount);
                 } else if (argCount != 0) {
@@ -199,7 +199,7 @@ static bool bindMethod(PtrQlass* klass, PtrString* name) {
 
 static PtrPreval* captureUpvalue(Value* local) {
     PtrPreval* prevUpvalue = NULL;
-    PtrPreval* upvalue = runner.openUpvalues;
+    PtrPreval* upvalue = runner.__openPrevals;
     while (upvalue != NULL && upvalue->location > local) {
         prevUpvalue = upvalue;
         upvalue = upvalue->next;
@@ -213,7 +213,7 @@ static PtrPreval* captureUpvalue(Value* local) {
     createdUpvalue->next = upvalue;
 
     if (prevUpvalue == NULL) {
-        runner.openUpvalues = createdUpvalue;
+        runner.__openPrevals = createdUpvalue;
     } else {
         prevUpvalue->next = createdUpvalue;
     }
@@ -222,12 +222,12 @@ static PtrPreval* captureUpvalue(Value* local) {
 }
 
 static void closeUpvalues(Value* last) {
-    while (runner.openUpvalues != NULL &&
-           runner.openUpvalues->location >= last) {
-        PtrPreval* upvalue = runner.openUpvalues;
+    while (runner.__openPrevals != NULL &&
+           runner.__openPrevals->location >= last) {
+        PtrPreval* upvalue = runner.__openPrevals;
         upvalue->closed = *upvalue->location;
         upvalue->location = &upvalue->closed;
-        runner.openUpvalues = upvalue->next;
+        runner.__openPrevals = upvalue->next;
     }
 }
 
@@ -251,7 +251,7 @@ static void concatenate() {
     PtrString* a = AS_STRING(peek(1));
 
     int length = a->length + b->length;
-    char* chars = ALLOCATE(char, length + 1);
+    char* chars = ALLOC(char, length + 1);
     memcpy(chars, a->chars, a->length);
     memcpy(chars + a->length, b->chars, b->length);
     chars[length] = '\0';
@@ -263,7 +263,7 @@ static void concatenate() {
 }
 
 static InterpretResult run() {
-    Context* frame = &runner.contextStack[runner.contextCount - 1];
+    Qall* frame = &runner.qalls[runner.qc - 1];
 
     #define READ_BYTE() (*frame->ip++)
     #define READ_SHORT() \
@@ -271,7 +271,7 @@ static InterpretResult run() {
         (uint16_t)((frame->ip[-2] << 8) | frame->ip[-1]))
 
     #define READ_CONSTANT() \
-        (frame->closure->function->segment.constants.values[READ_BYTE()])
+        (frame->qlosure->function->segment.constants.values[READ_BYTE()])
 
     #define READ_STRING() AS_STRING(READ_CONSTANT())
 
@@ -358,12 +358,12 @@ static InterpretResult run() {
             }
             case OP_GET_UPVALUE: {
                 Byte slot = READ_BYTE();
-                push(*frame->closure->upvalues[slot]->location);
+                push(*frame->qlosure->upvalues[slot]->location);
                 break;
             }
             case OP_SET_UPVALUE: {
                 Byte slot = READ_BYTE();
-                *frame->closure->upvalues[slot]->location = peek(0);
+                *frame->qlosure->upvalues[slot]->location = peek(0);
                 break;
             }
             case OP_GET_PROPERTY: {
@@ -486,7 +486,7 @@ static InterpretResult run() {
                 if (!callValue(peek(argCount), argCount)) {
                     return SQR_INTRP_ERROR_RUNTIME;
                 }
-                frame = &runner.contextStack[runner.contextCount - 1];
+                frame = &runner.qalls[runner.qc - 1];
                 break;
             }
             case OP_INVOKE: {
@@ -495,7 +495,7 @@ static InterpretResult run() {
                 if (!invoke(method, argCount)) {
                     return SQR_INTRP_ERROR_RUNTIME;
                 }
-                frame = &runner.contextStack[runner.contextCount - 1];
+                frame = &runner.qalls[runner.qc - 1];
                 break;
             }
             case OP_SUPER_INVOKE: {
@@ -505,7 +505,7 @@ static InterpretResult run() {
                 if (!invokeFromClass(superclass, method, argCount)) {
                     return SQR_INTRP_ERROR_RUNTIME;
                 }
-                frame = &runner.contextStack[runner.contextCount - 1];
+                frame = &runner.qalls[runner.qc - 1];
                 break;
             }
             case OP_ARRAY: {
@@ -532,16 +532,16 @@ static InterpretResult run() {
             }
             case OP_CLOSURE: {
                 PtrFunq* function = AS_FUNCTION(READ_CONSTANT());
-                PtrQlosure* closure = newClosure(function);
-                push(OBJ_VAL(closure));
-                for (int i = 0; i < closure->upvalueCount; i++) {
+                PtrQlosure* qlosure = newClosure(function);
+                push(OBJ_VAL(qlosure));
+                for (int i = 0; i < qlosure->revalCount; i++) {
                     Byte isLocal = READ_BYTE();
                     Byte index = READ_BYTE();
                     if (isLocal) {
-                        closure->upvalues[i] =
+                        qlosure->upvalues[i] =
                             captureUpvalue(frame->slots + index);
                     } else {
-                        closure->upvalues[i] = frame->closure->upvalues[index];
+                        qlosure->upvalues[i] = frame->qlosure->upvalues[index];
                     }
                 }
                 break;
@@ -553,15 +553,15 @@ static InterpretResult run() {
             case OP_RETURN: {
                 Value result = pop();
                 closeUpvalues(frame->slots);
-                runner.contextCount--;
-                if (runner.contextCount == 0) {
+                runner.qc--;
+                if (runner.qc == 0) {
                     pop();
                     return SQR_INTRP_OK;
                 }
 
                 runner.cursor = frame->slots;
                 push(result);
-                frame = &runner.contextStack[runner.contextCount - 1];
+                frame = &runner.qalls[runner.qc - 1];
                 break;
             }
             case OP_CLASS:
@@ -601,9 +601,9 @@ InterpretResult interpret(const char* source) {
     PtrFunq* function = digest(source);
     if (function == NULL) return SQR_INTRP_ERROR_DIGEST;
     push(OBJ_VAL(function));
-    PtrQlosure* closure = newClosure(function);
+    PtrQlosure* qlosure = newClosure(function);
     pop();
-    push(OBJ_VAL(closure));
-    call(closure, 0);
+    push(OBJ_VAL(qlosure));
+    call(qlosure, 0);
     return run();
 }

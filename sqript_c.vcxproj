@@ -145,6 +145,7 @@
     <ClCompile Include="debug.c" />
     <ClCompile Include="digester.c" />
     <ClCompile Include="console.c" />
+    <ClCompile Include="io.c" />
     <ClCompile Include="list.c" />
     <ClCompile Include="main.c" />
     <ClCompile Include="memory.c" />
@@ -162,6 +163,7 @@
     <ClInclude Include="debug.h" />
     <ClInclude Include="console.h" />
     <ClInclude Include="extension.h" />
+    <ClInclude Include="io.h" />
     <ClInclude Include="list.h" />
     <ClInclude Include="memory.h" />
     <ClInclude Include="object.h" />

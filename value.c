@@ -16,8 +16,8 @@ void initValueArray(ValueArray* array) {
 void writeValueArray(ValueArray* array, Value value) {
     if (array->capacity < array->count + 1) {
         int oldCapacity = array->capacity;
-        array->capacity = GROW_CAPACITY(oldCapacity);
-        array->values = GROW_ARRAY(Value, array->values,
+        array->capacity = NEXT_SIZE(oldCapacity);
+        array->values = ARR_RESIZE(Value, array->values,
                                    oldCapacity, array->capacity);
     }
 
@@ -26,7 +26,7 @@ void writeValueArray(ValueArray* array, Value value) {
 }
 
 void freeValueArray(ValueArray* array) {
-    FREE_ARRAY(Value, array->values, array->capacity);
+    ARR_FREE(Value, array->values, array->capacity);
     initValueArray(array);
 }
 

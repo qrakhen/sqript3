@@ -64,6 +64,7 @@ typedef struct {
 } Console;
 
 void consoleInit();
+void consoleRun(int flags);
 void consoleSetColor(const char* color);
 void consoleSetBackground(const char* color);
 void consoleSetCursor(short x, short y);

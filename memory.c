@@ -9,17 +9,17 @@
 #include "debug.h"
 #endif
 
-#define GC_HEAP_GROW_FACTOR 2
+#define __GC_GROW 2
 
 void* reallocate(void* pointer, size_t oldSize, size_t newSize) {
-    runner.bytesAllocated += newSize - oldSize;
+    runner.bAlloc += newSize - oldSize;
     if (newSize > oldSize) {
     #ifdef DEBUG_STRESS_GC
         collectGarbage();
     #endif
 
-        if (runner.bytesAllocated > runner.__gcTrigger) {
-            collectGarbage();
+        if (runner.bAlloc > runner.__gcNext) {
+            __gcRunCycle();
         }
     }
 
@@ -33,20 +33,20 @@ void* reallocate(void* pointer, size_t oldSize, size_t newSize) {
     return result;
 }
 
-void markObject(Ptr* object) {
+void __gcTargetPtr(Ptr* object) {
     if (object == NULL) return;
     if (object->__gcFree) return;
 
 #ifdef DEBUG_LOG_GC
-    printf("%p mark ", (void*)object);
-    printValue(OBJ_VAL(object));
+    printf("%p mark ", (void*)ptr);
+    printValue(OBJ_VAL(ptr));
     printf("\n");
 #endif
 
     object->__gcFree = true;
 
     if (runner.__gcLimit < runner.__gcCount + 1) {
-        runner.__gcLimit = GROW_CAPACITY(runner.__gcLimit);
+        runner.__gcLimit = NEXT_SIZE(runner.__gcLimit);
         runner.__gcStack = (Ptr**)realloc(runner.__gcStack,
                                       sizeof(Ptr*) * runner.__gcLimit);
         if (runner.__gcStack == NULL) exit(1);
@@ -55,58 +55,58 @@ void markObject(Ptr* object) {
     runner.__gcStack[runner.__gcCount++] = object;
 }
 
-void markValue(Value value) {
-    if (IS_PTR(value)) markObject(AS_OBJ(value));
+void __gcTargetValue(Value value) {
+    if (IS_PTR(value)) __gcTargetPtr(AS_OBJ(value));
 }
 
 static void markArray(ValueArray* array) {
     for (int i = 0; i < array->count; i++) {
-        markValue(array->values[i]);
+        __gcTargetValue(array->values[i]);
     }
 }
 
-static void blackenObject(Ptr* object) {
+static void blackenObject(Ptr* ptr) {
 #ifdef DEBUG_LOG_GC
-    printf("%p blacken ", (void*)object);
-    printValue(OBJ_VAL(object));
+    printf("%p blacken ", (void*)ptr);
+    printValue(OBJ_VAL(ptr));
     printf("\n");
 #endif
 
-    switch (object->type) {
+    switch (ptr->type) {
         case PTR_METHOD: {
-            PtrMethod* bound = (PtrMethod*)object;
-            markValue(bound->receiver);
-            markObject((Ptr*)bound->method);
+            PtrMethod* bound = (PtrMethod*)ptr;
+            __gcTargetValue(bound->receiver);
+            __gcTargetPtr((Ptr*)bound->method);
             break;
         }
         case PTR_QLASS: {
-            PtrQlass* klass = (PtrQlass*)object;
-            markObject((Ptr*)klass->name);
-            markRegister(&klass->methods);
+            PtrQlass* qlass = (PtrQlass*)ptr;
+            __gcTargetPtr((Ptr*)qlass->name);
+            markRegister(&qlass->methods);
             break;
         }
         case PTR_QLOSURE: {
-            PtrQlosure* closure = (PtrQlosure*)object;
-            markObject((Ptr*)closure->function);
-            for (int i = 0; i < closure->upvalueCount; i++) {
-                markObject((Ptr*)closure->upvalues[i]);
+            PtrQlosure* qlosure = (PtrQlosure*)ptr;
+            __gcTargetPtr((Ptr*)qlosure->function);
+            for (int i = 0; i < qlosure->revalCount; i++) {
+                __gcTargetPtr((Ptr*)qlosure->upvalues[i]);
             }
             break;
         }
         case PTR_FUNQ: {
-            PtrFunq* function = (PtrFunq*)object;
-            markObject((Ptr*)function->name);
-            markArray(&function->segment.constants);
+            PtrFunq* funq = (PtrFunq*)ptr;
+            __gcTargetPtr((Ptr*)funq->name);
+            markArray(&funq->segment.constants);
             break;
         }
         case PTR_INSTANCE: {
-            PtrInstance* instance = (PtrInstance*)object;
-            markObject((Ptr*)instance->klass);
+            PtrInstance* instance = (PtrInstance*)ptr;
+            __gcTargetPtr((Ptr*)instance->klass);
             markRegister(&instance->fields);
             break;
         }
         case PTR_PREVAL:
-            markValue(((PtrPreval*)object)->closed);
+            __gcTargetValue(((PtrPreval*)ptr)->closed);
             break;
         case PTR_NATIVE:
         case PTR_STRING:
@@ -116,7 +116,7 @@ static void blackenObject(Ptr* object) {
 
 static void freeObject(Ptr* object) {
 #ifdef DEBUG_LOG_GC
-    printf("%p free type %d\n", (void*)object, object->type);
+    printf("%p free type %d\n", (void*)ptr, ptr->type);
 #endif
 
     switch (object->type) {
@@ -124,21 +124,21 @@ static void freeObject(Ptr* object) {
             FREE(PtrMethod, object);
             break;
         case PTR_QLASS: {
-            PtrQlass* klass = (PtrQlass*)object;
-            freeRegister(&klass->methods);
+            PtrQlass* qlass = (PtrQlass*)object;
+            freeRegister(&qlass->methods);
             FREE(PtrQlass, object);
             break;
         } // [braces]
         case PTR_QLOSURE: {
-            PtrQlosure* closure = (PtrQlosure*)object;
-            FREE_ARRAY(PtrPreval*, closure->upvalues,
-                       closure->upvalueCount);
+            PtrQlosure* qlosure = (PtrQlosure*)object;
+            ARR_FREE(PtrPreval*, qlosure->upvalues,
+                       qlosure->revalCount);
             FREE(PtrQlosure, object);
             break;
         }
         case PTR_FUNQ: {
-            PtrFunq* function = (PtrFunq*)object;
-            freeSegment(&function->segment);
+            PtrFunq* funq = (PtrFunq*)object;
+            freeSegment(&funq->segment);
             FREE(PtrFunq, object);
             break;
         }
@@ -153,7 +153,7 @@ static void freeObject(Ptr* object) {
             break;
         case PTR_STRING: {
             PtrString* string = (PtrString*)object;
-            FREE_ARRAY(char, string->chars, string->length + 1);
+            ARR_FREE(char, string->chars, string->length + 1);
             FREE(PtrString, object);
             break;
         }
@@ -165,22 +165,22 @@ static void freeObject(Ptr* object) {
 
 static void markRoots() {
     for (Value* slot = runner.stack; slot < runner.cursor; slot++) {
-        markValue(*slot);
+        __gcTargetValue(*slot);
     }
 
-    for (int i = 0; i < runner.contextCount; i++) {
-        markObject((Ptr*)runner.contextStack[i].closure);
+    for (int i = 0; i < runner.qc; i++) {
+        __gcTargetPtr((Ptr*)runner.qalls[i].qlosure);
     }
 
-    for (PtrPreval* upvalue = runner.openUpvalues;
+    for (PtrPreval* upvalue = runner.__openPrevals;
          upvalue != NULL;
          upvalue = upvalue->next) {
-        markObject((Ptr*)upvalue);
+        __gcTargetPtr((Ptr*)upvalue);
     }
 
     markRegister(&runner.globals);
     markCompilerRoots();
-    markObject((Ptr*)runner.initString);
+    __gcTargetPtr((Ptr*)runner.__initString);
 }
 
 static void traceReferences() {
@@ -214,28 +214,27 @@ static void sweep() {
     }
 }
 
-void collectGarbage() {
-#ifdef DEBUG_LOG_GC
-    printf("-- gc begin\n");
-    size_t before = vm.bytesAllocated;
-#endif
+void __gcRunCycle() {
+    #ifdef DEBUG_LOG_GC
+        printf("-- gc begin\n");
+        size_t before = vm.bAlloc;
+    #endif
 
     markRoots();
     traceReferences();
     registerRemoveWhite(&runner.strings);
     sweep();
 
-    runner.__gcTrigger = runner.bytesAllocated * GC_HEAP_GROW_FACTOR;
+    runner.__gcNext = runner.bAlloc * __GC_GROW;
 
-#ifdef DEBUG_LOG_GC
-    printf("-- gc end\n");
-    printf("   collected %zu bytes (from %zu to %zu) next at %zu\n",
-           before - vm.bytesAllocated, before, vm.bytesAllocated,
-           vm.nextGC);
-#endif
+    #ifdef DEBUG_LOG_GC
+        printf("-- gc end\n");
+        printf("   collected %zu bytes (from %zu to %zu) next at %zu\n",
+               before - runner.bAlloc, before, runner.bAlloc, runner.__gcNext);
+    #endif
 }
 
-void freeObjects() {
+void __freePointers() {
     Ptr* object = runner.pointers;
     while (object != NULL) {
         Ptr* next = object->next;

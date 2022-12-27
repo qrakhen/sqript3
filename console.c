@@ -1,10 +1,15 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <time.h>
-#include <stdarg.h>
+#include <string.h>
 
-#include "console.h"
 #include "common.h"
+#include "segment.h"
+#include "debug.h"
+#include "runner.h"
+#include "console.h"
+
+#define __C_PREFIX_INPUT " <: "
+#define __C_PREFIT_OUTPUT " :> "
 
 static Byte logLevel = LOG_LEVEL_SPAM;
 
@@ -12,6 +17,19 @@ Console console;
 
 static void __setCursor(short x, short y) {
     printf("%c[%d;%dH", 27, x, y);
+}
+
+void consoleRun(int flags) {
+    char line[8192];
+    int r = 0;
+    do {
+        printf(__C_PREFIX_INPUT);
+        if (!fgets(line, sizeof(line), stdin)) {
+            printf("\n");
+            break;
+        }
+        r = (int)interpret(line);
+    } while ((flags & SQR_OPTION_FLAG_SAFE_MODE) == 0 || r == 0);
 }
 
 void consoleInit() {

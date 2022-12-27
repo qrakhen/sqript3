@@ -50,23 +50,23 @@ PtrQlass* newClass(PtrString* name) {
 }
 
 PtrQlosure* newClosure(PtrFunq* function) {
-    PtrPreval** upvalues = ALLOCATE(PtrPreval*,
-                                     function->upvalueCount);
-    for (int i = 0; i < function->upvalueCount; i++) {
-        upvalues[i] = NULL;
+    PtrPreval** revals = ALLOC(PtrPreval*,
+                                     function->revalCount);
+    for (int i = 0; i < function->revalCount; i++) {
+        revals[i] = NULL;
     }
 
-    PtrQlosure* closure = ALLOCATE_OBJ(PtrQlosure, PTR_QLOSURE);
-    closure->function = function;
-    closure->upvalues = upvalues;
-    closure->upvalueCount = function->upvalueCount;
-    return closure;
+    PtrQlosure* qlosure = ALLOCATE_OBJ(PtrQlosure, PTR_QLOSURE);
+    qlosure->function = function;
+    qlosure->upvalues = revals;
+    qlosure->revalCount = function->revalCount;
+    return qlosure;
 }
 
 PtrFunq* newFunction() {
     PtrFunq* function = ALLOCATE_OBJ(PtrFunq, PTR_FUNQ);
     function->argc = 0;
-    function->upvalueCount = 0;
+    function->revalCount = 0;
     function->name = NULL;
     initSegment(&function->segment);
     return function;
@@ -114,7 +114,7 @@ PtrString* takeString(char* chars, int length) {
     PtrString* interned = registerFindString(&runner.strings, chars, length,
                                              hash);
     if (interned != NULL) {
-        FREE_ARRAY(char, chars, length + 1);
+        ARR_FREE(char, chars, length + 1);
         return interned;
     }
 
@@ -123,11 +123,10 @@ PtrString* takeString(char* chars, int length) {
 
 PtrString* copyString(const char* chars, int length) {
     uint32_t hash = hashString(chars, length);
-    PtrString* interned = registerFindString(&runner.strings, chars, length,
-                                             hash);
+    PtrString* interned = registerFindString(&runner.strings, chars, length,  hash);
     if (interned != NULL) return interned;
 
-    char* heapChars = ALLOCATE(char, length + 1);
+    char* heapChars = ALLOC(char, length + 1);
     memcpy(heapChars, chars, length);
     heapChars[length] = '\0';
 

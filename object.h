@@ -47,7 +47,7 @@ struct Ptr {
 typedef struct {
     Ptr ptr;
     Byte argc;
-    int upvalueCount;
+    int revalCount;
     Segment segment;
     PtrString* name;
 } PtrFunq;
@@ -78,7 +78,7 @@ typedef struct {
     Ptr ptr;
     PtrFunq* function;
     PtrPreval** upvalues;
-    int upvalueCount;
+    int revalCount;
 } PtrQlosure;
 
 typedef struct {

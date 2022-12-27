@@ -6,7 +6,7 @@
 #include "value.h"
 
 #define MAX_QALLS 64
-#define STACK_MAX (MAX_QALLS * UINT8_COUNT)
+#define STACK_MAX (MAX_QALLS * BYTE_MAX)
 
 typedef struct {
     PtrQlosure* qlosure;
@@ -28,9 +28,9 @@ typedef struct {
     PtrPreval* __openPrevals;
 
     Ptr* pointers;
-    size_t bytesAllocated;
+    size_t bAlloc;
 
-    size_t __gcTrigger;
+    size_t __gcNext;
     int __gcCount;
     int __gcLimit;
     Ptr** __gcStack;

@@ -15,7 +15,7 @@ void initRegister(Register* table) {
 }
 
 void freeRegister(Register* table) {
-    FREE_ARRAY(Entry, table->entries, table->capacity);
+    ARR_FREE(Entry, table->entries, table->capacity);
     initRegister(table);
 }
 
@@ -51,7 +51,7 @@ bool registerGet(Register* table, PtrString* key, Value* value) {
 }
 
 static void adjustCapacity(Register* table, int capacity) {
-    Entry* entries = ALLOCATE(Entry, capacity);
+    Entry* entries = ALLOC(Entry, capacity);
     for (int i = 0; i < capacity; i++) {
         entries[i].key = NULL;
         entries[i].value = NULL_VAL;
@@ -68,14 +68,14 @@ static void adjustCapacity(Register* table, int capacity) {
         table->count++;
     }
 
-    FREE_ARRAY(Entry, table->entries, table->capacity);
+    ARR_FREE(Entry, table->entries, table->capacity);
     table->entries = entries;
     table->capacity = capacity;
 }
 
 bool registerSet(Register* table, PtrString* key, Value value) {
     if (table->count + 1 > table->capacity * TABLE_MAX_LOAD) {
-        int capacity = GROW_CAPACITY(table->capacity);
+        int capacity = NEXT_SIZE(table->capacity);
         adjustCapacity(table, capacity);
     }
 
@@ -112,28 +112,25 @@ void registerAddAll(Register* from, Register* to) {
 }
 
 PtrString* registerFindString(
-    Register* table,
-    const char* chars,
-    int length,
-    uint32_t hash) {
-    if (table->count == 0) return NULL;
+        Register* reg,
+        const char* chars,
+        int length,
+        uint32_t hash) {
+    if (reg->count == 0) return NULL;
 
 
-    uint32_t index = hash & (table->capacity - 1);
+    uint32_t index = hash & (reg->capacity - 1);
     for (;;) {
-        Entry* entry = &table->entries[index];
+        Entry* entry = &reg->entries[index];
         if (entry->key == NULL) {
-            // Stop if we find an empty non-tombstone entry.
             if (IS_NULL(entry->value)) return NULL;
         } else if (entry->key->length == length &&
                    entry->key->hash == hash &&
                    memcmp(entry->key->chars, chars, length) == 0) {
-            // We found it.
             return entry->key;
         }
 
-
-        index = (index + 1) & (table->capacity - 1);
+        index = (index + 1) & (reg->capacity - 1);
     }
 }
 
@@ -149,7 +146,7 @@ void registerRemoveWhite(Register* table) {
 void markRegister(Register* table) {
     for (int i = 0; i < table->capacity; i++) {
         Entry* entry = &table->entries[i];
-        markObject((Ptr*)entry->key);
-        markValue(entry->value);
+        __gcTargetPtr((Ptr*)entry->key);
+        __gcTargetValue(entry->value);
     }
 }

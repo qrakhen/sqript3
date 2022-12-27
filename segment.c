@@ -13,8 +13,8 @@ void initSegment(Segment* segment) {
 }
 
 void freeSegment(Segment* segment) {
-    FREE_ARRAY(Byte, segment->code, segment->capacity);
-    FREE_ARRAY(int, segment->lines, segment->capacity);
+    ARR_FREE(Byte, segment->code, segment->capacity);
+    ARR_FREE(int, segment->lines, segment->capacity);
     freeValueArray(&segment->constants);
     initSegment(segment);
 }
@@ -22,9 +22,9 @@ void freeSegment(Segment* segment) {
 void writeSegment(Segment* segment, Byte value, int line) {
     if (segment->capacity < segment->count + 1) {
         int oldCapacity = segment->capacity;
-        segment->capacity = GROW_CAPACITY(oldCapacity);
-        segment->code = GROW_ARRAY(Byte, segment->code, oldCapacity, segment->capacity);
-        segment->lines = GROW_ARRAY(int, segment->lines, oldCapacity, segment->capacity);
+        segment->capacity = NEXT_SIZE(oldCapacity);
+        segment->code = ARR_RESIZE(Byte, segment->code, oldCapacity, segment->capacity);
+        segment->lines = ARR_RESIZE(int, segment->lines, oldCapacity, segment->capacity);
     }
 
     segment->code[segment->count] = value;
