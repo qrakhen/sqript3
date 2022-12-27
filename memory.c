@@ -39,7 +39,7 @@ void __gcTargetPtr(Ptr* object) {
 
 #ifdef DEBUG_LOG_GC
     printf("%p mark ", (void*)ptr);
-    printValue(OBJ_VAL(ptr));
+    printValue(PTR_VAL(ptr));
     printf("\n");
 #endif
 
@@ -56,7 +56,7 @@ void __gcTargetPtr(Ptr* object) {
 }
 
 void __gcTargetValue(Value value) {
-    if (IS_PTR(value)) __gcTargetPtr(AS_OBJ(value));
+    if (IS_PTR(value)) __gcTargetPtr(AS_PTR(value));
 }
 
 static void markArray(ValueArray* array) {
@@ -68,14 +68,14 @@ static void markArray(ValueArray* array) {
 static void blackenObject(Ptr* ptr) {
 #ifdef DEBUG_LOG_GC
     printf("%p blacken ", (void*)ptr);
-    printValue(OBJ_VAL(ptr));
+    printValue(PTR_VAL(ptr));
     printf("\n");
 #endif
 
     switch (ptr->type) {
         case PTR_METHOD: {
             PtrMethod* bound = (PtrMethod*)ptr;
-            __gcTargetValue(bound->receiver);
+            __gcTargetValue(bound->target);
             __gcTargetPtr((Ptr*)bound->method);
             break;
         }
@@ -101,7 +101,7 @@ static void blackenObject(Ptr* ptr) {
         }
         case PTR_INSTANCE: {
             PtrInstance* instance = (PtrInstance*)ptr;
-            __gcTargetPtr((Ptr*)instance->klass);
+            __gcTargetPtr((Ptr*)instance->qlass);
             markRegister(&instance->fields);
             break;
         }

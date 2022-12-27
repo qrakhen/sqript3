@@ -81,12 +81,12 @@ void printType(Value value) {
         case T_INT: printf("int"); break;
         case T_NUMBER: printf("number"); break;
         case T_PTR:
-            switch (AS_OBJ(value)->type) {
+            switch (AS_PTR(value)->type) {
                 case PTR_METHOD: printf("method"); break;
                 case PTR_QLASS: printf("qlass<%s>", AS_CLASS(value)->name->chars); break;
                 case PTR_QLOSURE: printf("qlosure"); break;
                 case PTR_FUNQ: printf("funqtion"); break;
-                case PTR_INSTANCE: printf("instance<%s>", AS_INSTANCE(value)->klass->name->chars); break;
+                case PTR_INSTANCE: printf("instance<%s>", AS_INSTANCE(value)->qlass->name->chars); break;
                 case PTR_ARRAY: printf("array<any>[%d]", AS_ARRAY(value)->length); break;
                 case PTR_NATIVE: printf("native"); break;
                 case PTR_STRING: printf("string"); break;
@@ -108,7 +108,7 @@ bool valuesEqual(Value a, Value b) {
         case T_BOOL:    return AS_BOOL(a) == AS_BOOL(b);
         case T_NULL:    return true;
         case T_NUMBER:  return AS_NUMBER(a) == AS_NUMBER(b);
-        case T_PTR:     return AS_OBJ(a) == AS_OBJ(b);
+        case T_PTR:     return AS_PTR(a) == AS_PTR(b);
         default:        return false;
     }
     #endif

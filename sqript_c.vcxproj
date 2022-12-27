@@ -149,6 +149,7 @@
     <ClCompile Include="list.c" />
     <ClCompile Include="main.c" />
     <ClCompile Include="memory.c" />
+    <ClCompile Include="native.c" />
     <ClCompile Include="object.c" />
     <ClCompile Include="reader.c" />
     <ClCompile Include="runner.c" />
@@ -166,6 +167,7 @@
     <ClInclude Include="io.h" />
     <ClInclude Include="list.h" />
     <ClInclude Include="memory.h" />
+    <ClInclude Include="native.h" />
     <ClInclude Include="object.h" />
     <ClInclude Include="reader.h" />
     <ClInclude Include="runner.h" />
@@ -174,6 +176,7 @@
     <ClInclude Include="value.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="README.md" />
     <None Include="test.sqr" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

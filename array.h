@@ -5,7 +5,7 @@
 #include "object.h"
 
 #define IS_ARRAY(value) matchPtrType(value, PTR_ARRAY)
-#define AS_ARRAY(value) ((PtrArray*)AS_OBJ(value))
+#define AS_ARRAY(value) ((PtrArray*)AS_PTR(value))
 
 typedef struct {
     Ptr ptr;

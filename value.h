@@ -50,7 +50,7 @@ struct Value {
 #define IS_PTR(v)           ((v).type == T_PTR)
 #define IS_ANY(v)           ((v).type == T_ANY)
 
-#define AS_OBJ(value)       ((value).as.ptr)
+#define AS_PTR(value)       ((value).as.ptr)
 #define AS_BOOL(value)      ((value).as.boolean)
 #define AS_BYTE(value)      ((value).as.byte)
 #define AS_NUMBER(value)    ((value).as.number)
@@ -61,7 +61,7 @@ struct Value {
 #define BYTE_VAL(value)   ((Value){ T_BYTE,     TM_DYN, { .byte = value }})
 #define NUMBER_VAL(value) ((Value){ T_NUMBER,   TM_DYN, { .number = value }})
 #define INT_VAL(value)    ((Value){ T_INT,      TM_DYN, { .integer = value }})
-#define OBJ_VAL(object)   ((Value){ T_PTR,      TM_DYN, { .ptr = (Ptr*)object }})
+#define PTR_VAL(object)   ((Value){ T_PTR,      TM_DYN, { .ptr = (Ptr*)object }})
 
 typedef struct {
     int capacity;

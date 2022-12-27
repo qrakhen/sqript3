@@ -267,7 +267,7 @@ static WeightRule* getRule(TokenType type);
 static void digestWeight(Weight precedence);
 
 static Byte identifierConstant(Token* name) {
-    return makeConstant(OBJ_VAL(copyString(name->start,
+    return makeConstant(PTR_VAL(copyString(name->start,
                         name->length)));
 }
 
@@ -508,7 +508,7 @@ static void __OR(bool canAssign) {
 }
 
 static void __STR(bool canAssign) {
-    emitConstant(OBJ_VAL(copyString(digester.previous.start + 1,
+    emitConstant(PTR_VAL(copyString(digester.previous.start + 1,
                  digester.previous.length - 2)));
 }
 
@@ -704,7 +704,7 @@ static void function(FunctionType type) {
 
     PtrFunq* function = endCompiler();
 
-    emitBytes(OP_CLOSURE, makeConstant(OBJ_VAL(function)));
+    emitBytes(OP_CLOSURE, makeConstant(PTR_VAL(function)));
 
     for (int i = 0; i < function->revalCount; i++) {
         emitByte(compiler.upvalues[i].isLocal ? 1 : 0);

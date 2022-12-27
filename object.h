@@ -6,7 +6,7 @@
 #include "register.h"
 #include "value.h"
 
-#define OBJ_TYPE(value)        (AS_OBJ(value)->type)
+#define PTR_TYPE(value)        (AS_PTR(value)->type)
 
 #define IS_BOUND_METHOD(value) matchPtrType(value, PTR_METHOD)
 #define IS_CLASS(value)        matchPtrType(value, PTR_QLASS)
@@ -16,15 +16,14 @@
 #define IS_NATIVE(value)       matchPtrType(value, PTR_NATIVE)
 #define IS_STRING(value)       matchPtrType(value, PTR_STRING)
 
-#define AS_BOUND_METHOD(value) ((PtrMethod*)AS_OBJ(value))
-#define AS_CLASS(value)        ((PtrQlass*)AS_OBJ(value))
-#define AS_CLOSURE(value)      ((PtrQlosure*)AS_OBJ(value))
-#define AS_FUNCTION(value)     ((PtrFunq*)AS_OBJ(value))
-#define AS_INSTANCE(value)     ((PtrInstance*)AS_OBJ(value))
-#define AS_NATIVE(value) \
-    (((PtrNative*)AS_OBJ(value))->function)
-#define AS_STRING(value)       ((PtrString*)AS_OBJ(value))
-#define AS_CSTRING(value)      (((PtrString*)AS_OBJ(value))->chars)
+#define AS_BOUND_METHOD(value) ((PtrMethod*)AS_PTR(value))
+#define AS_CLASS(value)        ((PtrQlass*)AS_PTR(value))
+#define AS_CLOSURE(value)      ((PtrQlosure*)AS_PTR(value))
+#define AS_FUNCTION(value)     ((PtrFunq*)AS_PTR(value))
+#define AS_INSTANCE(value)     ((PtrInstance*)AS_PTR(value))
+#define AS_NATIVE(value)       (((PtrNative*)AS_PTR(value))->function)
+#define AS_STRING(value)       ((PtrString*)AS_PTR(value))
+#define AS_CSTRING(value)      (((PtrString*)AS_PTR(value))->chars)
 
 typedef enum {
     PTR_METHOD,
@@ -90,33 +89,38 @@ typedef struct {
 
 typedef struct {
     Ptr ptr;
-    PtrQlass* klass;
+    PtrQlass* qlass;
     Register fields;
 } PtrInstance;
 
 typedef struct {
     Ptr ptr;
-    Value receiver;
+    Value target;
     PtrQlosure* method;
 } PtrMethod;
 
 typedef struct {
     Ptr ptr;
-    Value target;
-    PtrString* name;
-    NativeMethod* method;
+    NativeMethod method;
 } PtrNativeMethod;
+
+typedef struct {
+    Ptr ptr;
+    Value target;
+    NativeMethod* method;
+} PtrTargetedNativeMethod;
 
 
 Ptr* allocatePtr(size_t size, PtrType type);
 PtrQlosure* newClosure(PtrFunq* function);
 PtrFunq* newFunction();
 PtrQlass* newClass(PtrString* name);
-PtrInstance* newInstance(PtrQlass* klass);
-PtrMethod* newBoundMethod(Value receiver, PtrQlosure* method);
+PtrInstance* newInstance(PtrQlass* qlass);
+PtrMethod* newBoundMethod(Value target, PtrQlosure* method);
 
 PtrNative* newNative(NativeFunq function);
-PtrNativeMethod* newNativeMethod(PtrType type, PtrString* name);
+PtrNativeMethod* newNativeMethod(NativeMethod method);
+PtrTargetedNativeMethod* newTargetedNativeMethod(Value target, PtrNativeMethod* method);
 
 PtrString* takeString(char* chars, int length);
 PtrString* copyString(const char* chars, int length);
@@ -124,7 +128,7 @@ PtrPreval* newUpvalue(Value* slot);
 void printObject(Value value);
 
 static inline bool matchPtrType(Value value, PtrType type) {
-    return IS_PTR(value) && AS_OBJ(value)->type == type;
+    return IS_PTR(value) && AS_PTR(value)->type == type;
 }
 
 #endif

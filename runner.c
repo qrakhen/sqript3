@@ -11,23 +11,9 @@
 #include "memory.h"
 #include "runner.h"
 #include "console.h"
+#include "native.h"
 
 Runner runner;
-
-static Value clockNative(int argCount, Value* args) {
-    return NUMBER_VAL((double)clock() / CLOCKS_PER_SEC);
-}
-
-static Value lengthNative(int argCount, Value* args) {
-    if (argCount != 1) return NULL_VAL;
-    if (matchPtrType(args[0], PTR_STRING)) return NUMBER_VAL(AS_STRING(args[0])->length);
-    if (matchPtrType(args[0], PTR_ARRAY)) return NUMBER_VAL(AS_ARRAY(args[0])->length);
-    else return NULL_VAL;
-}
-
-static Value runFile() {
-
-}
 
 static void resetStack() {
     runner.cursor = runner.stack;
@@ -61,8 +47,8 @@ static void runtimeError(const char* format, ...) {
 }
 
 static void defineNative(const char* name, NativeFunq function) {
-    push(OBJ_VAL(copyString(name, (int)strlen(name))));
-    push(OBJ_VAL(newNative(function)));
+    push(PTR_VAL(copyString(name, (int)strlen(name))));
+    push(PTR_VAL(newNative(function)));
     registerSet(&runner.globals, AS_STRING(runner.stack[0]), runner.stack[1]);
     pop();
     pop();
@@ -84,8 +70,10 @@ void initRunner() {
     runner.__initString = NULL;
     runner.__initString = copyString("init", 4);
 
-    defineNative("time", clockNative);
-    defineNative("length", lengthNative);
+    initNativeMethods();
+
+    defineNative("time", nativeTime);
+    defineNative("length", nativeLength);
 }
 
 void freeRunner() {
@@ -120,17 +108,17 @@ static bool call(PtrQlosure* qlosure, int argCount) {
 
 static bool callValue(Value callee, int argCount) {
     if (IS_PTR(callee)) {
-        switch (OBJ_TYPE(callee)) {
+        switch (PTR_TYPE(callee)) {
             case PTR_METHOD: {
                 PtrMethod* bound = AS_BOUND_METHOD(callee);
-                runner.cursor[-argCount - 1] = bound->receiver;
+                runner.cursor[-argCount - 1] = bound->target;
                 return call(bound->method, argCount);
             }
             case PTR_QLASS: {
-                PtrQlass* klass = AS_CLASS(callee);
-                runner.cursor[-argCount - 1] = OBJ_VAL(newInstance(klass));
+                PtrQlass* qlass = AS_CLASS(callee);
+                runner.cursor[-argCount - 1] = PTR_VAL(newInstance(qlass));
                 Value initializer;
-                if (registerGet(&klass->methods, runner.__initString,
+                if (registerGet(&qlass->methods, runner.__initString,
                     &initializer)) {
                     return call(AS_CLOSURE(initializer), argCount);
                 } else if (argCount != 0) {
@@ -158,10 +146,10 @@ static bool callValue(Value callee, int argCount) {
     return false;
 }
 
-static bool invokeFromClass(PtrQlass* klass, PtrString* name,
+static bool invokeFromClass(PtrQlass* qlass, PtrString* name,
                             int argCount) {
     Value method;
-    if (!registerGet(&klass->methods, name, &method)) {
+    if (!registerGet(&qlass->methods, name, &method)) {
         runtimeError("Undefined property '%s'.", name->chars);
         return false;
     }
@@ -169,14 +157,14 @@ static bool invokeFromClass(PtrQlass* klass, PtrString* name,
 }
 
 static bool invoke(PtrString* name, int argCount) {
-    Value receiver = peek(argCount);
+    Value target = peek(argCount);
 
-    if (!IS_INSTANCE(receiver)) {
+    if (!IS_INSTANCE(target)) {
         runtimeError("Only instances have methods.");
         return false;
     }
 
-    PtrInstance* instance = AS_INSTANCE(receiver);
+    PtrInstance* instance = AS_INSTANCE(target);
 
     Value value;
     if (registerGet(&instance->fields, name, &value)) {
@@ -184,20 +172,19 @@ static bool invoke(PtrString* name, int argCount) {
         return callValue(value, argCount);
     }
 
-    return invokeFromClass(instance->klass, name, argCount);
+    return invokeFromClass(instance->qlass, name, argCount);
 }
 
-static bool bindMethod(PtrQlass* klass, PtrString* name) {
+static bool bindMethod(PtrQlass* qlass, PtrString* name) {
     Value method;
-    if (!registerGet(&klass->methods, name, &method)) {
+    if (!registerGet(&qlass->methods, name, &method)) {
         runtimeError("Undefined property '%s'.", name->chars);
         return false;
     }
 
-    PtrMethod* bound = newBoundMethod(peek(0),
-                                           AS_CLOSURE(method));
+    PtrMethod* bound = newBoundMethod(peek(0), AS_CLOSURE(method));
     pop();
-    push(OBJ_VAL(bound));
+    push(PTR_VAL(bound));
     return true;
 }
 
@@ -237,8 +224,8 @@ static void closeUpvalues(Value* last) {
 
 static void defineMethod(PtrString* name) {
     Value method = peek(0);
-    PtrQlass* klass = AS_CLASS(peek(1));
-    registerSet(&klass->methods, name, method);
+    PtrQlass* qlass = AS_CLASS(peek(1));
+    registerSet(&qlass->methods, name, method);
     pop();
 }
 
@@ -263,7 +250,7 @@ static void concatenate() {
     PtrString* result = takeString(chars, length);
     pop();
     pop();
-    push(OBJ_VAL(result));
+    push(PTR_VAL(result));
 }
 
 static InterpretResult run() {
@@ -385,7 +372,7 @@ static InterpretResult run() {
                     push(value);
                     break;
                 }
-                if (!bindMethod(instance->klass, name)) {
+                if (!bindMethod(instance->qlass, name)) {
                     return SQR_INTRP_ERROR_RUNTIME;
                 }
                 break;
@@ -518,7 +505,7 @@ static InterpretResult run() {
                 for (int i = length - 1; i >= 0; i--) {
                     arr->values[i] = pop();
                 }
-                push(OBJ_VAL(arr));
+                push(PTR_VAL(arr));
                 break;
             }
             case OP_ARRAY_GET: {
@@ -537,7 +524,7 @@ static InterpretResult run() {
             case OP_CLOSURE: {
                 PtrFunq* function = AS_FUNCTION(READ_CONSTANT());
                 PtrQlosure* qlosure = newClosure(function);
-                push(OBJ_VAL(qlosure));
+                push(PTR_VAL(qlosure));
                 for (int i = 0; i < qlosure->revalCount; i++) {
                     Byte isLocal = READ_BYTE();
                     Byte index = READ_BYTE();
@@ -569,7 +556,7 @@ static InterpretResult run() {
                 break;
             }
             case OP_CLASS:
-                push(OBJ_VAL(newClass(READ_STRING())));
+                push(PTR_VAL(newClass(READ_STRING())));
                 break;
             case OP_INHERIT: {
                 Value superclass = peek(1);
@@ -604,10 +591,10 @@ void hack(bool b) {
 InterpretResult interpret(const char* source) {
     PtrFunq* function = digest(source);
     if (function == NULL) return SQR_INTRP_ERROR_DIGEST;
-    push(OBJ_VAL(function));
+    push(PTR_VAL(function));
     PtrQlosure* qlosure = newClosure(function);
     pop();
-    push(OBJ_VAL(qlosure));
+    push(PTR_VAL(qlosure));
     call(qlosure, 0);
     return run();
 }

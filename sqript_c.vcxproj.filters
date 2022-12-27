@@ -63,6 +63,9 @@
     <ClCompile Include="io.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="native.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="common.h">
@@ -110,9 +113,15 @@
     <ClInclude Include="io.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="native.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="test.sqr">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="README.md">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>

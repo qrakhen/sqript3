@@ -7,7 +7,7 @@
 #include "value.h"
 #include "runner.h"
 
-#define ALLOCATE_OBJ(type, objectType) \
+#define ALLOCATE_PTR(type, objectType) \
     (type*)allocatePtr(sizeof(type), objectType)
 
 Ptr* allocatePtr(size_t size, PtrType type) {
@@ -25,28 +25,31 @@ Ptr* allocatePtr(size_t size, PtrType type) {
     return object;
 }
 
-PtrNativeMethod* newNativeMethod(Value target, PtrString* name, NativeMethod* method) {
-    PtrNativeMethod* bound = ALLOCATE_OBJ(PtrNativeMethod, PTR_METHOD);
-    bound->name = name;
+PtrTargetedNativeMethod* newTargetedNativeMethod(Value target, PtrNativeMethod* method) {
+    PtrTargetedNativeMethod* fn = ALLOCATE_PTR(PtrTargetedNativeMethod, PTR_METHOD);
+    fn->target = target;
+    fn->method = method->method;
+    return fn;
+}
+
+PtrNativeMethod* newNativeMethod(Value target, NativeMethod method) {
+    PtrNativeMethod* fn = ALLOCATE_PTR(PtrNativeMethod, PTR_METHOD);
+    fn->method = method;
+    return fn;
+}
+
+PtrMethod* newBoundMethod(Value target, PtrQlosure* method) {
+    PtrMethod* bound = ALLOCATE_PTR(PtrMethod, PTR_METHOD);
     bound->target = target;
     bound->method = method;
     return bound;
 }
 
-PtrMethod* newBoundMethod(Value receiver,
-                               PtrQlosure* method) {
-    PtrMethod* bound = ALLOCATE_OBJ(PtrMethod,
-                                         PTR_METHOD);
-    bound->receiver = receiver;
-    bound->method = method;
-    return bound;
-}
-
 PtrQlass* newClass(PtrString* name) {
-    PtrQlass* klass = ALLOCATE_OBJ(PtrQlass, PTR_QLASS);
-    klass->name = name;
-    initRegister(&klass->methods);
-    return klass;
+    PtrQlass* qlass = ALLOCATE_PTR(PtrQlass, PTR_QLASS);
+    qlass->name = name;
+    initRegister(&qlass->methods);
+    return qlass;
 }
 
 PtrQlosure* newClosure(PtrFunq* function) {
@@ -56,7 +59,7 @@ PtrQlosure* newClosure(PtrFunq* function) {
         revals[i] = NULL;
     }
 
-    PtrQlosure* qlosure = ALLOCATE_OBJ(PtrQlosure, PTR_QLOSURE);
+    PtrQlosure* qlosure = ALLOCATE_PTR(PtrQlosure, PTR_QLOSURE);
     qlosure->function = function;
     qlosure->upvalues = revals;
     qlosure->revalCount = function->revalCount;
@@ -64,7 +67,7 @@ PtrQlosure* newClosure(PtrFunq* function) {
 }
 
 PtrFunq* newFunction() {
-    PtrFunq* function = ALLOCATE_OBJ(PtrFunq, PTR_FUNQ);
+    PtrFunq* function = ALLOCATE_PTR(PtrFunq, PTR_FUNQ);
     function->argc = 0;
     function->revalCount = 0;
     function->name = NULL;
@@ -72,27 +75,27 @@ PtrFunq* newFunction() {
     return function;
 }
 
-PtrInstance* newInstance(PtrQlass* klass) {
-    PtrInstance* instance = ALLOCATE_OBJ(PtrInstance, PTR_INSTANCE);
-    instance->klass = klass;
+PtrInstance* newInstance(PtrQlass* qlass) {
+    PtrInstance* instance = ALLOCATE_PTR(PtrInstance, PTR_INSTANCE);
+    instance->qlass = qlass;
     initRegister(&instance->fields);
     return instance;
 }
 
 PtrNative* newNative(NativeFunq function) {
-    PtrNative* native = ALLOCATE_OBJ(PtrNative, PTR_NATIVE);
+    PtrNative* native = ALLOCATE_PTR(PtrNative, PTR_NATIVE);
     native->function = function;
     return native;
 }
 
 static PtrString* allocateString(char* chars, int length,
                                  uint32_t hash) {
-    PtrString* string = ALLOCATE_OBJ(PtrString, PTR_STRING);
+    PtrString* string = ALLOCATE_PTR(PtrString, PTR_STRING);
     string->length = length;
     string->chars = chars;
     string->hash = hash;
 
-    push(OBJ_VAL(string));
+    push(PTR_VAL(string));
     registerSet(&runner.strings, string, NULL_VAL);
     pop();
 
@@ -134,7 +137,7 @@ PtrString* copyString(const char* chars, int length) {
 }
 
 PtrPreval* newUpvalue(Value* slot) {
-    PtrPreval* upvalue = ALLOCATE_OBJ(PtrPreval, PTR_PREVAL);
+    PtrPreval* upvalue = ALLOCATE_PTR(PtrPreval, PTR_PREVAL);
     upvalue->closed = NULL_VAL;
     upvalue->location = slot;
     upvalue->next = NULL;
@@ -150,7 +153,7 @@ static void printFunction(PtrFunq* function) {
 }
 
 void printObject(Value value) {
-    switch (OBJ_TYPE(value)) {
+    switch (PTR_TYPE(value)) {
         case PTR_METHOD:
             printFunction(AS_BOUND_METHOD(value)->method->function);
             break;
@@ -165,7 +168,7 @@ void printObject(Value value) {
             break;
         case PTR_INSTANCE:
             printf("%s instance",
-                   AS_INSTANCE(value)->klass->name->chars);
+                   AS_INSTANCE(value)->qlass->name->chars);
             break;        
         case PTR_NATIVE:
             printf("<native fn>");
