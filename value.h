@@ -9,9 +9,10 @@ typedef uint8_t byte;
 typedef uint16_t int16;
 typedef uint32_t int32;
 typedef uint64_t int64;
+typedef struct Value Value;
 typedef struct Obj Obj;
-typedef struct List List;
 typedef struct Array Array;
+typedef struct List List;
 typedef struct ObjString ObjString;
 
 #ifdef NAN_BOXING
@@ -65,36 +66,40 @@ typedef enum {
     T_NULL,
     T_NUMBER,
     T_INTEGER,
-    T_COLLECTION,
-    T_OBJ
+    T_ARRAY,
+    T_OBJ,
+    T_PTR,
 } ValueType;
 
-typedef struct {
+struct Value {
     ValueType type;
     union {
         bool boolean;
         double number;
+        Value* ptr;
         Obj* obj;
-        List* list;
     } as;
-} Value;
+};
 
 #define IS_BOOL(v)          ((v).type == T_BOOL)
 #define IS_NULL(v)          ((v).type == T_NULL)
 #define IS_NUMBER(v)        ((v).type == T_NUMBER)
 #define IS_INTEGER(v)       (IS_NUMBER(v) && (abs(ceil(AS_NUMBER(v)) - floor(AS_NUMBER(v))) == 0))
-#define IS_COLLECTION(v)    ((v).type == T_COLLECTION)
 #define IS_OBJ(v)           ((v).type == T_OBJ)
+#define IS_PTR(v)           ((v).type == T_PTR)
+#define IS_ARRAY(v)         ((v).type == T_ARRAY)
 #define IS_ANY(v)           ((v).type == T_ANY)
 
-#define AS_OBJ(value)     ((value).as.obj)
-#define AS_BOOL(value)    ((value).as.boolean)
-#define AS_NUMBER(value)  ((value).as.number)
+#define AS_OBJ(value)       ((value).as.obj)
+#define AS_BOOL(value)      ((value).as.boolean)
+#define AS_NUMBER(value)    ((value).as.number)
+#define AS_PTR(value)       ((value).as.ptr)
 
-#define BOOL_VAL(value)   ((Value){ T_BOOL,     {.boolean = value} })
-#define NULL_VAL          ((Value){ T_NULL,     {.number = 0} })
-#define NUMBER_VAL(value) ((Value){ T_NUMBER,   {.number = value} })
-#define OBJ_VAL(object)   ((Value){ T_OBJ,      {.obj = (Obj*)object} })
+#define BOOL_VAL(value)   ((Value){ T_BOOL,     { .boolean = value }})
+#define NULL_VAL          ((Value){ T_NULL,     { .number = 0 }})
+#define NUMBER_VAL(value) ((Value){ T_NUMBER,   { .number = value }})
+#define OBJ_VAL(object)   ((Value){ T_OBJ,      { .obj = (Obj*)object }})
+#define PTR_VAL(ptr)      ((Value){ T_PTR,      { .ptr = ptr }})
 
 #endif
 
