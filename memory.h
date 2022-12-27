@@ -2,16 +2,27 @@
 #define sqript_memory_h
 
 #include "common.h"
+#include "object.h"
 
-#define SCALE_LIMIT(size) \
-    ((size) < 8 ? 8 : (size) * 2)
+#define ALLOCATE(type, count) \
+    (type*)reallocate(NULL, 0, sizeof(type) * (count))
 
-#define FREE_ARRAY(type, ptr, size) \
-    reallocate(ptr, sizeof(type) * (size), 0)
+#define FREE(type, pointer) reallocate(pointer, sizeof(type), 0)
 
-#define SCALE_ARRAY(type, ptr, _limit, limit) \
-    (type*)reallocate(ptr, sizeof(type) * (_limit), sizeof(type) * (limit))
+#define GROW_CAPACITY(capacity) \
+    ((capacity) < 8 ? 8 : (capacity) * 2)
 
-void* reallocate(void* ptr, size_t _size, size_t size);
+#define GROW_ARRAY(type, pointer, oldCount, newCount) \
+    (type*)reallocate(pointer, sizeof(type) * (oldCount), \
+        sizeof(type) * (newCount))
+
+#define FREE_ARRAY(type, pointer, oldCount) \
+    reallocate(pointer, sizeof(type) * (oldCount), 0)
+
+void* reallocate(void* pointer, size_t oldSize, size_t newSize);
+void markObject(Ptr* object);
+void markValue(Value value);
+void collectGarbage();
+void freeObjects();
 
 #endif

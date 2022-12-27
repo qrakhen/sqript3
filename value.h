@@ -1,62 +1,80 @@
 #ifndef sqript_value_h
 #define sqript_value_h
 
-#include <stdint.h>
-#include <stdbool.h>
+#include <string.h>
 
-typedef uint8_t byte;
+#include "common.h"
 
-typedef void* protoVal;
-typedef protoVal Integer;
+typedef bool Bool;
+typedef uint8_t Byte;
+typedef int64_t Int;
+typedef double Number;
+
+typedef struct Value Value;
+typedef struct Ptr Ptr;
+typedef struct PtrString PtrString;
 
 typedef enum {
+    T_ANY,
+    T_NULL,
     T_BOOL,
     T_BYTE,
     T_NUMBER,
     T_INT,
-    T_NULL,
-    T_STRING,
-    T_COLLECTION,
-    T_OBJECT
+    T_PTR,
 } ValueType;
 
-typedef struct {
+typedef enum {
+    TM_DYN,
+    TM_STRICT
+} TypeMode;
+
+struct Value {
     ValueType type;
+    TypeMode mode;
     union {
-        bool boolean;
-        double number;
+        Bool boolean;
+        Byte byte;
+        Int integer;
+        Number number;
+        Ptr* ptr;
     } as;
-} Value;
+};
 
-#define IS_BOOL(v)      ((v).type == T_BOOL)
-#define IS_NIL(v)       ((v).type == T_NULL)
-#define IS_NUMBER(v)    ((v).type == T_NUMBER)
+#define IS_BOOL(v)          ((v).type == T_BOOL)
+#define IS_NULL(v)          ((v).type == T_NULL)
+#define IS_BYTE(v)          ((v).type == T_BYTE)
+#define IS_NUMBER(v)        ((v).type == T_NUMBER)
+#define IS_INT(v)           ((v).type == T_INT)
+#define MAYBE_INT(v)        (IS_NUMBER(v) && (abs(ceil(AS_NUMBER(v)) - floor(AS_NUMBER(v))) == 0))
+#define IS_OBJ(v)           ((v).type == T_PTR)
+#define IS_ANY(v)           ((v).type == T_ANY)
 
-#define AS_BOOL(v)      ((v).as.boolean)
-#define AS_NUMBER(v)    ((v).as.number)
+#define AS_OBJ(value)       ((value).as.ptr)
+#define AS_BOOL(value)      ((value).as.boolean)
+#define AS_BYTE(value)      ((value).as.byte)
+#define AS_NUMBER(value)    ((value).as.number)
+#define AS_INT(value)       ((value).as.integer)
 
-#define VAL_BOOL(v)     ((Value) { T_BOOL, { .boolean = v } })
-#define VAL_NULL        ((Value) { T_NULL, { .number = 0 } })
-#define VAL_NUMBER(v)   ((Value) { T_NUMBER, { .number = v } })
+#define BOOL_VAL(value)   ((Value){ T_BOOL,     TM_DYN, { .boolean = value }})
+#define NULL_VAL          ((Value){ T_NULL,     TM_DYN, { .ptr = NULL }})
+#define BYTE_VAL(value)   ((Value){ T_BYTE,     TM_DYN, { .byte = value }})
+#define NUMBER_VAL(value) ((Value){ T_NUMBER,   TM_DYN, { .number = value }})
+#define INT_VAL(value)    ((Value){ T_INT,      TM_DYN, { .integer = value }})
+#define OBJ_VAL(object)   ((Value){ T_PTR,      TM_DYN, { .ptr = (Ptr*)object }})
 
 typedef struct {
-    int pos;
-    int size;
+    int capacity;
+    int count;
     Value* values;
 } ValueArray;
 
-typedef struct {
-    byte value;
-
-} Boolean;
-
-//typedef int Integer;
-typedef float Number;
-typedef char* String;
-
+bool valuesEqual(Value a, Value b);
 void initValueArray(ValueArray* array);
 void writeValueArray(ValueArray* array, Value value);
-void clearValueArray(ValueArray* array);
+void freeValueArray(ValueArray* array);
+char* valueToString(Value value);
 void printValue(Value value);
+void printType(Value value);
 
 #endif

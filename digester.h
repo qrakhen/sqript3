@@ -1,8 +1,10 @@
 #ifndef sqript_digester_h
 #define sqript_digester_h
 
-#include "runtime.h"
+#include "object.h"
+#include "runner.h"
 
-bool digest(const char* source, Segment* segment);
+PtrFunq* digest(const char* source);
+void markCompilerRoots();
 
 #endif
