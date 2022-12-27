@@ -83,9 +83,8 @@ static void skipVoid() {
                 reader.line++;
                 next();
                 break;
-            case '/':
-                if (peek() == '/') while (current() != '\n' && !done()) next();
-                else return;
+            case '#':
+                while (current() != '\n' && !done()) next();
                 break;
             default:
                 return;
@@ -93,8 +92,7 @@ static void skipVoid() {
     }
 }
 
-static TokenType checkKeyword(int start, int length,
-                              const char* rest, TokenType type) {
+static TokenType checkKeyword(int start, int length, const char* rest, TokenType type) {
     if (reader.current - reader.start == start + length &&
         memcmp(reader.start + start, rest, length) == 0) {
         return type;
@@ -106,6 +104,7 @@ static TokenType checkKeyword(int start, int length,
 static TokenType identifierType() {
     switch (reader.start[0]) {
         case 'c': return checkKeyword(1, 4, "lass", TOKEN_CLASS);
+        case 'q': return checkKeyword(1, 4, "lass", TOKEN_CLASS);
         case 'e': return checkKeyword(1, 3, "lse", TOKEN_ELSE);
         case 'f':
             if (reader.current - reader.start > 1) {
@@ -181,8 +180,8 @@ Token readToken() {
         case ']': return makeToken(TOKEN_ARRAY_CLOSE);
         case ';': return makeToken(TOKEN_SEMICOLON);
         case ',': return makeToken(TOKEN_COMMA);
-        case '.': return makeToken(TOKEN_DOT);
-        case ':': return makeToken(TOKEN_COLON);
+        case '.': return makeToken(match('~') ? TOKEN_THIS : TOKEN_DOT);
+        case ':': return makeToken(match(':') ? TOKEN_PRINT : TOKEN_COLON);
         case '-': return makeToken(TOKEN_MINUS);
         case '+': return makeToken(TOKEN_PLUS);
         case '/': return makeToken(TOKEN_SLASH);

@@ -118,7 +118,6 @@ PtrString* registerFindString(
         uint32_t hash) {
     if (reg->count == 0) return NULL;
 
-
     uint32_t index = hash & (reg->capacity - 1);
     for (;;) {
         Entry* entry = &reg->entries[index];

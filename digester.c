@@ -289,8 +289,7 @@ static int resolveLocal(Compiler* compiler, Token* name) {
     return -1;
 }
 
-static int addUpvalue(Compiler* compiler, Byte index,
-                      bool isLocal) {
+static int addUpvalue(Compiler* compiler, Byte index, bool isLocal) {
     int revalCount = compiler->function->revalCount;
 
     for (int i = 0; i < revalCount; i++) {
@@ -683,7 +682,6 @@ static void inlineBlock() {
     consume(TOKEN_SEMICOLON, "missing ; after inline block");
 }
 
-
 static void array(ValueType type) {
 
 }
@@ -705,8 +703,12 @@ static void function(FunctionType type) {
         } while (match(TOKEN_COMMA));
     }
     consume(TOKEN_GROUP_CLOSE, "Expect ')' after parameters.");
-    consume(TOKEN_CONTEXT_OPEN, "Expect '{' before function body.");
-    block();
+    if (!check(TOKEN_CONTEXT_OPEN)) {
+        statement();
+    } else {
+        consume(TOKEN_CONTEXT_OPEN, "Expect '{' before function body.");
+        block();
+    }
 
     PtrFunq* function = endCompiler();
 
