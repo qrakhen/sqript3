@@ -5,6 +5,7 @@
 #include "object.h"
 #include "memory.h"
 #include "value.h"
+#include "array.h"
 
 void initValueArray(ValueArray* array) {
     array->values = NULL;
@@ -55,12 +56,24 @@ void printValue(Value value) {
             else
                 printf("%g", AS_NUMBER(value));
             break;
-        case T_PTR: printObject(value); break;
+        case T_PTR: 
+            if (matchPtrType(value, PTR_ARRAY)) {
+                printf("[");
+                for (int i = 0; i < AS_ARRAY(value)->length; i++) {
+                    printValue(AS_ARRAY(value)->values[i]);
+                    if (i < AS_ARRAY(value)->length - 1)
+                        printf(", ");
+                }
+                printf("]");
+                break;
+            } else
+                printObject(value); break;
     }
 }
 
 void printType(Value value) {
     switch (value.type) {
+        case T_ANY: printf("any"); break;
         case T_BOOL: printf("bool"); break;
         case T_NULL: printf("null"); break;
         case T_BYTE: printf("byte"); break;
@@ -73,7 +86,7 @@ void printType(Value value) {
                 case PTR_QLOSURE: printf("qlosure"); break;
                 case PTR_FUNQ: printf("funqtion"); break;
                 case PTR_INSTANCE: printf("instance<%s>", AS_INSTANCE(value)->klass->name->chars); break;
-                case PTR_ARRAY: printf("array<...>"); break;
+                case PTR_ARRAY: printf("array<any>[%d]", AS_ARRAY(value)->length); break;
                 case PTR_NATIVE: printf("native"); break;
                 case PTR_STRING: printf("string"); break;
                 case PTR_PREVAL: printf("preval"); break;

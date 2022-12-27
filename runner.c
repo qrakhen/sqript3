@@ -7,6 +7,7 @@
 #include "digester.h"
 #include "debug.h"
 #include "object.h"
+#include "array.h"
 #include "memory.h"
 #include "runner.h"
 #include "console.h"
@@ -290,14 +291,14 @@ static InterpretResult run() {
     for (;;) {
         #ifdef DEBUG_TRACE_EXECUTION
         printf("          ");
-        for (Value* slot = vm.stack; slot < vm.stackTop; slot++) {
+        for (Value* slot = runner.stack; slot < runner.stackTop; slot++) {
             printf("[ ");
             printValue(*slot);
             printf(" ]");
         }
         printf("\n");
-        disassembleInstruction(&frame->closure->function->chunk,
-                               (int)(frame->ip - frame->closure->function->chunk.code));
+        disassembleInstruction(&frame->closure->function->segment,
+                               (int)(frame->ip - frame->closure->function->segment.code));
         #endif
 
         byte instruction;
@@ -496,6 +497,15 @@ static InterpretResult run() {
                     return SQR_INTRP_ERROR_RUNTIME;
                 }
                 frame = &runner.frames[runner.frameCount - 1];
+                break;
+            }
+            case OP_ARRAY: {
+                int length = AS_NUMBER(READ_CONSTANT());
+                PtrArray* arr = createArray(length, T_ANY);
+                for (int i = length - 1; i >= 0; i--) {
+                    arr->values[i] = pop();
+                }
+                push(OBJ_VAL(arr));
                 break;
             }
             case OP_CLOSURE: {

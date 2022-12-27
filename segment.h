@@ -33,6 +33,7 @@ typedef enum {
     OP_BITWISE_NOT,
     OP_NOT,
     OP_NEGATE,
+    OP_ARRAY,
     OP_PRINT,
     OP_TYPEOF,
     OP_JUMP,

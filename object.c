@@ -159,7 +159,7 @@ void printObject(Value value) {
         case PTR_INSTANCE:
             printf("%s instance",
                    AS_INSTANCE(value)->klass->name->chars);
-            break;
+            break;        
         case PTR_NATIVE:
             printf("<native fn>");
             break;

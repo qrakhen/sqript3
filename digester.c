@@ -4,6 +4,7 @@
 
 #include "common.h"
 #include "digester.h"
+#include "array.h"
 #include "memory.h"
 #include "reader.h"
 
@@ -229,9 +230,8 @@ static PtrFunq* endCompiler() {
     PtrFunq* function = current->function;
 
     #ifdef DEBUG_PRINT_CODE
-    if (!parser.failed) {
-
-        disassembleChunk(currentChunk(), function->name != NULL
+    if (!digester.failed) {
+        disassembleChunk(currentSegment(), function->name != NULL
                          ? function->name->chars : "<script>");
     }
     #endif
@@ -330,7 +330,7 @@ static int resolveUpvalue(Compiler* compiler, Token* name) {
 
 static void addLocal(Token name) {
     if (current->localCount == UINT8_COUNT) {
-        error("Too many local variables in function.");
+        error("too many local variables in function.");
         return;
     }
 
@@ -467,11 +467,17 @@ static void __GRP(bool canAssign) {
 }
 
 static void __ARR(bool canAssign) {
-    expression();
-    if (check(TOKEN_COMMA)) {
-        next();
-        __ARR(canAssign);
-    } else consume(TOKEN_ARRAY_CLOSE, "expected , or ] after array definition");
+    int length = 0;
+    while (!check(TOKEN_ARRAY_CLOSE)) {
+        expression(); 
+        length++;
+        if (check(TOKEN_COMMA))
+            next();
+        else
+            break;          
+    }
+    consume(TOKEN_ARRAY_CLOSE, "expected ] after array definition");
+    emitBytes(OP_ARRAY, makeConstant(NUMBER_VAL(length)));
 }
 
 static void __NUM(bool canAssign) {
@@ -657,11 +663,11 @@ static void expression() {
 static void block() {
     while (!check(TOKEN_CONTEXT_CLOSE) && !check(TOKEN_EOF))
         declaration();
-    consume(TOKEN_CONTEXT_CLOSE, "Expect ' }' after block.");
+    consume(TOKEN_CONTEXT_CLOSE, "missing } after block.");
 }
 
 static void array(ValueType type) {
-    
+
 }
 
 static void function(FunctionType type) {
@@ -698,7 +704,6 @@ static void method() {
     consume(TOKEN_IDENTIFIER, "Expect method name.");
     byte constant = identifierConstant(&digester.previous);
 
-
     FunctionType type = F_INST;
     if (digester.previous.length == 4 &&
         memcmp(digester.previous.start, "init", 4) == 0) {
@@ -724,11 +729,11 @@ static void classDeclaration() {
     currentClass = &classCompiler;
 
     if (match(TOKEN_LESS)) {
-        consume(TOKEN_IDENTIFIER, "Expect superclass name.");
+        consume(TOKEN_IDENTIFIER, "missing inheriting qlass name");
         __REF(false);
 
         if (identifiersEqual(&className, &digester.previous)) {
-            error("A class can't inherit from itself.");
+            error("qlass can't inherit itself");
         }
 
         beginScope();
@@ -756,7 +761,7 @@ static void classDeclaration() {
 }
 
 static void funqDeclaration() {
-    byte global = parseVariable("Expect function name.");
+    byte global = parseVariable("missing funqtion name");
     markInitialized();
     function(F_FUNC);
     defineVariable(global);
@@ -925,10 +930,8 @@ static void synchronize() {
 static void declaration() {
     if (match(TOKEN_CLASS)) {
         classDeclaration();
-
     } else if (match(TOKEN_FUNCTION)) {
         funqDeclaration();
-
     } else if (match(TOKEN_VAR)) {
         varDeclaration();
     } else {

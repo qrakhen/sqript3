@@ -1,9 +1,15 @@
 #include "array.h"
+#include "memory.h"
 
 PtrArray* createArray(int length, ValueType type) {
+    Value* values = ALLOCATE(Value, length);
+    for (int i = 0; i < length; i++)
+        values[i] = NULL_VAL;
+
     PtrArray* arr = (PtrArray*)allocatePtr(sizeof(PtrArray), PTR_ARRAY);
     arr->length = length;
     arr->type = type;
+    arr->values = values;
     return arr;
 }
 
