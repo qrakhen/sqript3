@@ -39,37 +39,37 @@ PtrNativeMethod* newNativeMethod(Value target, NativeMethod method) {
     return fn;
 }
 
-PtrMethod* newBoundMethod(Value target, PtrQlosure* member) {
-    PtrMethod* bound = ALLOCATE_PTR(PtrMethod, PTR_METHOD);
+Method* newBoundMethod(Value target, Qontext* member) {
+    Method* bound = ALLOCATE_PTR(Method, PTR_METHOD);
     bound->target = target;
     bound->method = member;
     return bound;
 }
 
-PtrQlass* newClass(String* name) {
-    PtrQlass* qlass = ALLOCATE_PTR(PtrQlass, PTR_QLASS);
+Qlass* newClass(String* name) {
+    Qlass* qlass = ALLOCATE_PTR(Qlass, PTR_QLASS);
     qlass->name = name;
     initRegister(&qlass->methods);
     initRegister(&qlass->properties);
     return qlass;
 }
 
-PtrQlosure* newClosure(PtrFunq* function) {
+Qontext* newClosure(Funqtion* function) {
     PtrPreval** revals = ALLOC(PtrPreval*,
                                      function->revalCount);
     for (int i = 0; i < function->revalCount; i++) {
         revals[i] = NULL;
     }
 
-    PtrQlosure* qlosure = ALLOCATE_PTR(PtrQlosure, PTR_QLOSURE);
+    Qontext* qlosure = ALLOCATE_PTR(Qontext, PTR_QLOSURE);
     qlosure->function = function;
     qlosure->upvalues = revals;
     qlosure->revalCount = function->revalCount;
     return qlosure;
 }
 
-PtrFunq* newFunction() {
-    PtrFunq* function = ALLOCATE_PTR(PtrFunq, PTR_FUNQ);
+Funqtion* newFunction() {
+    Funqtion* function = ALLOCATE_PTR(Funqtion, PTR_FUNQ);
     function->argc = 0;
     function->revalCount = 0;
     function->name = NULL;
@@ -77,15 +77,15 @@ PtrFunq* newFunction() {
     return function;
 }
 
-PtrInstance* newInstance(PtrQlass* qlass) {
-    PtrInstance* instance = ALLOCATE_PTR(PtrInstance, PTR_INSTANCE);
+Objeqt* newInstance(Qlass* qlass) {
+    Objeqt* instance = ALLOCATE_PTR(Objeqt, PTR_OBJEQT);
     instance->qlass = qlass;
     initRegister(&instance->fields);
     return instance;
 }
 
-PtrNative* newNative(NativeFunq function) {
-    PtrNative* native = ALLOCATE_PTR(PtrNative, PTR_NATIVE);
+NativeQall* newNative(NativeFunq function) {
+    NativeQall* native = ALLOCATE_PTR(NativeQall, PTR_NATIVE);
     native->function = function;
     return native;
 }
@@ -98,7 +98,7 @@ PtrPreval* newUpvalue(Value* slot) {
     return upvalue;
 }
 
-static void printFunction(PtrFunq* function) {
+static void printFunction(Funqtion* function) {
     if (function->name == NULL) {
         printf("<sqript>");
         return;
@@ -109,20 +109,20 @@ static void printFunction(PtrFunq* function) {
 void printObject(Value value) {
     switch (PTR_TYPE(value)) {
         case PTR_METHOD:
-            printFunction(AS_BOUND_METHOD(value)->method->function);
+            printFunction(AS_METHOD(value)->method->function);
             break;
         case PTR_QLASS:
-            printf("%s", AS_CLASS(value)->name->chars);
+            printf("%s", AS_QLASS(value)->name->chars);
             break;
         case PTR_QLOSURE:
-            printFunction(AS_CLOSURE(value)->function);
+            printFunction(AS_QONTEXT(value)->function);
             break;
         case PTR_FUNQ:
-            printFunction(AS_FUNCTION(value));
+            printFunction(AS_FUNQ(value));
             break;
-        case PTR_INSTANCE:
+        case PTR_OBJEQT:
             printf("%s instance",
-                   AS_INSTANCE(value)->qlass->name->chars);
+                   AS_OBJEQT(value)->qlass->name->chars);
             break;        
         case PTR_NATIVE:
             printf("<native fn>");

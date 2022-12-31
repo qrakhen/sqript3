@@ -133,7 +133,7 @@ int __dbgDissectOp(Segment* segment, int offset) {
             printValue(segment->constants.values[constant]);
             printf("\n");
 
-            PtrFunq* function = AS_FUNCTION(
+            Funqtion* function = AS_FUNQ(
                 segment->constants.values[constant]);
             for (int j = 0; j < function->revalCount; j++) {
                 int isLocal = segment->code[offset++];

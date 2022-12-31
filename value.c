@@ -88,10 +88,10 @@ void printType(Value value) {
         case T_PTR:
             switch (AS_PTR(value)->type) {
                 case PTR_METHOD: printf("method"); break;
-                case PTR_QLASS: printf("qlass<%s>", AS_CLASS(value)->name->chars); break;
+                case PTR_QLASS: printf("qlass<%s>", AS_QLASS(value)->name->chars); break;
                 case PTR_QLOSURE: printf("qlosure"); break;
                 case PTR_FUNQ: printf("funqtion"); break;
-                case PTR_INSTANCE: printf("instance<%s>", AS_INSTANCE(value)->qlass->name->chars); break;
+                case PTR_OBJEQT: printf("instance<%s>", AS_OBJEQT(value)->qlass->name->chars); break;
                 case PTR_ARRAY: printf("array<any>[%d]", AS_ARRAY(value)->length); break;
                 case PTR_NATIVE: printf("native"); break;
                 case PTR_STRING: printf("string"); break;
