@@ -26,6 +26,8 @@ Value listPop(List* list);
 void listInsert(List* list, int index, Value value);
 void listDelete(List* list, int index);
 int listFindIndex(List* list, Value value);
+PtrArray* listFilter(List* list, QollectionFilterFunq* filter);
+void listForEach(List* list, QollectionFunq* filter);
 void freeList(List* list);
 PtrArray* listToArray(List* list);
 

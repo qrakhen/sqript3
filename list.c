@@ -75,6 +75,19 @@ void freeList(List* list) {
     reallocate(list, list->length * sizeof(List), 0);
 }
 
+PtrArray* listFilter(List* list, PtrFunq* filter) {
+
+}
+
+void listForEach(List* list, QollectionFunq fq) {
+    __Node* cur = list->head;
+    int index = 0;
+    while (cur != NULL) {
+        fq(cur->value, index++);
+        cur = cur->next;
+    }
+}
+
 PtrArray* listToArray(List* list) {
     __Node* cur = list->head;
     PtrArray* arr = createArray(list->length, list->type);

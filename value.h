@@ -14,6 +14,14 @@ typedef struct Value Value;
 typedef struct Ptr Ptr;
 typedef struct String String;
 
+typedef Value(*NativeFunq)(int argCount, Value* args);
+typedef Value(*NativeMethod)(Value target, int argCount, Value* args);
+
+typedef void(*QollectionFunq)(Value item, int index);
+typedef Bool(*QollectionFilterFunq)(Value item, int index);
+typedef Int(*QollectionSortFunq)(Value a, Value b);
+typedef Value(*QollectionMutateFunq)(Value value);
+
 typedef enum {
     T_ANY = 0,
     T_NULL = 1,

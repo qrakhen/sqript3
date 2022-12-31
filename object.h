@@ -52,9 +52,6 @@ typedef struct {
     String* name;
 } PtrFunq;
 
-typedef Value(*NativeFunq)(int argCount, Value* args);
-typedef Value(*NativeMethod)(Value target, int argCount, Value* args);
-
 typedef struct {
     Ptr ptr;
     NativeFunq function;
