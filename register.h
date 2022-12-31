@@ -5,7 +5,7 @@
 #include "value.h"
 
 typedef struct {
-    PtrString* key;
+    String* key;
     Value value;
     bool typeStrict; // hier oder bei value???
 } Entry;
@@ -18,11 +18,11 @@ typedef struct {
 
 void initRegister(Register* table);
 void freeRegister(Register* table);
-bool registerGet(Register* table, PtrString* key, Value* value);
-bool registerSet(Register* table, PtrString* key, Value value);
-bool registerDelete(Register* table, PtrString* key);
+bool registerGet(Register* table, String* key, Value* value);
+bool registerSet(Register* table, String* key, Value value);
+bool registerDelete(Register* table, String* key);
 void registerAddAll(Register* from, Register* to);
-PtrString* registerFindString(Register* table, const char* chars,
+String* registerFindString(Register* table, const char* chars,
                            int length, uint32_t hash);
 
 void registerRemoveWhite(Register* table);

@@ -207,7 +207,7 @@ static void initCompiler(Compiler* compiler, FunctionType type) {
     compiler->function = newFunction();
     current = compiler;
     if (type != F_CODE) {
-        current->function->name = copyString(digester.previous.start, digester.previous.length);
+        current->function->name = makeString(digester.previous.start, digester.previous.length);
     }
 
     Local* local = &current->locals[current->localCount++];
@@ -265,7 +265,7 @@ static WeightRule* getRule(TokenType type);
 static void digestWeight(Weight precedence);
 
 static Byte identifierConstant(Token* name) {
-    return makeConstant(PTR_VAL(copyString(name->start,
+    return makeConstant(PTR_VAL(makeString(name->start,
                         name->length)));
 }
 
@@ -505,7 +505,7 @@ static void __OR(bool canAssign) {
 }
 
 static void __STR(bool canAssign) {
-    emitConstant(PTR_VAL(copyString(digester.previous.start + 1, digester.previous.length - 2)));
+    emitConstant(PTR_VAL(makeString(digester.previous.start + 1, digester.previous.length - 2)));
 }
 
 static void namedVariable(Token name, bool canAssign) {

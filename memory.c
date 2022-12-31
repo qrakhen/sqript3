@@ -153,9 +153,9 @@ static void freeObject(Ptr* object) {
             FREE(PtrNative, object);
             break;
         case PTR_STRING: {
-            PtrString* string = (PtrString*)object;
+            String* string = (String*)object;
             ARR_FREE(char, string->chars, string->length + 1);
-            FREE(PtrString, object);
+            FREE(String, object);
             break;
         }
         case PTR_PREVAL:

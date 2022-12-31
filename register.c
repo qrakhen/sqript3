@@ -21,7 +21,7 @@ void freeRegister(Register* table) {
 }
 
 static Entry* findEntry(Entry* entries, int capacity,
-                        PtrString* key) {
+                        String* key) {
 
     uint32_t index = key->hash & (capacity - 1);
     Entry* tombstone = NULL;
@@ -41,7 +41,7 @@ static Entry* findEntry(Entry* entries, int capacity,
     }
 }
 
-bool registerGet(Register* table, PtrString* key, Value* value) {
+bool registerGet(Register* table, String* key, Value* value) {
     if (table->count == 0) return false;
 
     Entry* entry = findEntry(table->entries, table->capacity, key);
@@ -74,7 +74,7 @@ static void adjustCapacity(Register* table, int capacity) {
     table->capacity = capacity;
 }
 
-bool registerSet(Register* table, PtrString* key, Value value) {
+bool registerSet(Register* table, String* key, Value value) {
     if (table->count + 1 > table->capacity * TABLE_MAX_LOAD) {
         int capacity = NEXT_SIZE(table->capacity);
         adjustCapacity(table, capacity);
@@ -90,7 +90,7 @@ bool registerSet(Register* table, PtrString* key, Value value) {
     return isNewKey;
 }
 
-bool registerDelete(Register* table, PtrString* key) {
+bool registerDelete(Register* table, String* key) {
     if (table->count == 0) return false;
 
     // Find the entry.
@@ -112,7 +112,7 @@ void registerAddAll(Register* from, Register* to) {
     }
 }
 
-PtrString* registerFindString(
+String* registerFindString(
         Register* reg,
         const char* chars,
         int length,

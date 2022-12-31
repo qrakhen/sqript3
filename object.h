@@ -48,7 +48,7 @@ typedef struct {
     Byte argc;
     int revalCount;
     Segment segment;
-    PtrString* name;
+    String* name;
 } PtrFunq;
 
 typedef Value(*NativeFunq)(int argCount, Value* args);
@@ -75,7 +75,7 @@ typedef struct {
 
 typedef struct {
     Ptr ptr;
-    PtrString* name;
+    String* name;
     Register methods;
     Register properties;
 } PtrQlass;
@@ -106,7 +106,7 @@ typedef struct {
 Ptr* allocatePtr(size_t size, PtrType type);
 PtrQlosure* newClosure(PtrFunq* function);
 PtrFunq* newFunction();
-PtrQlass* newClass(PtrString* name);
+PtrQlass* newClass(String* name);
 PtrInstance* newInstance(PtrQlass* qlass);
 PtrMethod* newBoundMethod(Value target, PtrQlosure* member);
 

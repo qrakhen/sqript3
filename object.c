@@ -46,7 +46,7 @@ PtrMethod* newBoundMethod(Value target, PtrQlosure* member) {
     return bound;
 }
 
-PtrQlass* newClass(PtrString* name) {
+PtrQlass* newClass(String* name) {
     PtrQlass* qlass = ALLOCATE_PTR(PtrQlass, PTR_QLASS);
     qlass->name = name;
     initRegister(&qlass->methods);

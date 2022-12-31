@@ -12,7 +12,7 @@ typedef double Number;
 
 typedef struct Value Value;
 typedef struct Ptr Ptr;
-typedef struct PtrString PtrString;
+typedef struct String String;
 
 typedef enum {
     T_ANY,
@@ -45,7 +45,7 @@ struct Value {
 #define IS_NULL(v)          ((v).type == T_NULL)
 #define IS_BYTE(v)          ((v).type == T_BYTE)
 #define IS_NUMBER(v)        ((v).type == T_NUMBER)
-#define IS_INT(v)           ((v).type == T_INT)
+//#define IS_INT(v)           ((v).type == T_INT)
 #define MAYBE_INT(v)        (IS_NUMBER(v) && (abs(ceil(AS_NUMBER(v)) - floor(AS_NUMBER(v))) == 0))
 #define IS_PTR(v)           ((v).type == T_PTR)
 #define IS_ANY(v)           ((v).type == T_ANY)
@@ -54,13 +54,13 @@ struct Value {
 #define AS_BOOL(value)      ((value).as.boolean)
 #define AS_BYTE(value)      ((value).as.byte)
 #define AS_NUMBER(value)    ((value).as.number)
-#define AS_INT(value)       ((value).as.integer)
+//#define AS_INT(value)       ((value).as.integer)
 
 #define BOOL_VAL(value)   ((Value){ T_BOOL,     TM_DYN, { .boolean = value }})
 #define NULL_VAL          ((Value){ T_NULL,     TM_DYN, { .ptr = NULL }})
 #define BYTE_VAL(value)   ((Value){ T_BYTE,     TM_DYN, { .byte = value }})
 #define NUMBER_VAL(value) ((Value){ T_NUMBER,   TM_DYN, { .number = value }})
-#define INT_VAL(value)    ((Value){ T_INT,      TM_DYN, { .integer = value }})
+//#define INT_VAL(value)    ((Value){ T_INT,      TM_DYN, { .integer = value }})
 #define PTR_VAL(object)   ((Value){ T_PTR,      TM_DYN, { .ptr = (Ptr*)object }})
 
 typedef struct {

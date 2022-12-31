@@ -14,7 +14,6 @@ struct List {
     int length;
     ValueType type;
     Node* head;
-    Node* current;
 };
 
 List* createList(ValueType type);

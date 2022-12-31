@@ -3,12 +3,12 @@
 
 Register nativeMethods[16];
 
-void registerNativeMethod(ValueType type, PtrString* name, NativeMethod member) {
+void registerNativeMethod(ValueType type, String* name, NativeMethod member) {
     PtrNativeMethod* fn = newNativeMethod(member);
     registerSet(&nativeMethods[type], name, PTR_VAL(fn));
 }
 
-PtrTargetedNativeMethod* bindNativeMethod(Value target, PtrString* name) {
+PtrTargetedNativeMethod* bindNativeMethod(Value target, String* name) {
     Value fn;
     if (!registerGet(&nativeMethods[target.type], name, &fn)) {
         return NULL;
@@ -18,6 +18,12 @@ PtrTargetedNativeMethod* bindNativeMethod(Value target, PtrString* name) {
 }
 
 void initNativeMethods() {
+    defineNative("time", nativeTime);
+    defineNative("length", nativeLength);
+    defineNative("substr", nativeSubstr);
+    defineNative("split", nativeSplit);
+    defineNative("indexOf", nativeIndexOf);
+
     for (int i = 0; i < 16; i++)
         initRegister(&nativeMethods[i]);
 }
@@ -39,12 +45,29 @@ Value nativeStr(int argCount, Value* args) {
 }
 
 Value nativeSubstr(int argCount, Value* args) {
-    if (argCount < 2) return NULL_VAL;
-    if (!matchPtrType(args[0], PTR_STRING)) return NULL_VAL;    
+    if (argCount == 1) return args[0];
+    if (!IS_STRING(args[0])) return NULL_VAL;
+    String* str = AS_STRING(args[0]);
     int from = AS_NUMBER(args[1]);
-    int to = argCount > 2 ? AS_NUMBER(args[2]) : AS_STRING(args[0])->length;
-    int len = to - from;
-    char* dest = (char*)malloc(sizeof(char) * (len + 1));
-    strncpy(dest, (AS_CSTRING(args[0]) + from), len);
-    return PTR_VAL(takeString(dest, len));
+    int length = argCount > 2 ? AS_NUMBER(args[2]) : ((int)str->length - from);
+    return PTR_VAL(subString(str, from, length));
+}
+
+Value nativeSplit(int argCount, Value* args) {
+    if (argCount != 2) return NULL_VAL;
+    if (!IS_STRING(args[0])) return NULL_VAL;
+    String* str = AS_STRING(args[0]);
+    String* split = AS_STRING(args[1]);
+    return PTR_VAL(splitString(str, split));
+}
+
+Value nativeIndexOf(int argCount, Value* args) {
+    if (argCount != 2) return NULL_VAL;
+    if (IS_STRING(args[0])) {
+        String* str = AS_STRING(args[0]);
+        String* needle = AS_STRING(args[1]);
+        return stringIndexOf(str, needle);
+    } else {
+        return NULL_VAL;
+    }
 }

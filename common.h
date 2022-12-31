@@ -5,8 +5,8 @@
 #include <stddef.h>
 #include <stdint.h>
 
-//#define __DBG_STACK
-//#define __DBG_TRACE
+#define __DBG_STACK
+#define __DBG_TRACE
 //#define __DBG_GCLOG
 
 #define BYTE_MAX 0x100

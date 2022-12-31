@@ -1,23 +1,27 @@
 #ifndef sqript_string_h
 #define sqript_string_h
 
+#include "common.h"
 #include "value.h"
 #include "object.h"
-#include "types.h"
+#include "array.h"
 
 #define IS_STRING(value)       matchPtrType(value, PTR_STRING)
 
-#define AS_STRING(value)       ((PtrString*)AS_PTR(value))
-#define AS_CSTRING(value)      (((PtrString*)AS_PTR(value))->chars)
+#define AS_STRING(value)       ((String*)AS_PTR(value))
+#define AS_CSTRING(value)      (((String*)AS_PTR(value))->chars)
 
-struct PtrString {
+struct String {
     Ptr ptr;
     int length;
     char* chars;
     uint32_t hash;
 };
 
-PtrString* takeString(char* chars, int length);
-PtrString* copyString(const char* chars, int length);
+String* takeString(char* chars, int length);
+String* makeString(const char* chars, int length);
+String* subString(String* str, int from, int length);
+Value stringIndexOf(String* str, String* needle);
+PtrArray* splitString(String* str, String* split);
 
 #endif
