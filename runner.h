@@ -24,7 +24,7 @@ typedef struct {
     Register globals;
     Register strings;
 
-    PtrString* __initString;
+    String* __initString;
     PtrPreval* __openPrevals;
 
     Ptr* pointers;
@@ -46,6 +46,8 @@ extern Runner runner;
 
 void initRunner();
 void freeRunner();
+
+void defineNative(const char* name, NativeFunq funq);
 
 InterpretResult interpret(const char* source);
 void push(Value value);

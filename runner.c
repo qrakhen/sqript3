@@ -47,8 +47,8 @@ static void runtimeError(const char* format, ...) {
     resetStack();
 }
 
-static void defineNative(const char* name, NativeFunq function) {
-    push(PTR_VAL(copyString(name, (int)strlen(name))));
+void defineNative(const char* name, NativeFunq function) {
+    push(PTR_VAL(makeString(name, (int)strlen(name))));
     push(PTR_VAL(newNative(function)));
     registerSet(&runner.globals, AS_STRING(runner.stack[0]), runner.stack[1]);
     pop();
@@ -69,13 +69,9 @@ void initRunner() {
     runner.__gcStack = NULL;
 
     runner.__initString = NULL;
-    runner.__initString = copyString("init", 4);
+    runner.__initString = makeString("init", 4);
 
     initNativeMethods();
-
-    defineNative("time", nativeTime);
-    defineNative("length", nativeLength);
-    defineNative("substr", nativeSubstr);
 }
 
 void freeRunner() {
@@ -145,7 +141,7 @@ static bool callValue(Value callee, int argCount) {
     return false;
 }
 
-static bool invokeFromClass(PtrQlass* qlass, PtrString* name, int argCount) {
+static bool invokeFromClass(PtrQlass* qlass, String* name, int argCount) {
     Value member;
     if (!registerGet(&qlass->methods, name, &member)) {
         runtimeError("unknown member '%s'.", name->chars);
@@ -154,7 +150,7 @@ static bool invokeFromClass(PtrQlass* qlass, PtrString* name, int argCount) {
     return call(AS_CLOSURE(member), argCount);
 }
 
-static bool invoke(PtrString* name, int argCount) {
+static bool invoke(String* name, int argCount) {
     Value target = peek(argCount);
 
     if (!IS_INSTANCE(target)) {
@@ -173,7 +169,7 @@ static bool invoke(PtrString* name, int argCount) {
     return invokeFromClass(instance->qlass, name, argCount);
 }
 
-static bool bindMethod(PtrQlass* qlass, PtrString* name) {
+static bool bindMethod(PtrQlass* qlass, String* name) {
     Value member;
     if (!registerGet(&qlass->methods, name, &member)) {
         runtimeError("Undefined property '%s'.", name->chars);
@@ -220,14 +216,14 @@ static void closeUpvalues(Value* last) {
     }
 }
 
-static void defineMethod(PtrString* name) {
+static void defineMethod(String* name) {
     Value member = peek(0);
     PtrQlass* qlass = AS_CLASS(peek(1));
     registerSet(&qlass->methods, name, member);
     pop();
 }
 
-static void defineProperty(PtrString* name) {
+static void defineProperty(String* name) {
     Value member = peek(0);
     PtrQlass* qlass = AS_CLASS(peek(1));
     registerSet(&qlass->properties, name, member);
@@ -243,8 +239,8 @@ static bool isFalsey(Value value) {
 }
 
 static void concatenate() {
-    PtrString* b = AS_STRING(peek(0));
-    PtrString* a = AS_STRING(peek(1));
+    String* b = AS_STRING(peek(0));
+    String* a = AS_STRING(peek(1));
 
     int length = a->length + b->length;
     char* chars = ALLOC(char, length + 1);
@@ -252,7 +248,7 @@ static void concatenate() {
     memcpy(chars + a->length, b->chars, b->length);
     chars[length] = '\0';
 
-    PtrString* result = takeString(chars, length);
+    String* result = takeString(chars, length);
     pop();
     pop();
     push(PTR_VAL(result));
@@ -284,8 +280,8 @@ static InterpretResult run() {
 
     #define BITWISE_OP(valueType, op) \
         do { \
-            if (!IS_INT(peek(0)) || !IS_INT(peek(1))) { \
-                runtimeError("Operands must be numbers."); \
+            if (!MAYBE_INT(peek(0)) || !MAYBE_INT(peek(1))) { \
+                runtimeError("Operands must be integers."); \
                 return SQR_INTRP_ERROR_RUNTIME; \
             } \
             Int b = (Int)AS_NUMBER(pop()); \
@@ -328,7 +324,7 @@ static InterpretResult run() {
                 break;
             }
             case OP_GET_GLOBAL: {
-                PtrString* name = READ_STRING();
+                String* name = READ_STRING();
                 Value value;
                 if (!registerGet(&runner.globals, name, &value)) {
                     runtimeError("Undefined variable '%s'.", name->chars);
@@ -338,13 +334,13 @@ static InterpretResult run() {
                 break;
             }
             case OP_DEFINE_GLOBAL: {
-                PtrString* name = READ_STRING();
+                String* name = READ_STRING();
                 registerSet(&runner.globals, name, peek(0));
                 pop();
                 break;
             }
             case OP_SET_GLOBAL: {
-                PtrString* name = READ_STRING();
+                String* name = READ_STRING();
                 if (registerSet(&runner.globals, name, peek(0))) {
                     registerDelete(&runner.globals, name);
                     runtimeError("Undefined variable '%s'.", name->chars);
@@ -369,7 +365,7 @@ static InterpretResult run() {
                 }
 
                 PtrInstance* instance = AS_INSTANCE(peek(0));
-                PtrString* name = READ_STRING();
+                String* name = READ_STRING();
 
                 Value value;
                 if (registerGet(&instance->fields, name, &value)) {
@@ -396,7 +392,7 @@ static InterpretResult run() {
                 break;
             }
             case OP_GET_SUPER: {
-                PtrString* name = READ_STRING();
+                String* name = READ_STRING();
                 PtrQlass* superclass = AS_CLASS(pop());
 
                 if (!bindMethod(superclass, name)) {
@@ -433,7 +429,7 @@ static InterpretResult run() {
             case OP_BITWISE_OR:     BITWISE_OP(NUMBER_VAL, |); break;
             case OP_BITWISE_XOR:    BITWISE_OP(NUMBER_VAL, ^); break;
             case OP_BITWISE_NOT:
-                if (!IS_INT(peek(0))) {
+                if (!MAYBE_INT(peek(0))) {
                     runtimeError("operand must be an integer.");
                     return SQR_INTRP_ERROR_RUNTIME;
                 }
@@ -486,7 +482,7 @@ static InterpretResult run() {
                 break;
             }
             case OP_INVOKE: {
-                PtrString* member = READ_STRING();
+                String* member = READ_STRING();
                 int argCount = READ_BYTE();
                 if (!invoke(member, argCount)) {
                     return SQR_INTRP_ERROR_RUNTIME;
@@ -495,7 +491,7 @@ static InterpretResult run() {
                 break;
             }
             case OP_SUPER_INVOKE: {
-                PtrString* member = READ_STRING();
+                String* member = READ_STRING();
                 int argCount = READ_BYTE();
                 PtrQlass* superclass = AS_CLASS(pop());
                 if (!invokeFromClass(superclass, member, argCount)) {
