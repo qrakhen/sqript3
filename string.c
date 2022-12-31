@@ -7,16 +7,12 @@
 #include "value.h"
 #include "string.h"
 #include "runner.h"
+#include "list.h"
+#include "native.h"
 
 #define EMPTY_STRING (makeString("", 0))
 
 typedef uint32_t Hash;
-typedef struct SplitEntry SplitEntry;
-
-struct SplitEntry {
-    String* str;
-    SplitEntry* next;
-};
 
 static String* allocateString(char* chars, int length, Hash hash) {
     String* string = ALLOCATE_PTR(String, PTR_STRING);
@@ -38,6 +34,9 @@ static Hash hash(const char* key, int length) {
         hash *= 16777619;
     }
     return hash;
+}
+
+void registerNativeMethods() {
 }
 
 String* takeString(char* str, int len) {
@@ -68,45 +67,23 @@ String* subString(String* str, int from, int length) {
     return makeString(str->chars + from, length);
 }
 
-static __push(SplitEntry* e, String* str) {
-    SplitEntry* cur = e;
-
-}
-
 PtrArray* splitString(String* str, String* split) {
     char* start = str->chars;
-    int 
-        count = 0, 
-        pos = 0, 
-        last = 0;
+    int pos = 0, last = 0;
 
-    SplitEntry head;
-    head.str = NULL;
-    head.next = NULL;
-    SplitEntry* cur = &head;
+    List* list = listCreate(T_PTR_STRING);
     while (start[pos] != '\0' && pos <= str->length) {
         if (start[pos] == split->chars[0]) {
-            // @todo use linked list
-            cur->str = subString(str, last, pos - last);
-            cur->next = ALLOC(SplitEntry, 1);
-            cur = cur->next;
-            last = ++pos; // skip split char
-            count++;
+            listPush(list, PTR_VAL(subString(str, last, pos - last)));
+            last = ++pos;
         } else if (pos == str->length - 1) {
-            cur->str = subString(str, last, str->length - last);
-            count++;
+            listPush(list, PTR_VAL(subString(str, last, str->length - last)));
             break;
         }
         pos++;
     }
 
-    cur = &head;
-    PtrArray* arr = createArray(count, T_PTR);
-    for (int i = 0; i < count; i++) {
-        arr->values[i] = PTR_VAL(cur->str);
-        cur = cur->next;
-    }
-    return arr;
+    return listToArray(list);
 }
 
 Value stringIndexOf(String* str, String* needle) {

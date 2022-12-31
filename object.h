@@ -26,16 +26,16 @@
 #define AS_NATIVE(value)       (((PtrNative*)AS_PTR(value))->function)
 
 typedef enum {
-    PTR_METHOD,
-    PTR_QLASS,
-    PTR_QLOSURE,
-    PTR_FUNQ,
-    PTR_INSTANCE,
-    PTR_ARRAY,
-    PTR_LIST,
-    PTR_NATIVE,
-    PTR_STRING,
-    PTR_PREVAL
+    PTR_METHOD = T_PTR | 1,
+    PTR_QLASS = T_PTR | 2,
+    PTR_QLOSURE = T_PTR | 4,
+    PTR_FUNQ = T_PTR | 8,
+    PTR_INSTANCE = T_PTR | 16,
+    PTR_ARRAY = T_PTR | 32,
+    PTR_LIST = T_PTR | 64,
+    PTR_NATIVE = T_PTR | 128,
+    PTR_STRING = T_PTR | 256,
+    PTR_PREVAL = T_PTR | 512
 } PtrType;
 
 struct Ptr {

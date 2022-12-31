@@ -1,3 +1,8 @@
+/**
+ * Sqript Native Library
+ * Linked List
+ */
+
 #ifndef sqript_list_h
 #define sqript_list_h
 
@@ -14,13 +19,13 @@ struct List {
     struct __Node* head;
 };
 
-List* createList(ValueType type);
+List* listCreate(ValueType type);
 void listPush(List* list, Value value);
 Value listGet(List* list, int index);
 Value listPop(List* list);
 void listInsert(List* list, int index, Value value);
 void listDelete(List* list, int index);
-int listFind(List* list, Value value);
+int listFindIndex(List* list, Value value);
 void freeList(List* list);
 PtrArray* listToArray(List* list);
 
