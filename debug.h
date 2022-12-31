@@ -3,7 +3,7 @@
 
 #include "segment.h"
 
-void disassembleChunk(Segment* segment, const char* name);
-int disassembleInstruction(Segment* segment, int offset);
+void __dbgDissect(Segment* segment, const char* name);
+int __dbgDissectOp(Segment* segment, int offset);
 
 #endif

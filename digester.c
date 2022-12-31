@@ -229,7 +229,7 @@ static PtrFunq* endCompiler() {
 
     #ifdef DEBUG_PRINT_CODE
     if (!digester.failed) {
-        disassembleChunk(currentSegment(), function->name != NULL
+        __dbgDissect(currentSegment(), function->name != NULL
                          ? function->name->chars : "<script>");
     }
     #endif

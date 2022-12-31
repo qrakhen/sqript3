@@ -3,11 +3,11 @@
 #include "debug.h"
 #include "types.h"
 
-void disassembleChunk(Segment* segment, const char* name) {
+void __dbgDissect(Segment* segment, const char* name) {
     printf("== %s ==\n", name);
 
     for (int offset = 0; offset < segment->count;) {
-        offset = disassembleInstruction(segment, offset);
+        offset = __dbgDissectOp(segment, offset);
     }
 }
 
@@ -51,7 +51,7 @@ static int jumpInstruction(const char* name, int sign,
     return offset + 3;
 }
 
-int disassembleInstruction(Segment* segment, int offset) {
+int __dbgDissectOp(Segment* segment, int offset) {
     printf("%04d ", offset);
     if (offset > 0 &&
         segment->lines[offset] == segment->lines[offset - 1]) {

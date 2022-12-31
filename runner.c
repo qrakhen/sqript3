@@ -302,7 +302,7 @@ static InterpretResult run() {
             printf(" ]");
         }
         printf("\n");
-        disassembleInstruction(&frame->closure->function->segment,
+        __dbgDissectOp(&frame->closure->function->segment,
                                (int)(frame->ip - frame->closure->function->segment.code));
         #endif
 
