@@ -1,8 +1,7 @@
 #include <stdio.h>
 
 #include "debug.h"
-#include "object.h"
-#include "value.h"
+#include "types.h"
 
 void disassembleChunk(Segment* segment, const char* name) {
     printf("== %s ==\n", name);

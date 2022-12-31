@@ -1,4 +1,5 @@
 #include "native.h"
+#include "types.h"
 
 Register nativeMethods[16];
 
@@ -35,4 +36,15 @@ Value nativeLength(int argCount, Value* args) {
 Value nativeStr(int argCount, Value* args) {
     if (argCount != 1) return NULL_VAL;
     return PTR_VAL(valueToString(args[0]));
+}
+
+Value nativeSubstr(int argCount, Value* args) {
+    if (argCount < 2) return NULL_VAL;
+    if (!matchPtrType(args[0], PTR_STRING)) return NULL_VAL;    
+    int from = AS_NUMBER(args[1]);
+    int to = argCount > 2 ? AS_NUMBER(args[2]) : AS_STRING(args[0])->length;
+    int len = to - from;
+    char* dest = (char*)malloc(sizeof(char) * (len + 1));
+    strncpy(dest, (AS_CSTRING(args[0]) + from), len);
+    return PTR_VAL(takeString(dest, len));
 }

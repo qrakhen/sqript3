@@ -155,6 +155,7 @@
     <ClCompile Include="runner.c" />
     <ClCompile Include="segment.c" />
     <ClCompile Include="register.c" />
+    <ClCompile Include="string.c" />
     <ClCompile Include="value.c" />
   </ItemGroup>
   <ItemGroup>
@@ -173,6 +174,8 @@
     <ClInclude Include="runner.h" />
     <ClInclude Include="segment.h" />
     <ClInclude Include="register.h" />
+    <ClInclude Include="string.h" />
+    <ClInclude Include="types.h" />
     <ClInclude Include="value.h" />
   </ItemGroup>
   <ItemGroup>

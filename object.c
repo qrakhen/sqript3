@@ -6,6 +6,7 @@
 #include "register.h"
 #include "value.h"
 #include "runner.h"
+#include "types.h"
 
 #define ALLOCATE_PTR(type, objectType) \
     (type*)allocatePtr(sizeof(type), objectType)
@@ -87,54 +88,6 @@ PtrNative* newNative(NativeFunq function) {
     PtrNative* native = ALLOCATE_PTR(PtrNative, PTR_NATIVE);
     native->function = function;
     return native;
-}
-
-static PtrString* allocateString(char* chars, int length,
-                                 uint32_t hash) {
-    PtrString* string = ALLOCATE_PTR(PtrString, PTR_STRING);
-    string->length = length;
-    string->chars = chars;
-    string->hash = hash;
-
-    push(PTR_VAL(string));
-    registerSet(&runner.strings, string, NULL_VAL);
-    pop();
-
-    return string;
-}
-
-static uint32_t hashString(const char* key, int length) {
-    uint32_t hash = 2166136261u;
-    for (int i = 0; i < length; i++) {
-        hash ^= (Byte)key[i];
-        hash *= 16777619;
-    }
-    return hash;
-}
-
-PtrString* takeString(char* chars, int length) {
-
-    uint32_t hash = hashString(chars, length);
-    PtrString* interned = registerFindString(&runner.strings, chars, length,
-                                             hash);
-    if (interned != NULL) {
-        ARR_FREE(char, chars, length + 1);
-        return interned;
-    }
-
-    return allocateString(chars, length, hash);
-}
-
-PtrString* copyString(const char* chars, int length) {
-    uint32_t hash = hashString(chars, length);
-    PtrString* interned = registerFindString(&runner.strings, chars, length,  hash);
-    if (interned != NULL) return interned;
-
-    char* heapChars = ALLOC(char, length + 1);
-    memcpy(heapChars, chars, length);
-    heapChars[length] = '\0';
-
-    return allocateString(heapChars, length, hash);
 }
 
 PtrPreval* newUpvalue(Value* slot) {

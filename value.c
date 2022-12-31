@@ -5,8 +5,8 @@
 #include "object.h"
 #include "memory.h"
 #include "value.h"
-#include "array.h"
 #include "native.h"
+#include "string.h"
 
 static Value toString(Value target, int argc, Value* params) {
 

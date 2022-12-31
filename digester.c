@@ -113,7 +113,6 @@ static void next() {
     for (;;) {
         digester.current = readToken();
         if (digester.current.type != TOKEN_ERROR) break;
-
         errorAtCurrent(digester.current.start);
     }
 }
@@ -506,8 +505,7 @@ static void __OR(bool canAssign) {
 }
 
 static void __STR(bool canAssign) {
-    emitConstant(PTR_VAL(copyString(digester.previous.start + 1,
-                 digester.previous.length - 2)));
+    emitConstant(PTR_VAL(copyString(digester.previous.start + 1, digester.previous.length - 2)));
 }
 
 static void namedVariable(Token name, bool canAssign) {

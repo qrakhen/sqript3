@@ -5,6 +5,7 @@
 #include "object.h"
 #include "register.h"
 #include "value.h"
+#include "types.h"
 
 #define TABLE_MAX_LOAD 0.75
 

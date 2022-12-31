@@ -12,6 +12,7 @@
 #include "runner.h"
 #include "console.h"
 #include "native.h"
+#include "string.h"
 
 Runner runner;
 
@@ -58,14 +59,14 @@ void initRunner() {
     resetStack();
     runner.pointers = NULL;
     runner.bAlloc = 0;
-    runner.__gcNext = 1024 * 1024;
-
-    runner.__gcCount = 0;
-    runner.__gcLimit = 0;
-    runner.__gcStack = NULL;
 
     initRegister(&runner.globals);
     initRegister(&runner.strings);
+
+    runner.__gcNext = 1024 * 1024;
+    runner.__gcCount = 0;
+    runner.__gcLimit = 0;
+    runner.__gcStack = NULL;
 
     runner.__initString = NULL;
     runner.__initString = copyString("init", 4);
@@ -74,6 +75,7 @@ void initRunner() {
 
     defineNative("time", nativeTime);
     defineNative("length", nativeLength);
+    defineNative("substr", nativeSubstr);
 }
 
 void freeRunner() {

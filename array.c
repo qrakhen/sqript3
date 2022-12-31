@@ -2,7 +2,6 @@
 #include "memory.h"
 
 PtrArray* createArray(int length, ValueType type) {
-
     Value* values = ALLOC(Value, length);
     for (int i = 0; i < length; i++)
         values[i] = NULL_VAL;
@@ -27,6 +26,10 @@ bool arraySet(PtrArray* arr, int index, Value value) {
         return false;
     arr->values[index] = value;
     return true;
+}
+
+void arrayAppend(PtrArray* arr, Value value) {
+
 }
 
 void freeArray(PtrArray* array) {

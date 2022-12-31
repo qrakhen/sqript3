@@ -16,5 +16,6 @@ void initNativeMethods();
 
 Value nativeTime(int argCount, Value* args);
 Value nativeLength(int argCount, Value* args);
+Value nativeSubstr(int argCount, Value* args);
 
 #endif

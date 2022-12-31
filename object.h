@@ -6,6 +6,9 @@
 #include "register.h"
 #include "value.h"
 
+#define ALLOCATE_PTR(type, objectType) \
+    (type*)allocatePtr(sizeof(type), objectType)
+
 #define PTR_TYPE(value)        (AS_PTR(value)->type)
 
 #define IS_BOUND_METHOD(value) matchPtrType(value, PTR_METHOD)
@@ -14,7 +17,6 @@
 #define IS_FUNCTION(value)     matchPtrType(value, PTR_FUNQ)
 #define IS_INSTANCE(value)     matchPtrType(value, PTR_INSTANCE)
 #define IS_NATIVE(value)       matchPtrType(value, PTR_NATIVE)
-#define IS_STRING(value)       matchPtrType(value, PTR_STRING)
 
 #define AS_BOUND_METHOD(value) ((PtrMethod*)AS_PTR(value))
 #define AS_CLASS(value)        ((PtrQlass*)AS_PTR(value))
@@ -22,8 +24,6 @@
 #define AS_FUNCTION(value)     ((PtrFunq*)AS_PTR(value))
 #define AS_INSTANCE(value)     ((PtrInstance*)AS_PTR(value))
 #define AS_NATIVE(value)       (((PtrNative*)AS_PTR(value))->function)
-#define AS_STRING(value)       ((PtrString*)AS_PTR(value))
-#define AS_CSTRING(value)      (((PtrString*)AS_PTR(value))->chars)
 
 typedef enum {
     PTR_METHOD,
@@ -58,13 +58,6 @@ typedef struct {
     Ptr ptr;
     NativeFunq function;
 } PtrNative;
-
-struct PtrString {
-    Ptr ptr;
-    int length;
-    char* chars;
-    uint32_t hash;
-};
 
 typedef struct PtrPreval {
     Ptr ptr;
@@ -110,7 +103,6 @@ typedef struct {
     NativeMethod* method;
 } PtrTargetedNativeMethod;
 
-
 Ptr* allocatePtr(size_t size, PtrType type);
 PtrQlosure* newClosure(PtrFunq* function);
 PtrFunq* newFunction();
@@ -122,8 +114,6 @@ PtrNative* newNative(NativeFunq function);
 PtrNativeMethod* newNativeMethod(NativeMethod member);
 PtrTargetedNativeMethod* newTargetedNativeMethod(Value target, PtrNativeMethod* member);
 
-PtrString* takeString(char* chars, int length);
-PtrString* copyString(const char* chars, int length);
 PtrPreval* newUpvalue(Value* slot);
 void printObject(Value value);
 

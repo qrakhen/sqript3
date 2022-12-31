@@ -3,6 +3,7 @@
 #include "digester.h"
 #include "memory.h"
 #include "runner.h"
+#include "types.h"
 
 #ifdef DEBUG_LOG_GC
 #include <stdio.h>
