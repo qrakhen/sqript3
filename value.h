@@ -15,13 +15,25 @@ typedef struct Ptr Ptr;
 typedef struct String String;
 
 typedef enum {
-    T_ANY,
-    T_NULL,
-    T_BOOL,
-    T_BYTE,
-    T_NUMBER,
-    T_INT,
-    T_PTR,
+    T_ANY = 0,
+    T_NULL = 1,
+    T_BOOL = 2,
+    T_BYTE = 4,
+    T_INT = 8,
+    T_DEC = 16,
+    T_NUMBER = T_INT | T_DEC,
+
+    T_PTR = 1024,
+    T_PTR_METHOD = T_PTR | 1,
+    T_PTR_QLASS = T_PTR | 2,
+    T_PTR_QLOSURE = T_PTR | 4,
+    T_PTR_FUNQ = T_PTR | 8,
+    T_PTR_INSTANCE = T_PTR | 16,
+    T_PTR_ARRAY = T_PTR | 32,
+    T_PTR_LIST = T_PTR | 64,
+    T_PTR_NATIVE = T_PTR | 128,
+    T_PTR_STRING = T_PTR | 256,
+    T_PTR_PREVAL = T_PTR | 512
 } ValueType;
 
 typedef enum {

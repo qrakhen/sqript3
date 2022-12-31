@@ -4,25 +4,24 @@
 #include <stdlib.h>
 
 #include "value.h"
+#include "array.h"
+
 typedef struct List List;
-typedef struct {
-    Value value;
-    struct Node* next;
-} Node;
 
 struct List {
     int length;
     ValueType type;
-    Node* head;
+    struct __Node* head;
 };
 
 List* createList(ValueType type);
-void listPush(Value value);
-Value listPop();
-void listInsert(int index, Value value);
-void listDelete(int index, Value value);
-Value listGet(int index);
-int listFind(Value value);
+void listPush(List* list, Value value);
+Value listGet(List* list, int index);
+Value listPop(List* list);
+void listInsert(List* list, int index, Value value);
+void listDelete(List* list, int index);
+int listFind(List* list, Value value);
 void freeList(List* list);
+PtrArray* listToArray(List* list);
 
 #endif

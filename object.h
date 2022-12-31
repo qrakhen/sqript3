@@ -32,6 +32,7 @@ typedef enum {
     PTR_FUNQ,
     PTR_INSTANCE,
     PTR_ARRAY,
+    PTR_LIST,
     PTR_NATIVE,
     PTR_STRING,
     PTR_PREVAL

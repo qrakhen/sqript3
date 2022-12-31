@@ -3,12 +3,10 @@
 #include <stdlib.h>
 
 #include "memory.h"
-#include "object.h"
 #include "register.h"
 #include "value.h"
-#include "runner.h"
 #include "string.h"
-#include "array.h"
+#include "runner.h"
 
 #define EMPTY_STRING (makeString("", 0))
 
