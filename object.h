@@ -9,30 +9,32 @@
 #define ALLOCATE_PTR(type, objectType) \
     (type*)allocatePtr(sizeof(type), objectType)
 
-#define PTR_TYPE(value)        (AS_PTR(value)->type)
+// is the same as value type now so :shrug:
+#define PTR_TYPE(value)     (AS_PTR(value)->type)
 
-#define IS_BOUND_METHOD(value) matchPtrType(value, PTR_METHOD)
-#define IS_CLASS(value)        matchPtrType(value, PTR_QLASS)
-#define IS_CLOSURE(value)      matchPtrType(value, PTR_QLOSURE)
-#define IS_FUNCTION(value)     matchPtrType(value, PTR_FUNQ)
-#define IS_INSTANCE(value)     matchPtrType(value, PTR_INSTANCE)
-#define IS_NATIVE(value)       matchPtrType(value, PTR_NATIVE)
+#define IS_METHOD(value)    matchPtrType(value, PTR_METHOD)
+#define IS_QLASS(value)     matchPtrType(value, PTR_QLASS)
+#define IS_QONTEXT(value)   matchPtrType(value, PTR_QLOSURE)
+#define IS_FUNQ(value)      matchPtrType(value, PTR_FUNQ)
+#define IS_OBJEQT(value)    matchPtrType(value, PTR_OBJEQT)
+#define IS_NATIVE(value)    matchPtrType(value, PTR_NATIVE)
 
-#define AS_BOUND_METHOD(value) ((PtrMethod*)AS_PTR(value))
-#define AS_CLASS(value)        ((PtrQlass*)AS_PTR(value))
-#define AS_CLOSURE(value)      ((PtrQlosure*)AS_PTR(value))
-#define AS_FUNCTION(value)     ((PtrFunq*)AS_PTR(value))
-#define AS_INSTANCE(value)     ((PtrInstance*)AS_PTR(value))
-#define AS_NATIVE(value)       (((PtrNative*)AS_PTR(value))->function)
+#define AS_METHOD(value)    ((Method*)AS_PTR(value))
+#define AS_QLASS(value)     ((Qlass*)AS_PTR(value))
+#define AS_QONTEXT(value)   ((Qontext*)AS_PTR(value))
+#define AS_FUNQ(value)      ((Funqtion*)AS_PTR(value))
+#define AS_OBJEQT(value)    ((Objeqt*)AS_PTR(value))
+#define AS_NATIVE(value)    (((NativeQall*)AS_PTR(value))->function)
 
 typedef enum {
     PTR_METHOD = T_PTR | 1,
     PTR_QLASS = T_PTR | 2,
     PTR_QLOSURE = T_PTR | 4,
     PTR_FUNQ = T_PTR | 8,
-    PTR_INSTANCE = T_PTR | 16,
+    PTR_OBJEQT = T_PTR | 16,
     PTR_ARRAY = T_PTR | 32,
     PTR_LIST = T_PTR | 64,
+    PTR_QOLLECTION = PTR_LIST | PTR_ARRAY,
     PTR_NATIVE = T_PTR | 128,
     PTR_STRING = T_PTR | 256,
     PTR_PREVAL = T_PTR | 512
@@ -50,12 +52,12 @@ typedef struct {
     int revalCount;
     Segment segment;
     String* name;
-} PtrFunq;
+} Funqtion;
 
 typedef struct {
     Ptr ptr;
     NativeFunq function;
-} PtrNative;
+} NativeQall;
 
 typedef struct PtrPreval {
     Ptr ptr;
@@ -66,29 +68,29 @@ typedef struct PtrPreval {
 
 typedef struct {
     Ptr ptr;
-    PtrFunq* function;
+    Funqtion* function;
     PtrPreval** upvalues;
     int revalCount;
-} PtrQlosure;
+} Qontext;
 
 typedef struct {
     Ptr ptr;
     String* name;
     Register methods;
     Register properties;
-} PtrQlass;
+} Qlass;
 
 typedef struct {
     Ptr ptr;
-    PtrQlass* qlass;
+    Qlass* qlass;
     Register fields;
-} PtrInstance;
+} Objeqt;
 
 typedef struct {
     Ptr ptr;
     Value target;
-    PtrQlosure* method;
-} PtrMethod;
+    Qontext* method;
+} Method;
 
 typedef struct {
     Ptr ptr;
@@ -102,13 +104,13 @@ typedef struct {
 } PtrTargetedNativeMethod;
 
 Ptr* allocatePtr(size_t size, PtrType type);
-PtrQlosure* newClosure(PtrFunq* function);
-PtrFunq* newFunction();
-PtrQlass* newClass(String* name);
-PtrInstance* newInstance(PtrQlass* qlass);
-PtrMethod* newBoundMethod(Value target, PtrQlosure* member);
+Qontext* newClosure(Funqtion* function);
+Funqtion* newFunction();
+Qlass* newClass(String* name);
+Objeqt* newInstance(Qlass* qlass);
+Method* newBoundMethod(Value target, Qontext* member);
 
-PtrNative* newNative(NativeFunq function);
+NativeQall* newNative(NativeFunq function);
 PtrNativeMethod* newNativeMethod(NativeMethod member);
 PtrTargetedNativeMethod* newTargetedNativeMethod(Value target, PtrNativeMethod* member);
 

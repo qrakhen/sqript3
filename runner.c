@@ -32,7 +32,7 @@ static void runtimeError(const char* format, ...) {
 
     for (int i = runner.qc - 1; i >= 0; i--) {
         Qall* frame = &runner.qalls[i];
-        PtrFunq* function = frame->qlosure->function;
+        Funqtion* function = frame->qlosure->function;
         size_t instruction = frame->ip - function->segment.code - 1;
         fprintf(stderr, "[line %d] in ", // [minus]
                 function->segment.lines[instruction]);
@@ -85,7 +85,7 @@ void push(Value value) { *(runner.cursor++) = value; }
 Value pop() { return *(--runner.cursor); }
 static Value peek(int distance) { return runner.cursor[-1 - distance]; }
 
-static bool call(PtrQlosure* qlosure, int argCount) {
+static bool call(Qontext* qlosure, int argCount) {
     if (argCount != qlosure->function->argc) {
         runtimeError("Expected %d arguments but got %d.", qlosure->function->argc, argCount);
         return false;
@@ -107,16 +107,16 @@ static bool callValue(Value callee, int argCount) {
     if (IS_PTR(callee)) {
         switch (PTR_TYPE(callee)) {
             case PTR_METHOD: {
-                PtrMethod* bound = AS_BOUND_METHOD(callee);
+                Method* bound = AS_METHOD(callee);
                 runner.cursor[-argCount - 1] = bound->target;
                 return call(bound->method, argCount);
             }
             case PTR_QLASS: {
-                PtrQlass* qlass = AS_CLASS(callee);
+                Qlass* qlass = AS_QLASS(callee);
                 runner.cursor[-argCount - 1] = PTR_VAL(newInstance(qlass));
                 Value initializer;
                 if (registerGet(&qlass->methods, runner.__initString, &initializer)) {
-                    return call(AS_CLOSURE(initializer), argCount);
+                    return call(AS_QONTEXT(initializer), argCount);
                 } else if (argCount != 0) {
                     runtimeError("Expected 0 arguments but got %d.", argCount);
                     return false;
@@ -124,7 +124,7 @@ static bool callValue(Value callee, int argCount) {
                 return true;
             }
             case PTR_QLOSURE:
-                return call(AS_CLOSURE(callee), argCount);
+                return call(AS_QONTEXT(callee), argCount);
             case PTR_NATIVE: {
                 NativeFunq native = AS_NATIVE(callee);
                 Value result = native(argCount, runner.cursor - argCount);
@@ -141,24 +141,24 @@ static bool callValue(Value callee, int argCount) {
     return false;
 }
 
-static bool invokeFromClass(PtrQlass* qlass, String* name, int argCount) {
+static bool invokeFromClass(Qlass* qlass, String* name, int argCount) {
     Value member;
     if (!registerGet(&qlass->methods, name, &member)) {
         runtimeError("unknown member '%s'.", name->chars);
         return false;
     }
-    return call(AS_CLOSURE(member), argCount);
+    return call(AS_QONTEXT(member), argCount);
 }
 
 static bool invoke(String* name, int argCount) {
     Value target = peek(argCount);
 
-    if (!IS_INSTANCE(target)) {
+    if (!IS_OBJEQT(target)) {
         runtimeError("only instances have methods.");
         return false;
     }
 
-    PtrInstance* instance = AS_INSTANCE(target);
+    Objeqt* instance = AS_OBJEQT(target);
 
     Value value;
     if (registerGet(&instance->fields, name, &value)) {
@@ -169,14 +169,14 @@ static bool invoke(String* name, int argCount) {
     return invokeFromClass(instance->qlass, name, argCount);
 }
 
-static bool bindMethod(PtrQlass* qlass, String* name) {
+static bool bindMethod(Qlass* qlass, String* name) {
     Value member;
     if (!registerGet(&qlass->methods, name, &member)) {
         runtimeError("Undefined property '%s'.", name->chars);
         return false;
     }
 
-    PtrMethod* bound = newBoundMethod(peek(0), AS_CLOSURE(member));
+    Method* bound = newBoundMethod(peek(0), AS_QONTEXT(member));
     pop();
     push(PTR_VAL(bound));
     return true;
@@ -218,14 +218,14 @@ static void closeUpvalues(Value* last) {
 
 static void defineMethod(String* name) {
     Value member = peek(0);
-    PtrQlass* qlass = AS_CLASS(peek(1));
+    Qlass* qlass = AS_QLASS(peek(1));
     registerSet(&qlass->methods, name, member);
     pop();
 }
 
 static void defineProperty(String* name) {
     Value member = peek(0);
-    PtrQlass* qlass = AS_CLASS(peek(1));
+    Qlass* qlass = AS_QLASS(peek(1));
     registerSet(&qlass->properties, name, member);
     pop();
 }
@@ -359,12 +359,12 @@ static InterpretResult run() {
                 break;
             }
             case OP_GET_PROPERTY: {
-                if (!IS_INSTANCE(peek(0))) {
+                if (!IS_OBJEQT(peek(0))) {
                     runtimeError("only instances have properties.");
                     return SQR_INTRP_ERROR_RUNTIME;
                 }
 
-                PtrInstance* instance = AS_INSTANCE(peek(0));
+                Objeqt* instance = AS_OBJEQT(peek(0));
                 String* name = READ_STRING();
 
                 Value value;
@@ -379,12 +379,12 @@ static InterpretResult run() {
                 break;
             }
             case OP_SET_PROPERTY: {
-                if (!IS_INSTANCE(peek(1))) {
+                if (!IS_OBJEQT(peek(1))) {
                     runtimeError("Only instances have fields.");
                     return SQR_INTRP_ERROR_RUNTIME;
                 }
 
-                PtrInstance* instance = AS_INSTANCE(peek(1));
+                Objeqt* instance = AS_OBJEQT(peek(1));
                 registerSet(&instance->fields, READ_STRING(), peek(0));
                 Value value = pop();
                 pop();
@@ -393,7 +393,7 @@ static InterpretResult run() {
             }
             case OP_GET_SUPER: {
                 String* name = READ_STRING();
-                PtrQlass* superclass = AS_CLASS(pop());
+                Qlass* superclass = AS_QLASS(pop());
 
                 if (!bindMethod(superclass, name)) {
                     return SQR_INTRP_ERROR_RUNTIME;
@@ -493,7 +493,7 @@ static InterpretResult run() {
             case OP_SUPER_INVOKE: {
                 String* member = READ_STRING();
                 int argCount = READ_BYTE();
-                PtrQlass* superclass = AS_CLASS(pop());
+                Qlass* superclass = AS_QLASS(pop());
                 if (!invokeFromClass(superclass, member, argCount)) {
                     return SQR_INTRP_ERROR_RUNTIME;
                 }
@@ -523,8 +523,8 @@ static InterpretResult run() {
                 break;
             }
             case OP_CLOSURE: {
-                PtrFunq* function = AS_FUNCTION(READ_CONSTANT());
-                PtrQlosure* qlosure = newClosure(function);
+                Funqtion* function = AS_FUNQ(READ_CONSTANT());
+                Qontext* qlosure = newClosure(function);
                 push(PTR_VAL(qlosure));
                 for (int i = 0; i < qlosure->revalCount; i++) {
                     Byte isLocal = READ_BYTE();
@@ -561,13 +561,13 @@ static InterpretResult run() {
                 break;
             case OP_INHERIT: {
                 Value superclass = peek(1);
-                if (!IS_CLASS(superclass)) {
+                if (!IS_QLASS(superclass)) {
                     runtimeError("Superclass must be a class.");
                     return SQR_INTRP_ERROR_RUNTIME;
                 }
 
-                PtrQlass* subclass = AS_CLASS(peek(0));
-                registerAddAll(&AS_CLASS(superclass)->methods,
+                Qlass* subclass = AS_QLASS(peek(0));
+                registerAddAll(&AS_QLASS(superclass)->methods,
                             &subclass->methods);
                 pop();
                 break;
@@ -593,10 +593,10 @@ void hack(bool b) {
 }
 
 InterpretResult interpret(const char* source) {
-    PtrFunq* function = digest(source);
+    Funqtion* function = digest(source);
     if (function == NULL) return SQR_INTRP_ERROR_DIGEST;
     push(PTR_VAL(function));
-    PtrQlosure* qlosure = newClosure(function);
+    Qontext* qlosure = newClosure(function);
     pop();
     push(PTR_VAL(qlosure));
     call(qlosure, 0);

@@ -75,19 +75,19 @@ static void blackenObject(Ptr* ptr) {
 
     switch (ptr->type) {
         case PTR_METHOD: {
-            PtrMethod* bound = (PtrMethod*)ptr;
+            Method* bound = (Method*)ptr;
             __gcTargetValue(bound->target);
             __gcTargetPtr((Ptr*)bound->method);
             break;
         }
         case PTR_QLASS: {
-            PtrQlass* qlass = (PtrQlass*)ptr;
+            Qlass* qlass = (Qlass*)ptr;
             __gcTargetPtr((Ptr*)qlass->name);
             markRegister(&qlass->methods);
             break;
         }
         case PTR_QLOSURE: {
-            PtrQlosure* qlosure = (PtrQlosure*)ptr;
+            Qontext* qlosure = (Qontext*)ptr;
             __gcTargetPtr((Ptr*)qlosure->function);
             for (int i = 0; i < qlosure->revalCount; i++) {
                 __gcTargetPtr((Ptr*)qlosure->upvalues[i]);
@@ -95,13 +95,13 @@ static void blackenObject(Ptr* ptr) {
             break;
         }
         case PTR_FUNQ: {
-            PtrFunq* funq = (PtrFunq*)ptr;
+            Funqtion* funq = (Funqtion*)ptr;
             __gcTargetPtr((Ptr*)funq->name);
             markArray(&funq->segment.constants);
             break;
         }
-        case PTR_INSTANCE: {
-            PtrInstance* instance = (PtrInstance*)ptr;
+        case PTR_OBJEQT: {
+            Objeqt* instance = (Objeqt*)ptr;
             __gcTargetPtr((Ptr*)instance->qlass);
             markRegister(&instance->fields);
             break;
@@ -122,35 +122,35 @@ static void freeObject(Ptr* object) {
 
     switch (object->type) {
         case PTR_METHOD:
-            FREE(PtrMethod, object);
+            FREE(Method, object);
             break;
         case PTR_QLASS: {
-            PtrQlass* qlass = (PtrQlass*)object;
+            Qlass* qlass = (Qlass*)object;
             freeRegister(&qlass->methods);
-            FREE(PtrQlass, object);
+            FREE(Qlass, object);
             break;
         } // [braces]
         case PTR_QLOSURE: {
-            PtrQlosure* qlosure = (PtrQlosure*)object;
+            Qontext* qlosure = (Qontext*)object;
             ARR_FREE(PtrPreval*, qlosure->upvalues,
                        qlosure->revalCount);
-            FREE(PtrQlosure, object);
+            FREE(Qontext, object);
             break;
         }
         case PTR_FUNQ: {
-            PtrFunq* funq = (PtrFunq*)object;
+            Funqtion* funq = (Funqtion*)object;
             freeSegment(&funq->segment);
-            FREE(PtrFunq, object);
+            FREE(Funqtion, object);
             break;
         }
-        case PTR_INSTANCE: {
-            PtrInstance* instance = (PtrInstance*)object;
+        case PTR_OBJEQT: {
+            Objeqt* instance = (Objeqt*)object;
             freeRegister(&instance->fields);
-            FREE(PtrInstance, object);
+            FREE(Objeqt, object);
             break;
         }
         case PTR_NATIVE:
-            FREE(PtrNative, object);
+            FREE(NativeQall, object);
             break;
         case PTR_STRING: {
             String* string = (String*)object;

@@ -75,7 +75,7 @@ void freeList(List* list) {
     reallocate(list, list->length * sizeof(List), 0);
 }
 
-PtrArray* listFilter(List* list, PtrFunq* filter) {
+PtrArray* listFilter(List* list, Funqtion* filter) {
 
 }
 

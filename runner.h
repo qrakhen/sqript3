@@ -9,7 +9,7 @@
 #define STACK_MAX (MAX_QALLS * BYTE_MAX)
 
 typedef struct {
-    PtrQlosure* qlosure;
+    Qontext* qlosure;
     Byte* ip;
     Value* slots;
 } Qall;

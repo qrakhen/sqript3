@@ -61,7 +61,7 @@ typedef enum {
 
 typedef struct Compiler {
     struct Compiler* enclosing;
-    PtrFunq* function;
+    Funqtion* function;
     FunctionType type;
 
     Local locals[BYTE_MAX];
@@ -223,9 +223,9 @@ static void initCompiler(Compiler* compiler, FunctionType type) {
     }
 }
 
-static PtrFunq* endCompiler() {
+static Funqtion* endCompiler() {
     emitReturn();
-    PtrFunq* function = current->function;
+    Funqtion* function = current->function;
 
     #ifdef DEBUG_PRINT_CODE
     if (!digester.failed) {
@@ -708,7 +708,7 @@ static void function(FunctionType type) {
         block();
     }
 
-    PtrFunq* function = endCompiler();
+    Funqtion* function = endCompiler();
 
     emitBytes(OP_CLOSURE, makeConstant(PTR_VAL(function)));
 
@@ -988,7 +988,7 @@ static void statement() {
     }
 }
 
-PtrFunq* digest(const char* source) {
+Funqtion* digest(const char* source) {
     initScanner(source);
     Compiler compiler;
     initCompiler(&compiler, F_CODE);
@@ -1002,7 +1002,7 @@ PtrFunq* digest(const char* source) {
         declaration();
     }
 
-    PtrFunq* function = endCompiler();
+    Funqtion* function = endCompiler();
     return digester.failed ? NULL : function;
 }
 
