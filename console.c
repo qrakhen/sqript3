@@ -16,9 +16,7 @@
 #define __C_PREFIT_OUTPUT " :> "
 
 static Byte logLevel = LOG_LEVEL_SPAM;
-
 Console console;
-
 HANDLE hConsole;
 
 static void __setCursor(short x, short y) {

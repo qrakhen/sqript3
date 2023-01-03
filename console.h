@@ -69,6 +69,7 @@ typedef struct {
 } Console;
 
 #else
+
 #define C_COLOR_BLACK       0
 #define C_COLOR_BLUE        1
 #define C_COLOR_GREEN       2

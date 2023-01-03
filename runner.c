@@ -25,7 +25,7 @@ static void resetStack() {
 static void runtimeError(const char* format, ...) {
     va_list args;
     va_start(args, format);
-    //fprintf(stderr, C_COLOR_RED);
+    consoleSetColor(C_COLOR_RED);
     vfprintf(stderr, format, args);
     va_end(args);
     fputs("\n", stderr);
@@ -43,7 +43,7 @@ static void runtimeError(const char* format, ...) {
         }
     }
 
-    //fprintf(stderr, C_COLOR_RESET);
+    consoleResetColor();
     resetStack();
 }
 
