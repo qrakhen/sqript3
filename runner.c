@@ -34,7 +34,7 @@ static void runtimeError(const char* format, ...) {
         Qall* frame = &runner.qalls[i];
         Funqtion* function = frame->qlosure->function;
         size_t instruction = frame->ip - function->segment.code - 1;
-        fprintf(stderr, "[line %d] in ", // [minus]
+        fprintf(stderr, "[line %d] in ",
                 function->segment.lines[instruction]);
         if (function->name == NULL) {
             fprintf(stderr, "script\n");
@@ -106,6 +106,13 @@ static bool call(Qontext* qlosure, int argCount) {
 static bool callValue(Value callee, int argCount) {
     if (IS_PTR(callee)) {
         switch (PTR_TYPE(callee)) {
+            case PTR_NATIVE_METHOD: {
+                PtrTargetedNativeMethod* targeted = AS_TNMETHOD(callee);
+                NativeMethod fn = targeted->method->callback;
+                Value result = fn(targeted->target, argCount, runner.cursor - (argCount + 1));
+                push(result);
+                return true;
+            }
             case PTR_METHOD: {
                 Method* bound = AS_METHOD(callee);
                 runner.cursor[-argCount - 1] = bound->target;
@@ -152,21 +159,33 @@ static bool invokeFromClass(Qlass* qlass, String* name, int argCount) {
 
 static bool invoke(String* name, int argCount) {
     Value target = peek(argCount);
-
     if (!IS_OBJEQT(target)) {
-        runtimeError("only instances have methods.");
+        PtrTargetedNativeMethod* targeted = bindNativeMethod(target, name);
+        if (targeted != NULL) {
+            if (targeted->method->minArgs > argCount) {
+                runtimeError("%s expects at least %d arguments but got %d", name->chars, targeted->method->minArgs, argCount);
+                return false;
+            }
+            if (targeted->method->maxArgs < argCount) {
+                runtimeError("%s expects at most %d arguments but got %d", name->chars, targeted->method->maxArgs, argCount);
+                return false;
+            }
+            push(PTR_VAL(targeted));
+            return callValue(PTR_VAL(targeted), argCount);
+        } 
+        runtimeError("could not find method %s", name->chars);
         return false;
+    } else {
+        Objeqt* instance = AS_OBJEQT(target);
+
+        Value value;
+        if (registerGet(&instance->fields, name, &value)) {
+            runner.cursor[-argCount - 1] = value;
+            return callValue(value, argCount);
+        }
+
+        return invokeFromClass(instance->qlass, name, argCount);
     }
-
-    Objeqt* instance = AS_OBJEQT(target);
-
-    Value value;
-    if (registerGet(&instance->fields, name, &value)) {
-        runner.cursor[-argCount - 1] = value;
-        return callValue(value, argCount);
-    }
-
-    return invokeFromClass(instance->qlass, name, argCount);
 }
 
 static bool bindMethod(Qlass* qlass, String* name) {
@@ -290,16 +309,16 @@ static InterpretResult run() {
         } while (false)
 
     for (;;) {
-        #ifdef DEBUG_TRACE_EXECUTION
+        #ifdef __DBG_TRACE
         printf("          ");
-        for (Value* slot = runner.stack; slot < runner.stackTop; slot++) {
+        for (Value* slot = runner.stack; slot < runner.cursor; slot++) {
             printf("[ ");
             printValue(*slot);
             printf(" ]");
         }
         printf("\n");
-        __dbgDissectOp(&frame->closure->function->segment,
-                               (int)(frame->ip - frame->closure->function->segment.code));
+        __dbgDissectOp(&frame->qlosure->function->segment,
+                               (int)(frame->ip - frame->qlosure->function->segment.code));
         #endif
 
         Byte instruction;
@@ -359,24 +378,33 @@ static InterpretResult run() {
                 break;
             }
             case OP_GET_PROPERTY: {
+                // native methods
                 if (!IS_OBJEQT(peek(0))) {
+                    String* name = READ_STRING();
+                    Value value = peek(0);
+                    PtrTargetedNativeMethod* method = bindNativeMethod(value, name);
+                    if (method != NULL) {
+                        pop();
+                        push(PTR_VAL(method));
+                        break;
+                    }
                     runtimeError("only instances have properties.");
                     return SQR_INTRP_ERROR_RUNTIME;
-                }
+                } else {
+                    String* name = READ_STRING();
+                    Objeqt* instance = AS_OBJEQT(peek(0));
 
-                Objeqt* instance = AS_OBJEQT(peek(0));
-                String* name = READ_STRING();
-
-                Value value;
-                if (registerGet(&instance->fields, name, &value)) {
-                    pop();
-                    push(value);
+                    Value value;
+                    if (registerGet(&instance->fields, name, &value)) {
+                        pop();
+                        push(value);
+                        break;
+                    }
+                    if (!bindMethod(instance->qlass, name)) {
+                        return SQR_INTRP_ERROR_RUNTIME;
+                    }
                     break;
                 }
-                if (!bindMethod(instance->qlass, name)) {
-                    return SQR_INTRP_ERROR_RUNTIME;
-                }
-                break;
             }
             case OP_SET_PROPERTY: {
                 if (!IS_OBJEQT(peek(1))) {
@@ -446,10 +474,21 @@ static InterpretResult run() {
                 push(NUMBER_VAL(-AS_NUMBER(pop())));
                 break;
             case OP_PRINT: {
+                consoleSetColor(C_COLOR_GREEN);
                 printf(" :> ");
                 //consoleWriteLine(valueToString(pop()));
                 printValue(pop());
                 printf("\n");
+                consoleResetColor();
+                break;
+            }
+            case OP_PRINT_EXPR: {
+                consoleSetColor(C_COLOR_DGRAY);
+                printf(" :> ");
+                ///consoleWriteLine(valueToString(peek(-1)));
+                printValue(peek(-1));
+                printf("\n");
+                consoleResetColor();
                 break;
             }
             case OP_TYPEOF: {
@@ -520,6 +559,16 @@ static InterpretResult run() {
                 int index = AS_NUMBER(pop());
                 PtrArray* arr = AS_ARRAY(peek(0));
                 arr->values[index] = value;
+                break;
+            }
+            case OP_ARRAY_ADD: {
+                PtrArray* arr = AS_ARRAY(pop());
+                Value value = pop();
+                arrayAppend(arr, value);
+                break;
+            }
+            case OP_ARRAY_REMOVE: {
+                pop(); pop();
                 break;
             }
             case OP_CLOSURE: {
@@ -600,5 +649,6 @@ InterpretResult interpret(const char* source) {
     pop();
     push(PTR_VAL(qlosure));
     call(qlosure, 0);
-    return run();
+    int error = run();
+    return error;
 }

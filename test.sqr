@@ -1,16 +1,38 @@
+print ' === VALUES === ';
 *~ a <~ 5;
-typeof a;
 var b = 20;
+var c <~ 4.332;
+*~ d = false;
+*~ e <~ null;
+
+print ' === STRINGS === ';
+var s = "hello" + ' ' + "world";
+print s;
+print s:indexOf('w');
+print s:split(" ");
+print s.span(3, 5);
+print s.length();
+
+print ' === FUNQTIONS === ';
 fq add(a, b) { <: a + b; }
 print add(a, b);
+
+print ' === QONTEXT === ';
+fq outer(v) { fq inner() { return v; } return inner; }
+var wrapper = outer('passed to inner');
+print wrapper();
+
+print ' === LISTS === ';
 *~ c <~ [ 1, 5, [ 3 * 3, 5, time() ]];
-print length(c);
+print c;
+print 'length: ' + str(length(c));
+
+print ' === CLASSES === ';
 class X { init(v) { this:v <~ v; }}
 *~ x <~ X(c[2]);
 print x:v;
-var s = "hello" + "world";
-typeof s;
-print s;
+
+print ' === FC-REFERENCE === ';
 var f = time;
 typeof f;
 print f;

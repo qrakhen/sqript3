@@ -7,8 +7,9 @@
 #include "array.h"
 #include "memory.h"
 #include "reader.h"
+#include "types.h"
 
-#ifdef DEBUG_PRINT_CODE
+#ifdef __DBG_STACK
 #include "debug.h"
 #endif
 
@@ -227,10 +228,9 @@ static Funqtion* endCompiler() {
     emitReturn();
     Funqtion* function = current->function;
 
-    #ifdef DEBUG_PRINT_CODE
+    #ifdef __DBG_STACK
     if (!digester.failed) {
-        __dbgDissect(currentSegment(), function->name != NULL
-                         ? function->name->chars : "<script>");
+        __dbgDissect(currentSegment(), function->name != NULL ? function->name->chars : "<script>");
     }
     #endif
 
@@ -477,6 +477,11 @@ static void __ARR(bool canAssign) {
     emitBytes(OP_ARRAY, makeConstant(NUMBER_VAL(length)));
 }
 
+static void __ADD(bool canAssign) {
+    expression();
+    emitByte(OP_ARRAY_ADD);
+}
+
 static void __IDX(bool canAssign) {
     expression();
     consume(TOKEN_ARRAY_CLOSE, "expected ] after array accessor");
@@ -525,10 +530,12 @@ static void namedVariable(Token name, bool canAssign) {
 
     if (canAssign && match(TOKEN_EQUAL)) {
         expression();
-
         emitBytes(setOp, (Byte)arg);
+    } else if (match(TOKEN_ARRAY_ADD)) {
+        expression();
+        emitBytes(getOp, (Byte)arg);
+        emitByte(OP_ARRAY_ADD);
     } else {
-
         emitBytes(getOp, (Byte)arg);
     }
 }
@@ -594,6 +601,8 @@ WeightRule rules[] = {
     [TOKEN_CONTEXT_CLOSE]   = { NULL,   NULL,   W_NONE },
     [TOKEN_ARRAY_OPEN]      = { __ARR,  __IDX,  W_CALL },
     [TOKEN_ARRAY_CLOSE]     = { NULL,   NULL,   W_NONE },
+    [TOKEN_ARRAY_ADD]       = { NULL,   NULL,   W_NONE },
+    [TOKEN_ARRAY_REMOVE]    = { NULL,   NULL,   W_NONE },
     [TOKEN_COLON]           = { NULL,   __DOT,  W_CALL },
     [TOKEN_COMMA]           = { NULL,   NULL,   W_NONE },
     [TOKEN_DOT]             = { NULL,   __DOT,  W_CALL },
@@ -820,6 +829,9 @@ static void expressionStatement() {
     if (digester.current.type != TOKEN_EOF)
         consume(TOKEN_SEMICOLON, "missing ; after expression");
     emitByte(OP_POP);
+    #ifdef __DBG_PRINT_STATEMENTS;
+        emitByte(OP_PRINT_EXPR);
+    #endif
 }
 
 static void forStatement() {

@@ -10,6 +10,8 @@ typedef enum {
 
     TOKEN_ARRAY_OPEN, 
     TOKEN_ARRAY_CLOSE,
+    TOKEN_ARRAY_ADD,
+    TOKEN_ARRAY_REMOVE,
 
     TOKEN_COMMA, 
     TOKEN_DOT, 
@@ -63,6 +65,7 @@ typedef enum {
     TOKEN_TRUE, 
     TOKEN_VAR, 
     TOKEN_WHILE,
+    TOKEN_REF,
 
     TOKEN_ERROR, 
     TOKEN_EOF

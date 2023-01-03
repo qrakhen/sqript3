@@ -41,10 +41,12 @@ void consoleInit() {
 
 void consoleSetColor(const char* color) {
     console.color = color;
+    printf(color);
 }
 
 void consoleSetBackground(const char* color) {
-    console.background = color;
+    console.background = color; 
+    printf(color);
 }
 
 void consoleSetCursor(short x, short y) {
@@ -56,14 +58,12 @@ void consoleWrite(char* message) {
     printf(console.background);
     printf(console.color);
     printf(message);
-    printf(C_COLOR_RESET);
     console.cursorX += strlen(message);
 }
 
 void consoleWriteColor(char* message, const char* color) {
     printf(color);
     printf(message);
-    printf(C_COLOR_RESET);
 }
 
 void consoleWriteLine(char* message) {
@@ -75,7 +75,8 @@ void consoleWriteLine(char* message) {
 
 void consoleResetColor() {
     console.color = C_COLOR_RESET;
-    console.background = C_COLOR_RESET;
+    console.background = C_COLOR_RESET; 
+    printf(C_COLOR_RESET);
 }
 
 void consoleClear() {

@@ -3,7 +3,7 @@
 #include "debug.h"
 #include "types.h"
 
-void __dbgDissect(Segment* segment, const char* name) {
+void __dbgDissect(Segment* segment, char* name) {
     printf("== %s ==\n", name);
 
     for (int offset = 0; offset < segment->count;) {

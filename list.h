@@ -11,6 +11,9 @@
 #include "value.h"
 #include "array.h"
 
+#define IS_LIST(value) matchPtrType(value, PTR_LIST)
+#define IS_LIST(value) ((List*)AS_PTR(value))
+
 typedef struct List List;
 
 struct List {

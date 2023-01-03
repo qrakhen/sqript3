@@ -22,8 +22,7 @@ void writeValueArray(ValueArray* array, Value value) {
     if (array->capacity < array->count + 1) {
         int oldCapacity = array->capacity;
         array->capacity = NEXT_SIZE(oldCapacity);
-        array->values = ARR_RESIZE(Value, array->values,
-                                   oldCapacity, array->capacity);
+        array->values = ARR_RESIZE(Value, array->values, oldCapacity, array->capacity);
     }
 
     array->values[array->count] = value;
@@ -44,7 +43,7 @@ char* valueToString(Value value) {
     } else if (IS_NUMBER(value)) {
         sprintf(buffer, "%g", AS_NUMBER(value));
     } else if (IS_PTR(value)) {
-        printObject(value);
+        value.as.ptr->type;
     }
     return buffer;
 }
@@ -88,11 +87,13 @@ void printType(Value value) {
         case T_PTR:
             switch (AS_PTR(value)->type) {
                 case PTR_METHOD: printf("method"); break;
+                case PTR_NATIVE_METHOD: printf("method(native)"); break;
                 case PTR_QLASS: printf("qlass<%s>", AS_QLASS(value)->name->chars); break;
                 case PTR_QLOSURE: printf("qlosure"); break;
                 case PTR_FUNQ: printf("funqtion"); break;
                 case PTR_OBJEQT: printf("instance<%s>", AS_OBJEQT(value)->qlass->name->chars); break;
                 case PTR_ARRAY: printf("array<any>[%d]", AS_ARRAY(value)->length); break;
+                //case PTR_LIST: printf("list<any>[%d]", AS_LIST(value)->length); break;
                 case PTR_NATIVE: printf("native"); break;
                 case PTR_STRING: printf("string"); break;
                 case PTR_PREVAL: printf("preval"); break;

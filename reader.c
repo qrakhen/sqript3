@@ -200,10 +200,13 @@ Token readToken() {
             match('=') ? TOKEN_GREATER_EQUAL : (
                 match('>') ? TOKEN_BITWISE_RIGHT : TOKEN_GREATER));
         case '<': return makeToken(
-            match('=') ? TOKEN_LESS_EQUAL : (
-                match('<') ? TOKEN_BITWISE_LEFT : (
-                    match('~') ? TOKEN_EQUAL : (
-                        match(':') ? TOKEN_RETURN : TOKEN_LESS))));
+            match('=') ? TOKEN_LESS_EQUAL : 
+            match('<') ? TOKEN_BITWISE_LEFT : 
+            match('~') ? TOKEN_EQUAL : 
+            match(':') ? TOKEN_RETURN :
+            match('+') ? TOKEN_ARRAY_ADD :
+            match('-') ? TOKEN_ARRAY_REMOVE :
+            match('&') ? TOKEN_REF : TOKEN_LESS);
         case '"': return string('"');
         case '\'': return string('\'');
     }
