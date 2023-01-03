@@ -8,7 +8,7 @@
 #include "object.h"
 #include "array.h"
 
-Register nativeMethods[16];
+Register nativeMethods[2048];
 
 void registerNativeMethod(ValueType type, String* name, NativeMethod member);
 PtrTargetedNativeMethod* bindNativeMethod(Value target, String* name);

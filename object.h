@@ -20,6 +20,7 @@
 #define IS_NATIVE(value)    matchPtrType(value, PTR_NATIVE)
 
 #define AS_METHOD(value)    ((Method*)AS_PTR(value))
+#define AS_TNMETHOD(value)  ((PtrTargetedNativeMethod*)AS_PTR(value))
 #define AS_QLASS(value)     ((Qlass*)AS_PTR(value))
 #define AS_QONTEXT(value)   ((Qontext*)AS_PTR(value))
 #define AS_FUNQ(value)      ((Funqtion*)AS_PTR(value))
@@ -36,6 +37,7 @@ typedef enum {
     PTR_LIST = T_PTR | 64,
     PTR_QOLLECTION = PTR_LIST | PTR_ARRAY,
     PTR_NATIVE = T_PTR | 128,
+    PTR_NATIVE_METHOD = PTR_NATIVE | PTR_METHOD,
     PTR_STRING = T_PTR | 256,
     PTR_PREVAL = T_PTR | 512
 } PtrType;

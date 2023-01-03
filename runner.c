@@ -106,6 +106,13 @@ static bool call(Qontext* qlosure, int argCount) {
 static bool callValue(Value callee, int argCount) {
     if (IS_PTR(callee)) {
         switch (PTR_TYPE(callee)) {
+            case PTR_NATIVE_METHOD: {
+                PtrTargetedNativeMethod* method = AS_TNMETHOD(callee);
+                NativeMethod fn = method->method;
+                Value result = fn(method->target, argCount, runner.cursor - argCount);
+                push(result);
+                return true;
+            }
             case PTR_METHOD: {
                 Method* bound = AS_METHOD(callee);
                 runner.cursor[-argCount - 1] = bound->target;
@@ -154,19 +161,26 @@ static bool invoke(String* name, int argCount) {
     Value target = peek(argCount);
 
     if (!IS_OBJEQT(target)) {
-        runtimeError("only instances have methods.");
+        Value value = peek(0);
+        PtrTargetedNativeMethod* method = bindNativeMethod(value, name);
+        if (method != NULL) {
+            pop();
+            push(PTR_VAL(method));
+            return callValue(PTR_VAL(method), argCount);
+        } 
+        runtimeError("could not find method %s", name->chars);
         return false;
+    } else {
+        Objeqt* instance = AS_OBJEQT(target);
+
+        Value value;
+        if (registerGet(&instance->fields, name, &value)) {
+            runner.cursor[-argCount - 1] = value;
+            return callValue(value, argCount);
+        }
+
+        return invokeFromClass(instance->qlass, name, argCount);
     }
-
-    Objeqt* instance = AS_OBJEQT(target);
-
-    Value value;
-    if (registerGet(&instance->fields, name, &value)) {
-        runner.cursor[-argCount - 1] = value;
-        return callValue(value, argCount);
-    }
-
-    return invokeFromClass(instance->qlass, name, argCount);
 }
 
 static bool bindMethod(Qlass* qlass, String* name) {
@@ -359,24 +373,33 @@ static InterpretResult run() {
                 break;
             }
             case OP_GET_PROPERTY: {
+                // native methods
                 if (!IS_OBJEQT(peek(0))) {
+                    String* name = READ_STRING();
+                    Value value = peek(0);
+                    PtrTargetedNativeMethod* method = bindNativeMethod(value, name);
+                    if (method != NULL) {
+                        pop();
+                        push(PTR_VAL(method));
+                        break;
+                    }
                     runtimeError("only instances have properties.");
                     return SQR_INTRP_ERROR_RUNTIME;
-                }
+                } else {
+                    String* name = READ_STRING();
+                    Objeqt* instance = AS_OBJEQT(peek(0));
 
-                Objeqt* instance = AS_OBJEQT(peek(0));
-                String* name = READ_STRING();
-
-                Value value;
-                if (registerGet(&instance->fields, name, &value)) {
-                    pop();
-                    push(value);
+                    Value value;
+                    if (registerGet(&instance->fields, name, &value)) {
+                        pop();
+                        push(value);
+                        break;
+                    }
+                    if (!bindMethod(instance->qlass, name)) {
+                        return SQR_INTRP_ERROR_RUNTIME;
+                    }
                     break;
                 }
-                if (!bindMethod(instance->qlass, name)) {
-                    return SQR_INTRP_ERROR_RUNTIME;
-                }
-                break;
             }
             case OP_SET_PROPERTY: {
                 if (!IS_OBJEQT(peek(1))) {

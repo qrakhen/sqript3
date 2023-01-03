@@ -102,3 +102,7 @@ Value stringIndexOf(String* str, String* needle) {
 
     return NUMBER_VAL(-1);
 }
+
+Value native_StringLength(Value target, int argCount, Value* args) {
+    return NUMBER_VAL(((String*)AS_STRING(target))->length);
+}

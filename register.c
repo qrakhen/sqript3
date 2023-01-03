@@ -20,9 +20,7 @@ void freeRegister(Register* table) {
     initRegister(table);
 }
 
-static Entry* findEntry(Entry* entries, int capacity,
-                        String* key) {
-
+static Entry* findEntry(Entry* entries, int capacity, String* key) {
     uint32_t index = key->hash & (capacity - 1);
     Entry* tombstone = NULL;
 

@@ -24,4 +24,6 @@ String* subString(String* str, int from, int length);
 Value stringIndexOf(String* str, String* needle);
 PtrArray* splitString(String* str, String* split);
 
+Value native_StringLength(Value target, int argCount, Value* args);
+
 #endif

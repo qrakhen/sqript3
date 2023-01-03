@@ -19,4 +19,6 @@ Value arrayGet(PtrArray* array, int index);
 bool arraySet(PtrArray* array, int index, Value value);
 void freeArray(PtrArray* array);
 
+int arrayLength(PtrArray* array);
+
 #endif

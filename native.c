@@ -1,16 +1,17 @@
 #include "native.h"
-#include "types.h"
+#include "object.h";
+#include "types.h";
 
-Register nativeMethods[16];
+Register nativeMethods[2048];
 
-void registerNativeMethod(ValueType type, String* name, NativeMethod member) {
-    PtrNativeMethod* fn = newNativeMethod(member);
-    registerSet(&nativeMethods[type], name, PTR_VAL(fn));
+void registerNativeMethod(ValueType type, char* name, NativeMethod member) {
+    PtrNativeMethod* fn = newNativeMethod(member);    
+    registerSet(&nativeMethods[type], makeString(name, (int)strlen(name)), PTR_VAL(fn));
 }
 
 PtrTargetedNativeMethod* bindNativeMethod(Value target, String* name) {
     Value fn;
-    if (!registerGet(&nativeMethods[target.type], name, &fn)) {
+    if (!registerGet(&nativeMethods[AS_PTR(target)->type], name, &fn)) {
         return NULL;
     }
     PtrTargetedNativeMethod* method = newTargetedNativeMethod(target, (PtrNativeMethod*)AS_PTR(fn));
@@ -18,14 +19,17 @@ PtrTargetedNativeMethod* bindNativeMethod(Value target, String* name) {
 }
 
 void initNativeMethods() {
+    for (int i = 0; i < 2048; i++) {
+        initRegister(&nativeMethods[i]);
+    }
+
     defineNative("time", nativeTime);
     defineNative("length", nativeLength);
     defineNative("substr", nativeSubstr);
     defineNative("split", nativeSplit);
     defineNative("indexOf", nativeIndexOf);
 
-    for (int i = 0; i < 16; i++)
-        initRegister(&nativeMethods[i]);
+    registerNativeMethod(PTR_STRING, "len", native_StringLength);
 }
 
 Value nativeTime(int argCount, Value* args) {

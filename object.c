@@ -27,14 +27,14 @@ Ptr* allocatePtr(size_t size, PtrType type) {
 }
 
 PtrTargetedNativeMethod* newTargetedNativeMethod(Value target, PtrNativeMethod* method) {
-    PtrTargetedNativeMethod* fn = ALLOCATE_PTR(PtrTargetedNativeMethod, PTR_METHOD);
+    PtrTargetedNativeMethod* fn = ALLOCATE_PTR(PtrTargetedNativeMethod, PTR_NATIVE_METHOD);
     fn->target = target;
     fn->method = method->method;
     return fn;
 }
 
-PtrNativeMethod* newNativeMethod(Value target, NativeMethod method) {
-    PtrNativeMethod* fn = ALLOCATE_PTR(PtrNativeMethod, PTR_METHOD);
+PtrNativeMethod* newNativeMethod(NativeMethod method) {
+    PtrNativeMethod* fn = ALLOCATE_PTR(PtrNativeMethod, PTR_NATIVE_METHOD);
     fn->method = method;
     return fn;
 }
@@ -55,8 +55,7 @@ Qlass* newClass(String* name) {
 }
 
 Qontext* newClosure(Funqtion* function) {
-    PtrPreval** revals = ALLOC(PtrPreval*,
-                                     function->revalCount);
+    PtrPreval** revals = ALLOC(PtrPreval*, function->revalCount);
     for (int i = 0; i < function->revalCount; i++) {
         revals[i] = NULL;
     }
