@@ -1,6 +1,10 @@
 #ifndef sqript_console_h
 #define sqript_console_h
 
+//#include <windows.h> 
+//#include <ConsoleApi3.h>
+//#include <consoleapi2.h>
+
 #include "value.h"
 
 #define LOG_LEVEL_ERROR 1
@@ -12,9 +16,10 @@
 #if OS_UNIX
 #define __C_ESC "\033"
 #else 
-#define __C_ESC "\033"
+//#define __C_ESC "\033"
 #endif 
 
+#if OS_UNIX
 #define C_COLOR_BLACK       __C_ESC "[30m"
 #define C_COLOR_RED         __C_ESC "[31m"
 #define C_COLOR_GREEN       __C_ESC "[32m"
@@ -62,6 +67,37 @@ typedef struct {
     short cursorX;
     short cursorY;
 } Console;
+
+#else
+#define C_COLOR_BLACK       0
+#define C_COLOR_BLUE        1
+#define C_COLOR_GREEN       2
+#define C_COLOR_CYAN        3
+#define C_COLOR_RED         4
+#define C_COLOR_MAGENTA     5
+#define C_COLOR_YELLOW      6
+#define C_COLOR_LGRAY       7
+#define C_COLOR_DGRAY       8
+#define C_COLOR_LBLUE       9
+#define C_COLOR_LGREEN      10
+#define C_COLOR_LCYAN       11
+#define C_COLOR_LRED        12
+#define C_COLOR_LMAGENTA    13
+#define C_COLOR_LYELLOW     14
+#define C_COLOR_WHITE       15
+#define C_COLOR_RESET       15
+
+#define C_COLOR_AS_BACKGROUND(color) (color * 16)
+
+typedef struct {
+    Byte color;
+    Byte background;
+    short cursorX;
+    short cursorY;
+} Console;
+
+#endif
+
 
 void consoleInit();
 void consoleRun(int flags);

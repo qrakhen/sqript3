@@ -2,6 +2,10 @@
 #include <stdlib.h>
 #include <string.h>
 
+#ifndef OS_UNIX
+#include <windows.h>
+#endif
+
 #include "common.h"
 #include "segment.h"
 #include "debug.h"
@@ -15,8 +19,14 @@ static Byte logLevel = LOG_LEVEL_SPAM;
 
 Console console;
 
+HANDLE hConsole;
+
 static void __setCursor(short x, short y) {
     printf("%c[%d;%dH", 27, x, y);
+}
+
+static void updateColor() {
+    SetConsoleTextAttribute(hConsole, console.color + C_COLOR_AS_BACKGROUND(console.background));
 }
 
 void consoleRun(int flags) {
@@ -33,20 +43,22 @@ void consoleRun(int flags) {
 }
 
 void consoleInit() {
-    console.background = C_COLOR_RESET;
-    console.color = C_COLOR_RESET;
+    hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+    console.background = C_COLOR_BLACK;
+    console.color = C_COLOR_WHITE;
     console.cursorX = 0;
-    console.cursorY = 0;
+    console.cursorY = 0;    
+    updateColor();
 }
 
 void consoleSetColor(const char* color) {
     console.color = color;
-    printf(color);
+    updateColor();
 }
 
 void consoleSetBackground(const char* color) {
-    console.background = color; 
-    printf(color);
+    console.background = color;
+    updateColor();
 }
 
 void consoleSetCursor(short x, short y) {
@@ -55,14 +67,14 @@ void consoleSetCursor(short x, short y) {
 }
 
 void consoleWrite(char* message) {
-    printf(console.background);
-    printf(console.color);
+    //printf(console.background);
+    //printf(console.color);
     printf(message);
     console.cursorX += strlen(message);
 }
 
 void consoleWriteColor(char* message, const char* color) {
-    printf(color);
+    //printf(color);
     printf(message);
 }
 
@@ -74,9 +86,9 @@ void consoleWriteLine(char* message) {
 }
 
 void consoleResetColor() {
-    console.color = C_COLOR_RESET;
-    console.background = C_COLOR_RESET; 
-    printf(C_COLOR_RESET);
+    console.color = C_COLOR_WHITE;
+    console.background = C_COLOR_BLACK;
+    updateColor();
 }
 
 void consoleClear() {
