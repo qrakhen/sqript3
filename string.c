@@ -63,7 +63,8 @@ String* makeString(const char* chars, int length) {
 }
 
 String* subString(String* str, int from, int length) {
-    if (length < 1 || from >= str->length) return EMPTY_STRING;
+    if (length == -1) length = str->length - from;
+    else if (from >= str->length) return EMPTY_STRING;
     return makeString(str->chars + from, length);
 }
 
@@ -105,4 +106,25 @@ Value stringIndexOf(String* str, String* needle) {
 
 Value native_StringLength(Value target, int argCount, Value* args) {
     return NUMBER_VAL(((String*)AS_STRING(target))->length);
+}
+
+Value native_StringSubString(Value target, int argCount, Value* args) {
+    return PTR_VAL(
+        subString(
+            AS_STRING(target), 
+            NATIVE_GET_ARG(args, 0, AS_NUMBER), 
+            argCount > 1 ? NATIVE_GET_ARG(args, 1, AS_NUMBER) : -1));
+}
+
+Value native_StringIndexOf(Value target, int argCount, Value* args) {
+    return stringIndexOf(
+            AS_STRING(target),
+            NATIVE_GET_ARG(args, 0, AS_STRING));
+}
+
+Value native_StringSplit(Value target, int argCount, Value* args) {
+    return PTR_VAL(
+        splitString(
+            AS_STRING(target), 
+            argCount > 0 ? NATIVE_GET_ARG(args, 0, AS_STRING) : NULL));
 }

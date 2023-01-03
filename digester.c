@@ -7,8 +7,9 @@
 #include "array.h"
 #include "memory.h"
 #include "reader.h"
+#include "types.h"
 
-#ifdef DEBUG_PRINT_CODE
+#ifdef __DBG_STACK
 #include "debug.h"
 #endif
 
@@ -227,10 +228,9 @@ static Funqtion* endCompiler() {
     emitReturn();
     Funqtion* function = current->function;
 
-    #ifdef DEBUG_PRINT_CODE
+    #ifdef __DBG_STACK
     if (!digester.failed) {
-        __dbgDissect(currentSegment(), function->name != NULL
-                         ? function->name->chars : "<script>");
+        __dbgDissect(currentSegment(), function->name != NULL ? function->name->chars : "<script>");
     }
     #endif
 

@@ -3,7 +3,7 @@
 
 #include "segment.h"
 
-void __dbgDissect(Segment* segment, const char* name);
+void __dbgDissect(Segment* segment, char* name);
 int __dbgDissectOp(Segment* segment, int offset);
 
 #endif

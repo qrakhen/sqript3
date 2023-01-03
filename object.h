@@ -96,13 +96,15 @@ typedef struct {
 
 typedef struct {
     Ptr ptr;
-    NativeMethod method;
+    Byte minArgs;
+    Byte maxArgs;
+    NativeMethod callback;
 } PtrNativeMethod;
 
 typedef struct {
     Ptr ptr;
     Value target;
-    NativeMethod* method;
+    PtrNativeMethod* method;
 } PtrTargetedNativeMethod;
 
 Ptr* allocatePtr(size_t size, PtrType type);

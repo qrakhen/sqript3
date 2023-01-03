@@ -34,7 +34,7 @@ static void runtimeError(const char* format, ...) {
         Qall* frame = &runner.qalls[i];
         Funqtion* function = frame->qlosure->function;
         size_t instruction = frame->ip - function->segment.code - 1;
-        fprintf(stderr, "[line %d] in ", // [minus]
+        fprintf(stderr, "[line %d] in ",
                 function->segment.lines[instruction]);
         if (function->name == NULL) {
             fprintf(stderr, "script\n");
@@ -107,9 +107,9 @@ static bool callValue(Value callee, int argCount) {
     if (IS_PTR(callee)) {
         switch (PTR_TYPE(callee)) {
             case PTR_NATIVE_METHOD: {
-                PtrTargetedNativeMethod* method = AS_TNMETHOD(callee);
-                NativeMethod fn = method->method;
-                Value result = fn(method->target, argCount, runner.cursor - argCount);
+                PtrTargetedNativeMethod* targeted = AS_TNMETHOD(callee);
+                NativeMethod fn = targeted->method->callback;
+                Value result = fn(targeted->target, argCount, runner.cursor - (argCount + 1));
                 push(result);
                 return true;
             }
@@ -159,14 +159,19 @@ static bool invokeFromClass(Qlass* qlass, String* name, int argCount) {
 
 static bool invoke(String* name, int argCount) {
     Value target = peek(argCount);
-
     if (!IS_OBJEQT(target)) {
-        Value value = peek(0);
-        PtrTargetedNativeMethod* method = bindNativeMethod(value, name);
-        if (method != NULL) {
-            pop();
-            push(PTR_VAL(method));
-            return callValue(PTR_VAL(method), argCount);
+        PtrTargetedNativeMethod* targeted = bindNativeMethod(target, name);
+        if (targeted != NULL) {
+            if (targeted->method->minArgs > argCount) {
+                runtimeError("%s expects at least %d arguments but got %d", name->chars, targeted->method->minArgs, argCount);
+                return false;
+            }
+            if (targeted->method->maxArgs < argCount) {
+                runtimeError("%s expects at most %d arguments but got %d", name->chars, targeted->method->maxArgs, argCount);
+                return false;
+            }
+            push(PTR_VAL(targeted));
+            return callValue(PTR_VAL(targeted), argCount);
         } 
         runtimeError("could not find method %s", name->chars);
         return false;
@@ -304,16 +309,16 @@ static InterpretResult run() {
         } while (false)
 
     for (;;) {
-        #ifdef DEBUG_TRACE_EXECUTION
+        #ifdef __DBG_TRACE
         printf("          ");
-        for (Value* slot = runner.stack; slot < runner.stackTop; slot++) {
+        for (Value* slot = runner.stack; slot < runner.cursor; slot++) {
             printf("[ ");
             printValue(*slot);
             printf(" ]");
         }
         printf("\n");
-        __dbgDissectOp(&frame->closure->function->segment,
-                               (int)(frame->ip - frame->closure->function->segment.code));
+        __dbgDissectOp(&frame->qlosure->function->segment,
+                               (int)(frame->ip - frame->qlosure->function->segment.code));
         #endif
 
         Byte instruction;

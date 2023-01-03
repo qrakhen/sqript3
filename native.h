@@ -8,9 +8,11 @@
 #include "object.h"
 #include "array.h"
 
+#define NATIVE_GET_ARG(args, index, type) (type(args[index]))
+
 Register nativeMethods[2048];
 
-void registerNativeMethod(ValueType type, String* name, NativeMethod member);
+void registerNativeMethod(ValueType type, char* name, Byte argCount, NativeMethod member);
 PtrTargetedNativeMethod* bindNativeMethod(Value target, String* name);
 void initNativeMethods();
 

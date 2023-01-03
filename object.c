@@ -29,13 +29,13 @@ Ptr* allocatePtr(size_t size, PtrType type) {
 PtrTargetedNativeMethod* newTargetedNativeMethod(Value target, PtrNativeMethod* method) {
     PtrTargetedNativeMethod* fn = ALLOCATE_PTR(PtrTargetedNativeMethod, PTR_NATIVE_METHOD);
     fn->target = target;
-    fn->method = method->method;
+    fn->method = method;
     return fn;
 }
 
-PtrNativeMethod* newNativeMethod(NativeMethod method) {
+PtrNativeMethod* newNativeMethod(NativeMethod callback) {
     PtrNativeMethod* fn = ALLOCATE_PTR(PtrNativeMethod, PTR_NATIVE_METHOD);
-    fn->method = method;
+    fn->callback = callback;
     return fn;
 }
 

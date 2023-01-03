@@ -4,8 +4,10 @@
 
 Register nativeMethods[2048];
 
-void registerNativeMethod(ValueType type, char* name, NativeMethod member) {
-    PtrNativeMethod* fn = newNativeMethod(member);    
+void registerNativeMethod(ValueType type, char* name, Byte minArgs, Byte maxArgs, NativeMethod member) {
+    PtrNativeMethod* fn = newNativeMethod(member);
+    fn->minArgs = minArgs;
+    fn->maxArgs = maxArgs;
     registerSet(&nativeMethods[type], makeString(name, (int)strlen(name)), PTR_VAL(fn));
 }
 
@@ -25,11 +27,11 @@ void initNativeMethods() {
 
     defineNative("time", nativeTime);
     defineNative("length", nativeLength);
-    defineNative("substr", nativeSubstr);
-    defineNative("split", nativeSplit);
-    defineNative("indexOf", nativeIndexOf);
 
-    registerNativeMethod(PTR_STRING, "len", native_StringLength);
+    registerNativeMethod(PTR_STRING, "length", 0, 0, native_StringLength);
+    registerNativeMethod(PTR_STRING, "indexOf", 1, 1, native_StringIndexOf);
+    registerNativeMethod(PTR_STRING, "span", 1, 2, native_StringSubString);
+    registerNativeMethod(PTR_STRING, "split", 0, 1, native_StringSplit);
 }
 
 Value nativeTime(int argCount, Value* args) {
