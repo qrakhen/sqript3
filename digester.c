@@ -525,10 +525,11 @@ static void namedVariable(Token name, bool canAssign) {
 
     if (canAssign && match(TOKEN_EQUAL)) {
         expression();
-
         emitBytes(setOp, (Byte)arg);
+    } else if (match(TOKEN_ARRAY_ADD)) {
+        expression();
+        emitBytes(OP_ARRAY_ADD, (Byte)arg);
     } else {
-
         emitBytes(getOp, (Byte)arg);
     }
 }
@@ -594,6 +595,8 @@ WeightRule rules[] = {
     [TOKEN_CONTEXT_CLOSE]   = { NULL,   NULL,   W_NONE },
     [TOKEN_ARRAY_OPEN]      = { __ARR,  __IDX,  W_CALL },
     [TOKEN_ARRAY_CLOSE]     = { NULL,   NULL,   W_NONE },
+    [TOKEN_ARRAY_ADD]       = { NULL,   NULL,   W_NONE },
+    [TOKEN_ARRAY_REMOVE]    = { NULL,   NULL,   W_NONE },
     [TOKEN_COLON]           = { NULL,   __DOT,  W_CALL },
     [TOKEN_COMMA]           = { NULL,   NULL,   W_NONE },
     [TOKEN_DOT]             = { NULL,   __DOT,  W_CALL },
@@ -820,6 +823,9 @@ static void expressionStatement() {
     if (digester.current.type != TOKEN_EOF)
         consume(TOKEN_SEMICOLON, "missing ; after expression");
     emitByte(OP_POP);
+    #ifdef __DBG_PRINT_STATEMENTS;
+        emitByte(OP_PRINT_EXPR);
+    #endif
 }
 
 static void forStatement() {

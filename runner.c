@@ -474,10 +474,21 @@ static InterpretResult run() {
                 push(NUMBER_VAL(-AS_NUMBER(pop())));
                 break;
             case OP_PRINT: {
+                consoleSetColor(C_COLOR_GREEN);
                 printf(" :> ");
                 //consoleWriteLine(valueToString(pop()));
                 printValue(pop());
                 printf("\n");
+                consoleResetColor();
+                break;
+            }
+            case OP_PRINT_EXPR: {
+                consoleSetColor(C_COLOR_DGRAY);
+                printf(" :> ");
+                ///consoleWriteLine(valueToString(peek(-1)));
+                printValue(peek(-1));
+                printf("\n");
+                consoleResetColor();
                 break;
             }
             case OP_TYPEOF: {
@@ -548,6 +559,16 @@ static InterpretResult run() {
                 int index = AS_NUMBER(pop());
                 PtrArray* arr = AS_ARRAY(peek(0));
                 arr->values[index] = value;
+                break;
+            }
+            case OP_ARRAY_ADD: {
+                Value value = pop();
+                PtrArray* arr = AS_PTR(pop());
+                arrayAppend(arr, value);
+                break;
+            }
+            case OP_ARRAY_REMOVE: {
+                pop(); pop();
                 break;
             }
             case OP_CLOSURE: {
@@ -628,5 +649,6 @@ InterpretResult interpret(const char* source) {
     pop();
     push(PTR_VAL(qlosure));
     call(qlosure, 0);
-    return run();
+    int error = run();
+    return error;
 }

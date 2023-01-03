@@ -29,9 +29,40 @@ bool arraySet(PtrArray* arr, int index, Value value) {
 }
 
 void arrayAppend(PtrArray* arr, Value value) {
+    arr->values = ARR_RESIZE(Value, arr->values, arr->length, arr->length + 1);
+    arr->values[arr->length - 1] = value;
+}
+
+void arrayInsert(PtrArray* arr, int index, Value value) {
+
+}
+
+Value arrayPop(PtrArray* arr) {
+    Value v = arr->values[arr->length - 1];
+    ARR_RESIZE(Value, arr->values, arr->length, arr->length - 1);
+    return v;
+}
+
+PtrArray* arraySpan(PtrArray* arr, int from, int length) {
+    if (length == -1) length = arr->length - from;
+    PtrArray* span = createArray(length, arr->type);
+    span->length = length;
+    memcpy(span->values, arr->values, sizeof(Value) * length);
+    return span;
+}
+
+void arrayRemoveAt(PtrArray* arr, int index) {
+    arr->values = ARR_RESIZE(Value, arr->values, arr->length, arr->length - 1);
+}
+
+void arrayRemove(PtrArray* arr, Value value) {
 
 }
 
 void freeArray(PtrArray* array) {
-    // hm...
+    
+}
+
+int arrayLength(PtrArray* arr) {
+    return arr->length;
 }

@@ -71,7 +71,6 @@ int listFindIndex(List* list, Value value) {
 }
 
 void freeList(List* list) {
-    // yea well... free?
     reallocate(list, list->length * sizeof(List), 0);
 }
 

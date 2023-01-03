@@ -20,6 +20,8 @@ int main(int argc, const char* argv[]) {
     initRunner();
     consoleInit();
 
+    runFile("./test.sqr", __SQR_DEFAULT_FLAGS);
+
     if (argc == 1) {
         consoleRun(__SQR_DEFAULT_FLAGS);
     } else if (argc >= 2) {

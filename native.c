@@ -20,6 +20,12 @@ PtrTargetedNativeMethod* bindNativeMethod(Value target, String* name) {
     return method;
 }
 
+static Value nativeToString(int argCount, Value* args) {
+    if (argCount != 1) return NULL_VAL;
+    char* str = valueToString(args[0]);
+    return PTR_VAL(makeString(str, strlen(str)));
+}
+
 void initNativeMethods() {
     for (int i = 0; i < 2048; i++) {
         initRegister(&nativeMethods[i]);
@@ -27,6 +33,7 @@ void initNativeMethods() {
 
     defineNative("time", nativeTime);
     defineNative("length", nativeLength);
+    defineNative("str", nativeToString);
 
     registerNativeMethod(PTR_STRING, "length", 0, 0, native_StringLength);
     registerNativeMethod(PTR_STRING, "indexOf", 1, 1, native_StringIndexOf);
@@ -50,30 +57,10 @@ Value nativeStr(int argCount, Value* args) {
     return PTR_VAL(valueToString(args[0]));
 }
 
-Value nativeSubstr(int argCount, Value* args) {
-    if (argCount == 1) return args[0];
-    if (!IS_STRING(args[0])) return NULL_VAL;
-    String* str = AS_STRING(args[0]);
-    int from = AS_NUMBER(args[1]);
-    int length = argCount > 2 ? AS_NUMBER(args[2]) : ((int)str->length - from);
-    return PTR_VAL(subString(str, from, length));
-}
-
 Value nativeSplit(int argCount, Value* args) {
     if (argCount != 2) return NULL_VAL;
     if (!IS_STRING(args[0])) return NULL_VAL;
     String* str = AS_STRING(args[0]);
     String* split = AS_STRING(args[1]);
     return PTR_VAL(splitString(str, split));
-}
-
-Value nativeIndexOf(int argCount, Value* args) {
-    if (argCount != 2) return NULL_VAL;
-    if (IS_STRING(args[0])) {
-        String* str = AS_STRING(args[0]);
-        String* needle = AS_STRING(args[1]);
-        return stringIndexOf(str, needle);
-    } else {
-        return NULL_VAL;
-    }
 }
