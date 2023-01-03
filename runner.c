@@ -562,8 +562,8 @@ static InterpretResult run() {
                 break;
             }
             case OP_ARRAY_ADD: {
+                PtrArray* arr = AS_ARRAY(pop());
                 Value value = pop();
-                PtrArray* arr = AS_PTR(pop());
                 arrayAppend(arr, value);
                 break;
             }

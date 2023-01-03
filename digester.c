@@ -477,6 +477,11 @@ static void __ARR(bool canAssign) {
     emitBytes(OP_ARRAY, makeConstant(NUMBER_VAL(length)));
 }
 
+static void __ADD(bool canAssign) {
+    expression();
+    emitByte(OP_ARRAY_ADD);
+}
+
 static void __IDX(bool canAssign) {
     expression();
     consume(TOKEN_ARRAY_CLOSE, "expected ] after array accessor");
@@ -528,7 +533,8 @@ static void namedVariable(Token name, bool canAssign) {
         emitBytes(setOp, (Byte)arg);
     } else if (match(TOKEN_ARRAY_ADD)) {
         expression();
-        emitBytes(OP_ARRAY_ADD, (Byte)arg);
+        emitBytes(getOp, (Byte)arg);
+        emitByte(OP_ARRAY_ADD);
     } else {
         emitBytes(getOp, (Byte)arg);
     }

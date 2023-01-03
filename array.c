@@ -30,6 +30,7 @@ bool arraySet(PtrArray* arr, int index, Value value) {
 
 void arrayAppend(PtrArray* arr, Value value) {
     arr->values = ARR_RESIZE(Value, arr->values, arr->length, arr->length + 1);
+    arr->length++;
     arr->values[arr->length - 1] = value;
 }
 
