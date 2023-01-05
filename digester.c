@@ -9,7 +9,7 @@
 #include "reader.h"
 #include "types.h"
 
-#ifdef __DBG_STACK
+#if __DBG_STACK
 #include "debug.h"
 #endif
 
@@ -228,7 +228,7 @@ static Funqtion* endCompiler() {
     emitReturn();
     Funqtion* function = current->function;
 
-    #ifdef __DBG_STACK
+    #if __DBG_STACK
     if (!digester.failed) {
         __dbgDissect(currentSegment(), function->name != NULL ? function->name->chars : "<script>");
     }
@@ -485,7 +485,10 @@ static void __ADD(bool canAssign) {
 static void __IDX(bool canAssign) {
     expression();
     consume(TOKEN_ARRAY_CLOSE, "expected ] after array accessor");
-    if (canAssign && match(TOKEN_EQUAL)) {
+    if (canAssign && match(TOKEN_ARRAY_ADD)) {
+        expression();
+        emitByte(OP_ARRAY_ADD);
+    } else if (canAssign && match(TOKEN_EQUAL)) {
         expression();
         emitByte(OP_ARRAY_SET);
     } else {
@@ -829,7 +832,7 @@ static void expressionStatement() {
     if (digester.current.type != TOKEN_EOF)
         consume(TOKEN_SEMICOLON, "missing ; after expression");
     emitByte(OP_POP);
-    #ifdef __DBG_PRINT_STATEMENTS;
+    #if __DBG_PRINT_STATEMENTS;
         emitByte(OP_PRINT_EXPR);
     #endif
 }

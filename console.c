@@ -17,23 +17,33 @@
 
 static Byte logLevel = LOG_LEVEL_SPAM;
 Console console;
-HANDLE hConsole;
+HANDLE hOut, hCin;
 
-static void __setCursor(short x, short y) {
+static void setCursor(short x, short y) {
     printf("%c[%d;%dH", 27, x, y);
 }
 
+static void print(char* message) {
+    console.cursorX += strlen(message);
+    printf("%s", message);
+}
+
 static void updateColor() {
-    SetConsoleTextAttribute(hConsole, console.color + C_COLOR_AS_BACKGROUND(console.background));
+    #if OS_UNIX
+        print(console.background);
+        print(console.color);
+    #else
+        SetConsoleTextAttribute(hOut, console.color);
+    #endif
 }
 
 void consoleRun(int flags) {
     char line[8192];
     int r = 0;
     do {
-        printf(__C_PREFIX_INPUT);
+        consoleWrite(__C_PREFIX_INPUT);
         if (!fgets(line, sizeof(line), stdin)) {
-            printf("\n");
+            consoleWriteLine("");
             break;
         }
         r = (int)interpret(line);
@@ -41,21 +51,31 @@ void consoleRun(int flags) {
 }
 
 void consoleInit() {
-    hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-    console.background = C_COLOR_BLACK;
-    console.color = C_COLOR_WHITE;
+    #if OS_UNIX
+        console.background = C_COLOR_BLACK;
+        console.color = C_COLOR_WHITE;
+    #else
+        hOut = GetStdHandle(STD_OUTPUT_HANDLE);
+        hCin = GetStdHandle(STD_INPUT_HANDLE);
+        console.color = C_COLOR_WHITE | (16 * C_COLOR_BLACK);
+    #endif
     console.cursorX = 0;
     console.cursorY = 0;    
     updateColor();
 }
 
-void consoleSetColor(const char* color) {
+void consoleSetColorByte(Byte color) {
     console.color = color;
     updateColor();
 }
 
-void consoleSetBackground(const char* color) {
-    console.background = color;
+void consoleSetColor(Byte color) {
+    console.color = (console.color & 0xF0) | color;
+    updateColor();
+}
+
+void consoleSetBackground(Byte color) {
+    console.color = (console.color & 0x0F) | (color * 16);
     updateColor();
 }
 
@@ -65,39 +85,49 @@ void consoleSetCursor(short x, short y) {
 }
 
 void consoleWrite(char* message) {
-    //printf(console.background);
-    //printf(console.color);
-    printf(message);
-    console.cursorX += strlen(message);
+    print(message);
 }
 
-void consoleWriteColor(char* message, const char* color) {
-    //printf(color);
-    printf(message);
+void consoleWriteFormatted(char* format, ...) {
+    char r[8192];
+    va_list ptr;
+    va_start(ptr, format);
+    print(formatToString(format, ptr));
+    va_end(ptr);
+}
+
+void consoleWriteColor(char* message, Byte color) {
+    Byte _color = console.color;
+    #if OS_UNIX
+        print(color);
+    #else 
+        consoleSetColor(color);
+    #endif;
+    consoleWrite(message);
+    consoleSetColor(_color);
 }
 
 void consoleWriteLine(char* message) {
     consoleWrite(message);
-    printf("\n");
+    print("\n");
     console.cursorY++;
     console.cursorX = 0;
 }
 
 void consoleResetColor() {
     console.color = C_COLOR_WHITE;
-    console.background = C_COLOR_BLACK;
     updateColor();
 }
 
 void consoleClear() {
     #if OS_UNIX
-    system("clear");
+        system("clear");
     #else
-    system("cls");
+        system("cls");
     #endif
 }
 
-static void __logWrite(char* message, Byte level, ...) {
+static void __logWrite(char* format, Byte level, va_list args) {
     if (level > logLevel)
         return;
 
@@ -107,23 +137,18 @@ static void __logWrite(char* message, Byte level, ...) {
     time(&t);
     timeInfo = localtime(&t);
     strftime(buffer, 32, "%H:%M:%S", timeInfo);
-    //printf(buffer);
+    #if __CLI_SHOW_TIME
+        printf(buffer);
+    #endif
 
-    /*va_list args;
-    va_start(args, 16);
-    for (int i = 0;;i++) {
-        void* x = va_arg(args, i);
-        if (x == NULL)
-            break;
-    }*/
-    printf(" > %s\n", message);
+    print(formatToString(format, args));
 }
 
-void logError(char* message, ...) { __logWrite(message, LOG_LEVEL_ERROR); }
-void logWarn(char* message, ...) { __logWrite(message, LOG_LEVEL_WARN); }
-void logInfo(char* message, ...) { __logWrite(message, LOG_LEVEL_INFO); }
-void logDebug(char* message, ...) { __logWrite(message, LOG_LEVEL_DEBUG); }
-void logSpam(char* message, ...) { __logWrite(message, LOG_LEVEL_SPAM); }
+void logError(char* message, va_list args) { __logWrite(message, LOG_LEVEL_ERROR, args); }
+void logWarn(char* message, va_list args) { __logWrite(message, LOG_LEVEL_WARN, args); }
+void logInfo(char* message, va_list args) { __logWrite(message, LOG_LEVEL_INFO, args); }
+void logDebug(char* message, va_list args) { __logWrite(message, LOG_LEVEL_DEBUG, args); }
+void logSpam(char* message, va_list args) { __logWrite(message, LOG_LEVEL_SPAM, args); }
 
 void logLn() {
     printf("\n");

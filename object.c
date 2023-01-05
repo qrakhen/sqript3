@@ -19,7 +19,7 @@ Ptr* allocatePtr(size_t size, PtrType type) {
     object->next = runner.pointers;
     runner.pointers = object;
 
-    #ifdef DEBUG_LOG_GC
+    #if DEBUG_LOG_GC
     printf("%p allocate %zu for %d\n", (void*)object, size, type);
     #endif
 
@@ -84,7 +84,7 @@ Objeqt* newInstance(Qlass* qlass) {
 }
 
 NativeQall* newNative(NativeFunq function) {
-    NativeQall* native = ALLOCATE_PTR(NativeQall, PTR_NATIVE);
+    NativeQall* native = ALLOCATE_PTR(NativeQall, PTR_NATIVE_FUNQ);
     native->function = function;
     return native;
 }
@@ -123,7 +123,7 @@ void printObject(Value value) {
             printf("%s instance",
                    AS_OBJEQT(value)->qlass->name->chars);
             break;        
-        case PTR_NATIVE:
+        case PTR_NATIVE_FUNQ:
             printf("<native fn>");
             break;
         case PTR_STRING:

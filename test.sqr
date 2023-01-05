@@ -37,3 +37,12 @@ var f = time;
 typeof f;
 print f;
 print f();
+
+print ' === FIBONACCI === ';
+fq fib(n) { if (n < 2) <: n; <: fib(n-1) + fib(n-2); }
+print 'fib(8)';
+print fib(8);
+print 'fib(16)';
+print fib(16);
+print 'fib(24)';
+print fib(24);

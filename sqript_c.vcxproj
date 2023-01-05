@@ -141,6 +141,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="array.c" />
+    <ClCompile Include="common.c" />
     <ClCompile Include="core.list.c" />
     <ClCompile Include="debug.c" />
     <ClCompile Include="digester.c" />
@@ -179,8 +180,10 @@
     <ClInclude Include="value.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="core.sqr" />
     <None Include="README.md" />
     <None Include="test.sqr" />
+    <None Include="TODO.md" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -10,16 +10,15 @@
 
 #define NATIVE_GET_ARG(args, index, type) (type(args[index]))
 
-Register nativeMethods[2048];
+Register nativeMethods[512];
 
-void registerNativeMethod(ValueType type, char* name, Byte argCount, NativeMethod member);
+void registerNativeMethod(ValueType type, char* name, Byte minArgs, Byte maxArgs, NativeMethod member);
 PtrTargetedNativeMethod* bindNativeMethod(Value target, String* name);
 void initNativeMethods();
 
 Value nativeTime(int argCount, Value* args);
 Value nativeLength(int argCount, Value* args);
-Value nativeSubstr(int argCount, Value* args);
-Value nativeSplit(int argCount, Value* args);
-Value nativeIndexOf(int argCount, Value* args);
+Value nativeSplit(int argCount, Value* args); 
+Value runFile(int argCount, Value* args);
 
 #endif

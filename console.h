@@ -13,6 +13,15 @@
 #define LOG_LEVEL_DEBUG 8
 #define LOG_LEVEL_SPAM 16
 
+#define COUT(m) (consoleWrite(m))
+#define CERR(m) (COUTC(F("ERR: %s", m), C_COLOR_RED))
+#define COUTC(m, c) (consoleWriteColor(m, c))
+#define COUTLN(m) (consoleWriteLine(m))
+#define COUTLNC(m, c) { consoleWriteColor(m, c); CNL; }
+#define CNL (consoleWriteLine(""))
+#define CSETC(c) (consoleSetColorByte(c))
+#define CSETCUR(x, y) (consoleSetCursor(x, y))
+
 #if OS_UNIX
 #define __C_ESC "\033"
 #else 
@@ -92,7 +101,6 @@ typedef struct {
 
 typedef struct {
     Byte color;
-    Byte background;
     short cursorX;
     short cursorY;
 } Console;
@@ -102,12 +110,13 @@ typedef struct {
 
 void consoleInit();
 void consoleRun(int flags);
-void consoleSetColor(const char* color);
-void consoleSetBackground(const char* color);
+void consoleSetColor(Byte color);
+void consoleSetColorByte(Byte color);
+void consoleSetBackground(Byte color);
 void consoleSetCursor(short x, short y);
-void consoleWrite(char* message);
-void consoleWriteLine(char* message);
-void consoleWriteColor(char* message, const char* color);
+void consoleWrite(char* message); //va_list args);
+void consoleWriteLine(char* message); //va_list args);
+void consoleWriteColor(char* message, Byte color);
 void consoleClear();
 void consoleResetColor();
 

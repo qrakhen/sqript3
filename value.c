@@ -94,7 +94,7 @@ void printType(Value value) {
                 case PTR_OBJEQT: printf("instance<%s>", AS_OBJEQT(value)->qlass->name->chars); break;
                 case PTR_ARRAY: printf("array<any>[%d]", AS_ARRAY(value)->length); break;
                 //case PTR_LIST: printf("list<any>[%d]", AS_LIST(value)->length); break;
-                case PTR_NATIVE: printf("native"); break;
+                case PTR_NATIVE_FUNQ: printf("native"); break;
                 case PTR_STRING: printf("string"); break;
                 case PTR_PREVAL: printf("preval"); break;
             }

@@ -31,22 +31,24 @@ typedef enum {
     T_DEC = 16,
     T_NUMBER = T_INT | T_DEC,
 
-    T_PTR = 1024,
+    T_PTR = 512,
     T_PTR_METHOD = T_PTR | 1,
     T_PTR_QLASS = T_PTR | 2,
     T_PTR_QLOSURE = T_PTR | 4,
     T_PTR_FUNQ = T_PTR | 8,
     T_PTR_INSTANCE = T_PTR | 16,
     T_PTR_ARRAY = T_PTR | 32,
-    T_PTR_LIST = T_PTR | 64,
-    T_PTR_NATIVE = T_PTR | 128,
-    T_PTR_STRING = T_PTR | 256,
-    T_PTR_PREVAL = T_PTR | 512
+    T_PTR_NATIVE = T_PTR | 64,
+    T_PTR_NATIVE_FUNQ = T_PTR_NATIVE | T_PTR_FUNQ,
+    T_PTR_NATIVE_METHOD = T_PTR_NATIVE | T_PTR_METHOD,
+    T_PTR_STRING = T_PTR | 128,
+    T_PTR_PREVAL = T_PTR | 256
 } ValueType;
 
 typedef enum {
-    TM_DYN,
-    TM_STRICT
+    TM_DYN = 0,
+    TM_STRICT = 1,
+    TM_CONST = 2
 } TypeMode;
 
 struct Value {

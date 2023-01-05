@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <time.h>
+#include <math.h>
 
 #include "common.h"
 #include "digester.h"
@@ -132,7 +133,7 @@ static bool callValue(Value callee, int argCount) {
             }
             case PTR_QLOSURE:
                 return call(AS_QONTEXT(callee), argCount);
-            case PTR_NATIVE: {
+            case PTR_NATIVE_FUNQ: {
                 NativeFunq native = AS_NATIVE(callee);
                 Value result = native(argCount, runner.cursor - argCount);
                 runner.cursor -= argCount + 1;
@@ -309,7 +310,7 @@ static InterpretResult run() {
         } while (false)
 
     for (;;) {
-        #ifdef __DBG_TRACE
+        #if __DBG_TRACE
         printf("          ");
         for (Value* slot = runner.stack; slot < runner.cursor; slot++) {
             printf("[ ");
@@ -483,7 +484,7 @@ static InterpretResult run() {
                 break;
             }
             case OP_PRINT_EXPR: {
-                consoleSetColor(C_COLOR_DGRAY);
+                consoleSetColor(C_COLOR_LGRAY);
                 printf(" :> ");
                 ///consoleWriteLine(valueToString(peek(-1)));
                 printValue(peek(-1));
@@ -642,13 +643,38 @@ void hack(bool b) {
 }
 
 InterpretResult interpret(const char* source) {
+    #if __DBG_PRINT_EXEC_TIME
+        double ti = NOW_MS;
+    #endif
+
     Funqtion* function = digest(source);
     if (function == NULL) return SQR_INTRP_ERROR_DIGEST;
+
     push(PTR_VAL(function));
+
     Qontext* qlosure = newClosure(function);
     pop();
     push(PTR_VAL(qlosure));
     call(qlosure, 0);
+
+    #if __DBG_PRINT_EXEC_TIME
+        double tc = NOW_MS;
+    #endif
+
     int error = run();
+
+    #if __DBG_PRINT_EXEC_TIME
+        double te = NOW_MS;
+        double t1 = tc - ti;
+        double t2 = te - tc;
+        double t3 = t1 + t2;
+        
+        COUTLNC(F(
+                " :~ T: %s (%s : %s)", 
+                formatTime(t3, TIME_UNIT_MS), 
+                formatTime(t1, TIME_UNIT_MS),
+                formatTime(t2, TIME_UNIT_MS)),
+            C_COLOR_DGRAY);
+    #endif
     return error;
 }

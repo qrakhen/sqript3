@@ -24,7 +24,7 @@ static __Node* __newNode() {
 }
 
 List* listCreate(ValueType type) {
-    List* list = ALLOCATE_PTR(List, PTR_LIST);
+    List* list = ALLOCATE_PTR(List, PTR_ARRAY); // array because list is not a native type but still will be needed in GC cycle
     list->head = __newNode();
     list->length = 0;
     list->type = type;
@@ -71,6 +71,12 @@ int listFindIndex(List* list, Value value) {
 }
 
 void freeList(List* list) {
+    __Node* cur = list->head;
+    int index = 0;
+    while (cur != NULL) {
+        reallocate(cur, sizeof(__Node), 0);
+        cur = cur->next;
+    }
     reallocate(list, list->length * sizeof(List), 0);
 }
 

@@ -67,3 +67,8 @@ void freeArray(PtrArray* array) {
 int arrayLength(PtrArray* arr) {
     return arr->length;
 }
+
+void native_ArrayAppend(Value target, int argCount, Value* args) {
+    arrayAppend(AS_ARRAY(target), args[0]);
+    return NULL_VAL;
+}
