@@ -1,8 +1,13 @@
+#include <stdio.h>
+
 #include "native.h"
 #include "object.h";
 #include "types.h";
+#include "console.h";
+#include "runner.h"
+#include "io.h";
 
-Register nativeMethods[2048];
+Register nativeMethods[512];
 
 void registerNativeMethod(ValueType type, char* name, Byte minArgs, Byte maxArgs, NativeMethod member) {
     PtrNativeMethod* fn = newNativeMethod(member);
@@ -27,13 +32,15 @@ static Value nativeToString(int argCount, Value* args) {
 }
 
 void initNativeMethods() {
-    for (int i = 0; i < 2048; i++) {
+    for (int i = 0; i < 512; i++) {
         initRegister(&nativeMethods[i]);
     }
 
     defineNative("time", nativeTime);
     defineNative("length", nativeLength);
     defineNative("str", nativeToString);
+    defineNative("clear", consoleClear);
+    defineNative("run", nativeRunFile);
 
     registerNativeMethod(PTR_STRING, "length", 0, 0, native_StringLength);
     registerNativeMethod(PTR_STRING, "indexOf", 1, 1, native_StringIndexOf);
@@ -63,4 +70,15 @@ Value nativeSplit(int argCount, Value* args) {
     String* str = AS_STRING(args[0]);
     String* split = AS_STRING(args[1]);
     return PTR_VAL(splitString(str, split));
+}
+
+Value nativeRunFile(int argCount, Value* args) {
+    if (argCount < 1) return NULL_VAL;
+    if (!IS_STRING(args[0])) return NULL_VAL;
+    char* f = readFile(AS_STRING(args[0])->chars);
+    printf("%s", f);
+    interpret(f);
+    //runFile((AS_STRING(args[0])->chars), argCount > 1 ? AS_INT(args[1]) : SQR_OPTION_FLAG_NOFLAGS);
+    //runner.cursor = runner.stack;
+    return NULL_VAL;
 }

@@ -10,6 +10,7 @@
 typedef struct {
     Ptr ptr;
     int length;
+    bool fixedSize;
     ValueType type;
     Value* values;
 } PtrArray;

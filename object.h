@@ -17,7 +17,7 @@
 #define IS_QONTEXT(value)   matchPtrType(value, PTR_QLOSURE)
 #define IS_FUNQ(value)      matchPtrType(value, PTR_FUNQ)
 #define IS_OBJEQT(value)    matchPtrType(value, PTR_OBJEQT)
-#define IS_NATIVE(value)    matchPtrType(value, PTR_NATIVE)
+#define IS_NATIVE(value)    matchPtrType(value, PTR_NATIVE_FUNQ)
 
 #define AS_METHOD(value)    ((Method*)AS_PTR(value))
 #define AS_TNMETHOD(value)  ((PtrTargetedNativeMethod*)AS_PTR(value))
@@ -28,18 +28,18 @@
 #define AS_NATIVE(value)    (((NativeQall*)AS_PTR(value))->function)
 
 typedef enum {
-    PTR_METHOD = T_PTR | 1,
-    PTR_QLASS = T_PTR | 2,
-    PTR_QLOSURE = T_PTR | 4,
-    PTR_FUNQ = T_PTR | 8,
-    PTR_OBJEQT = T_PTR | 16,
-    PTR_ARRAY = T_PTR | 32,
-    PTR_LIST = T_PTR | 64,
-    PTR_QOLLECTION = PTR_LIST | PTR_ARRAY,
-    PTR_NATIVE = T_PTR | 128,
-    PTR_NATIVE_METHOD = PTR_NATIVE | PTR_METHOD,
-    PTR_STRING = T_PTR | 256,
-    PTR_PREVAL = T_PTR | 512
+    PTR = T_PTR,
+    PTR_METHOD = T_PTR_METHOD,
+    PTR_QLASS = T_PTR_QLASS,
+    PTR_QLOSURE = T_PTR_QLOSURE,
+    PTR_FUNQ = T_PTR_FUNQ,
+    PTR_OBJEQT = T_PTR_INSTANCE,
+    PTR_ARRAY = T_PTR_ARRAY,
+    PTR_NATIVE = T_PTR_NATIVE,
+    PTR_NATIVE_FUNQ = T_PTR_NATIVE_FUNQ,
+    PTR_NATIVE_METHOD = T_PTR_NATIVE_METHOD,
+    PTR_STRING = T_PTR_STRING,
+    PTR_PREVAL = T_PTR_PREVAL
 } PtrType;
 
 struct Ptr {

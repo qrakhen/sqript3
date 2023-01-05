@@ -69,6 +69,9 @@
     <ClCompile Include="string.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="common.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="common.h">
@@ -131,6 +134,12 @@
       <Filter>Resource Files</Filter>
     </None>
     <None Include="README.md">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="TODO.md">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="core.sqr">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>

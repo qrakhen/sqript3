@@ -5,7 +5,7 @@
 #include "runner.h"
 #include "types.h"
 
-#ifdef DEBUG_LOG_GC
+#if DEBUG_LOG_GC
 #include <stdio.h>
 #include "debug.h"
 #endif
@@ -15,7 +15,7 @@
 void* reallocate(void* pointer, size_t oldSize, size_t newSize) {
     runner.bAlloc += newSize - oldSize;
     if (newSize > oldSize) {
-    #ifdef DEBUG_STRESS_GC
+    #if DEBUG_STRESS_GC
         collectGarbage();
     #endif
 
@@ -38,7 +38,7 @@ void __gcTargetPtr(Ptr* object) {
     if (object == NULL) return;
     if (object->__gcFree) return;
 
-#ifdef DEBUG_LOG_GC
+#if DEBUG_LOG_GC
     printf("%p mark ", (void*)ptr);
     printValue(PTR_VAL(ptr));
     printf("\n");
@@ -67,7 +67,7 @@ static void markArray(ValueArray* array) {
 }
 
 static void blackenObject(Ptr* ptr) {
-#ifdef DEBUG_LOG_GC
+#if DEBUG_LOG_GC
     printf("%p blacken ", (void*)ptr);
     printValue(PTR_VAL(ptr));
     printf("\n");
@@ -109,14 +109,14 @@ static void blackenObject(Ptr* ptr) {
         case PTR_PREVAL:
             __gcTargetValue(((PtrPreval*)ptr)->closed);
             break;
-        case PTR_NATIVE:
+        case PTR_NATIVE_FUNQ:
         case PTR_STRING:
             break;
     }
 }
 
 static void freeObject(Ptr* object) {
-#ifdef DEBUG_LOG_GC
+#if DEBUG_LOG_GC
     printf("%p free type %d\n", (void*)ptr, ptr->type);
 #endif
 
@@ -149,7 +149,7 @@ static void freeObject(Ptr* object) {
             FREE(Objeqt, object);
             break;
         }
-        case PTR_NATIVE:
+        case PTR_NATIVE_FUNQ:
             FREE(NativeQall, object);
             break;
         case PTR_STRING: {
@@ -216,7 +216,7 @@ static void sweep() {
 }
 
 void __gcRunCycle() {
-    #ifdef DEBUG_LOG_GC
+    #if DEBUG_LOG_GC
         printf("-- gc begin\n");
         size_t before = vm.bAlloc;
     #endif
@@ -228,7 +228,7 @@ void __gcRunCycle() {
 
     runner.__gcNext = runner.bAlloc * __GC_GROW;
 
-    #ifdef DEBUG_LOG_GC
+    #if DEBUG_LOG_GC
         printf("-- gc end\n");
         printf("   collected %zu bytes (from %zu to %zu) next at %zu\n",
                before - runner.bAlloc, before, runner.bAlloc, runner.__gcNext);
