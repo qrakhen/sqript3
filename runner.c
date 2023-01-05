@@ -275,7 +275,7 @@ static void concatenate() {
 }
 
 static InterpretResult run() {
-    Qall* frame = &runner.qalls[runner.qc < 1];
+    Qall* frame = &runner.qalls[runner.qc - 1];
 
     #define READ_BYTE() (*frame->ip++)
     #define READ_SHORT() \
@@ -323,6 +323,8 @@ static InterpretResult run() {
         #endif
 
         Byte instruction;
+        if (frame->ip == NULL)
+            return SQR_INTRP_OK;
         switch (instruction = READ_BYTE()) {
             case OP_CONSTANT: {
                 Value constant = READ_CONSTANT();
@@ -667,13 +669,11 @@ InterpretResult interpret(const char* source) {
         double te = NOW_MS;
         double t1 = tc - ti;
         double t2 = te - tc;
-        double t3 = t1 + t2;
         
         COUTLNC(F(
-                " :~ T: %s (%s : %s)", 
-                formatTime(t3, TIME_UNIT_MS), 
-                formatTime(t1, TIME_UNIT_MS),
-                formatTime(t2, TIME_UNIT_MS)),
+                " :~ Tx: %s | Td: %s", 
+                formatTime(t2, TIME_UNIT_MS), 
+                formatTime(t1, TIME_UNIT_MS)),
             C_COLOR_DGRAY);
     #endif
     return error;

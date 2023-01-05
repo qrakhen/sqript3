@@ -7,7 +7,7 @@
 #include "runner.h"
 #include "io.h";
 
-Register nativeMethods[512];
+Register nativeMethods[1024];
 
 void registerNativeMethod(ValueType type, char* name, Byte minArgs, Byte maxArgs, NativeMethod member) {
     PtrNativeMethod* fn = newNativeMethod(member);
@@ -76,8 +76,8 @@ Value nativeRunFile(int argCount, Value* args) {
     if (argCount < 1) return NULL_VAL;
     if (!IS_STRING(args[0])) return NULL_VAL;
     char* f = readFile(AS_STRING(args[0])->chars);
-    printf("%s", f);
     interpret(f);
+    free(f);
     //runFile((AS_STRING(args[0])->chars), argCount > 1 ? AS_INT(args[1]) : SQR_OPTION_FLAG_NOFLAGS);
     //runner.cursor = runner.stack;
     return NULL_VAL;

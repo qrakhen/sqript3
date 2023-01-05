@@ -25,6 +25,8 @@ print wrapper();
 print ' === LISTS === ';
 *~ c <~ [ 1, 5, [ 3 * 3, 5, time() ]];
 print c;
+c <+ 10;
+print c;
 print 'length: ' + str(length(c));
 
 print ' === CLASSES === ';

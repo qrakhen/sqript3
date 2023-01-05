@@ -10,7 +10,7 @@
 
 #define NATIVE_GET_ARG(args, index, type) (type(args[index]))
 
-Register nativeMethods[512];
+Register nativeMethods[1024];
 
 void registerNativeMethod(ValueType type, char* name, Byte minArgs, Byte maxArgs, NativeMethod member);
 PtrTargetedNativeMethod* bindNativeMethod(Value target, String* name);

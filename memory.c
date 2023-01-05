@@ -48,8 +48,7 @@ void __gcTargetPtr(Ptr* object) {
 
     if (runner.__gcLimit < runner.__gcCount + 1) {
         runner.__gcLimit = NEXT_SIZE(runner.__gcLimit);
-        runner.__gcStack = (Ptr**)realloc(runner.__gcStack,
-                                      sizeof(Ptr*) * runner.__gcLimit);
+        runner.__gcStack = (Ptr**)realloc(runner.__gcStack, sizeof(Ptr*) * runner.__gcLimit);
         if (runner.__gcStack == NULL) exit(1);
     }
 
