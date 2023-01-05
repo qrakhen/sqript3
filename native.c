@@ -76,7 +76,6 @@ Value nativeRunFile(int argCount, Value* args) {
     if (argCount < 1) return NULL_VAL;
     if (!IS_STRING(args[0])) return NULL_VAL;
     char* f = readFile(AS_STRING(args[0])->chars);
-    initRunner();
     interpret(f);
     free(f);
     //runFile((AS_STRING(args[0])->chars), argCount > 1 ? AS_INT(args[1]) : SQR_OPTION_FLAG_NOFLAGS);

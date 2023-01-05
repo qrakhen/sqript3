@@ -11,3 +11,7 @@ only with type safety
 
 ## array add does not work with indexes
 like x[3] <+ 5; doesn't work, but *~ y <~ x[3]; then y <+ 5 does. something in digester, probably, stack is wrong
+
+
+# FIXED
+#### run file doesnt work (run("core.sqr") for example) and i have 0 clues why.

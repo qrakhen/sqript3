@@ -275,7 +275,7 @@ static void concatenate() {
 }
 
 static InterpretResult run() {
-    Qall* frame = &runner.qalls[runner.qc < 1];
+    Qall* frame = &runner.qalls[runner.qc - 1];
 
     #define READ_BYTE() (*frame->ip++)
     #define READ_SHORT() \
