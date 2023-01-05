@@ -323,6 +323,8 @@ static InterpretResult run() {
         #endif
 
         Byte instruction;
+        if (frame->ip == NULL)
+            return SQR_INTRP_OK;
         switch (instruction = READ_BYTE()) {
             case OP_CONSTANT: {
                 Value constant = READ_CONSTANT();
