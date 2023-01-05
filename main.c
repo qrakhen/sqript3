@@ -12,6 +12,11 @@
 uint16_t __SQR_DEFAULT_FLAGS = SQR_OPTION_FLAG_NOFLAGS;
 
 int main(int argc, const char* argv[]) {
+    #ifdef __OS_NOT_SUPPORTED
+        sprtinf(stderr, "%s", "OS NOT SUPPORTED");
+        exit(E_ERR_SYS_NOT_SUPPORTED);
+    #endif
+
     if (argc > 3) {
         printf("flags not supported (yet)\n");
         return 1;
@@ -20,7 +25,8 @@ int main(int argc, const char* argv[]) {
     initRunner();
     consoleInit();
 
-    runFile("./test.sqr", __SQR_DEFAULT_FLAGS);
+    //runFile("./core.sqr", __SQR_DEFAULT_FLAGS);
+    //runFile("./test.sqr", __SQR_DEFAULT_FLAGS);
 
     if (argc == 1) {
         consoleRun(__SQR_DEFAULT_FLAGS);

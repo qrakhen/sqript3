@@ -8,6 +8,17 @@
 #include "native.h"
 #include "string.h"
 
+static char* modeToString(TypeMode mode) {
+    switch (mode) {
+        case TM_NONE: return "none";
+        case TM_DYN: return "dyn";
+        case TM_STRICT: return "strict";
+        case TM_CONST: return "const";
+        case TM_REF: return "ref";
+        default: return "unknown";
+    }
+}
+
 static Value toString(Value target, int argc, Value* params) {
 
 }
@@ -43,12 +54,17 @@ char* valueToString(Value value) {
     } else if (IS_NUMBER(value)) {
         sprintf(buffer, "%g", AS_NUMBER(value));
     } else if (IS_PTR(value)) {
-        value.as.ptr->type;
+        value.v.ptr->type;
     }
     return buffer;
 }
 
 void printValue(Value value) {
+    #if __DBG_SHOW_FULL_INFO
+        printf("[%s]:", modeToString(value.mode));
+        printf("<%s> ", printType(value));
+    #endif
+
     switch (value.type) {
         case T_BOOL:
             printf(AS_BOOL(value) ? "true" : "false");
@@ -76,27 +92,27 @@ void printValue(Value value) {
     }
 }
 
-void printType(Value value) {
+char* printType(Value value) {
     switch (value.type) {
-        case T_ANY: printf("any"); break;
-        case T_BOOL: printf("bool"); break;
-        case T_NULL: printf("null"); break;
-        case T_BYTE: printf("byte"); break;
-        case T_INT: printf("int"); break;
-        case T_NUMBER: printf("number"); break;
+        case T_ANY: return printf("any"); break;
+        case T_BOOL:return ("bool"); break;
+        case T_NULL:return ("null"); break;
+        case T_BYTE:return ("byte"); break;
+        case T_INT:return ("int"); break;
+        case T_NUMBER:return ("number"); break;
+        case T_REF:return ("ref<...>"); break;
         case T_PTR:
             switch (AS_PTR(value)->type) {
-                case PTR_METHOD: printf("method"); break;
-                case PTR_NATIVE_METHOD: printf("method(native)"); break;
-                case PTR_QLASS: printf("qlass<%s>", AS_QLASS(value)->name->chars); break;
-                case PTR_QLOSURE: printf("qlosure"); break;
-                case PTR_FUNQ: printf("funqtion"); break;
-                case PTR_OBJEQT: printf("instance<%s>", AS_OBJEQT(value)->qlass->name->chars); break;
-                case PTR_ARRAY: printf("array<any>[%d]", AS_ARRAY(value)->length); break;
-                //case PTR_LIST: printf("list<any>[%d]", AS_LIST(value)->length); break;
-                case PTR_NATIVE_FUNQ: printf("native"); break;
-                case PTR_STRING: printf("string"); break;
-                case PTR_PREVAL: printf("preval"); break;
+                case PTR_METHOD:return ("method"); break;
+                case PTR_NATIVE_METHOD:return ("method(native)"); break;
+                case PTR_QLASS:return AS_QLASS(value)->name->chars; break;
+                case PTR_QLOSURE:return ("qlosure"); break;
+                case PTR_FUNQ:return ("funqtion"); break;
+                case PTR_OBJEQT:return AS_OBJEQT(value)->qlass->name->chars; break;
+                case PTR_ARRAY:return "array"; //AS_ARRAY(value)->length; break;
+                case PTR_NATIVE_FUNQ:return ("native"); break;
+                case PTR_STRING:return ("string"); break;
+                case PTR_PREVAL:return ("preval"); break;
             }
             break;
     }

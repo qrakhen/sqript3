@@ -19,6 +19,6 @@ void initNativeMethods();
 Value nativeTime(int argCount, Value* args);
 Value nativeLength(int argCount, Value* args);
 Value nativeSplit(int argCount, Value* args); 
-Value runFile(int argCount, Value* args);
+Value nativeRunFile(int argCount, Value* args);
 
 #endif

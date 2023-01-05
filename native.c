@@ -1,7 +1,11 @@
+#include <stdio.h>
+
 #include "native.h"
 #include "object.h";
 #include "types.h";
 #include "console.h";
+#include "runner.h"
+#include "io.h";
 
 Register nativeMethods[512];
 
@@ -36,7 +40,7 @@ void initNativeMethods() {
     defineNative("length", nativeLength);
     defineNative("str", nativeToString);
     defineNative("clear", consoleClear);
-    defineNative("run", runFile);
+    defineNative("run", nativeRunFile);
 
     registerNativeMethod(PTR_STRING, "length", 0, 0, native_StringLength);
     registerNativeMethod(PTR_STRING, "indexOf", 1, 1, native_StringIndexOf);
@@ -68,7 +72,13 @@ Value nativeSplit(int argCount, Value* args) {
     return PTR_VAL(splitString(str, split));
 }
 
-Value runFile(int argCount, Value* args) {
+Value nativeRunFile(int argCount, Value* args) {
     if (argCount < 1) return NULL_VAL;
     if (!IS_STRING(args[0])) return NULL_VAL;
+    char* f = readFile(AS_STRING(args[0])->chars);
+    printf("%s", f);
+    interpret(f);
+    //runFile((AS_STRING(args[0])->chars), argCount > 1 ? AS_INT(args[1]) : SQR_OPTION_FLAG_NOFLAGS);
+    //runner.cursor = runner.stack;
+    return NULL_VAL;
 }

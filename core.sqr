@@ -1,0 +1,45 @@
+class LinkedList {
+	init() {
+		this.head = __Node(null);
+	}
+
+	add(value) {
+		*~ cur <~ this.head;
+		while (cur.next != null) {
+			cur = cur.next;
+		}
+		cur.next = __Node(value);
+	}
+
+	last() {
+		*~ current <~ this.head;
+		while(current.next != null) {
+			current <~ current.next;
+		}
+		return current;
+	}
+
+	length() {
+		*~ current <~ this.head;
+		*~ count <~ -1;
+		while(current != null) {
+			current <~ current.next;
+			count <~ count + 1;
+		}
+		return count;
+	}
+}
+
+class __Node {
+	init(value) {
+		this.value = value;
+		this.next = null;
+	}
+}
+
+*~ list <~ LinkedList();
+list:add(32);
+print list.length();
+list:add(100);
+print list.length();
+print list.last();

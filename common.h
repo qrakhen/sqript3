@@ -7,12 +7,23 @@
 #include <stdint.h>
 #include <string.h>
 
-#define OS_WIN true
-#define OS_UNIX false
+//#define __OS_NONE
+//#define __OS_UNIX
+//#define __OS_ANDROID
+//#define __OS_IOS
+//#define __OS_INTEGRATED
+//#define __OS_UNKNOWN
 
-#define __DBG_PRINT_STATEMENTS true
+#define __OS_WIN
+
+#define __OS_ARCH_86    1
+#define __OS_ARCH_64    2
+#define __OS_ARCH_ARM   3
+
+#define __DBG_PRINT_STATEMENTS false
 #define __DBG_PRINT_EXEC_TIME true
-#define __DBG_STACK true
+#define __DBG_SHOW_FULL_INFO false
+#define __DBG_STACK false
 #define __DBG_TRACE false
 #define __DBG_GCLOG false
 
@@ -27,6 +38,7 @@
 #define E_ERR_IO_NOFILE 50
 #define E_ERR_IO_BADFILE 51
 #define E_ERR_SYS 10
+#define E_ERR_SYS_NOT_SUPPORTED 11
 #define E_ERR 1
 
 #define SQR_OPTION_FLAG_NOFLAGS 0
@@ -48,8 +60,9 @@
 #define TIME_UNIT_H 4
 
 #define NOW ((double)clock() / CLOCKS_PER_SEC)
-#define NOW_MS ((double)clock() / ((double)CLOCKS_PER_SEC / 1000))
-#define NOW_NS ((double)clock() / ((double)CLOCKS_PER_SEC / 1000 / 1000))
+#define NOW_MS ((double)clock() / ((double)CLOCKS_PER_SEC * 0.001))
+#define NOW_NS ((double)clock() / ((double)CLOCKS_PER_SEC * 0.000001))
+#define TIME ((unsigned long)time());
 
 #define F formatToString
 

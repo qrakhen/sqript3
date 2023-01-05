@@ -896,7 +896,7 @@ static void ifStatement() {
     patchJump(jmpF);
 }
 
-static void printType() {
+static void typeOf() {
     expression();
     if (digester.current.type != TOKEN_EOF)
         consume(TOKEN_SEMICOLON, "missing ; after expression");
@@ -985,7 +985,7 @@ static void statement() {
     if (match(TOKEN_PRINT)) {
         printStatement();
     } else if (match(TOKEN_TYPEOF)) {
-        printType();
+        typeOf();
     } else if (match(TOKEN_FOR)) {
         forStatement();
     } else if (match(TOKEN_IF)) {

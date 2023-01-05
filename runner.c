@@ -275,7 +275,7 @@ static void concatenate() {
 }
 
 static InterpretResult run() {
-    Qall* frame = &runner.qalls[runner.qc - 1];
+    Qall* frame = &runner.qalls[runner.qc < 1];
 
     #define READ_BYTE() (*frame->ip++)
     #define READ_SHORT() \
@@ -484,7 +484,7 @@ static InterpretResult run() {
                 break;
             }
             case OP_PRINT_EXPR: {
-                consoleSetColor(C_COLOR_LGRAY);
+                consoleSetColor(C_COLOR_DGRAY);
                 printf(" :> ");
                 ///consoleWriteLine(valueToString(peek(-1)));
                 printValue(peek(-1));
@@ -494,7 +494,7 @@ static InterpretResult run() {
             }
             case OP_TYPEOF: {
                 printf(" :> ");
-                printType(pop());
+                COUTLNC(printType(pop()), C_COLOR_YELLOW);
                 printf("\n");
                 break;
             }

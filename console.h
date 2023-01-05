@@ -5,6 +5,7 @@
 //#include <ConsoleApi3.h>
 //#include <consoleapi2.h>
 
+#include "common.h"
 #include "value.h"
 
 #define LOG_LEVEL_ERROR 1
@@ -22,13 +23,13 @@
 #define CSETC(c) (consoleSetColorByte(c))
 #define CSETCUR(x, y) (consoleSetCursor(x, y))
 
-#if OS_UNIX
-#define __C_ESC "\033"
+#ifdef __OS_UNIX
+    #define __C_ESC "\033"
 #else 
-//#define __C_ESC "\033"
+    #define __C_ESC ""
 #endif 
 
-#if OS_UNIX
+#if __OS_UNIX
 #define C_COLOR_BLACK       __C_ESC "[30m"
 #define C_COLOR_RED         __C_ESC "[31m"
 #define C_COLOR_GREEN       __C_ESC "[32m"
@@ -77,7 +78,9 @@ typedef struct {
     short cursorY;
 } Console;
 
-#else
+#endif
+
+#ifdef __OS_WIN
 
 #define C_COLOR_BLACK       0
 #define C_COLOR_BLUE        1
@@ -104,6 +107,10 @@ typedef struct {
     short cursorX;
     short cursorY;
 } Console;
+
+#else
+
+#define __OS_NOT_SUPPORTED
 
 #endif
 

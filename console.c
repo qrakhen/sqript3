@@ -2,15 +2,15 @@
 #include <stdlib.h>
 #include <string.h>
 
-#ifndef OS_UNIX
-#include <windows.h>
-#endif
-
 #include "common.h"
 #include "segment.h"
 #include "debug.h"
 #include "runner.h"
 #include "console.h"
+
+#ifdef __OS_WIN
+    #include <windows.h>
+#endif
 
 #define __C_PREFIX_INPUT " <: "
 #define __C_PREFIT_OUTPUT " :> "
@@ -29,7 +29,7 @@ static void print(char* message) {
 }
 
 static void updateColor() {
-    #if OS_UNIX
+    #ifdef __OS_UNIX
         print(console.background);
         print(console.color);
     #else
@@ -51,7 +51,7 @@ void consoleRun(int flags) {
 }
 
 void consoleInit() {
-    #if OS_UNIX
+    #ifdef __OS_UNIX
         console.background = C_COLOR_BLACK;
         console.color = C_COLOR_WHITE;
     #else
@@ -98,7 +98,7 @@ void consoleWriteFormatted(char* format, ...) {
 
 void consoleWriteColor(char* message, Byte color) {
     Byte _color = console.color;
-    #if OS_UNIX
+    #ifdef __OS_UNIX
         print(color);
     #else 
         consoleSetColor(color);
@@ -120,7 +120,7 @@ void consoleResetColor() {
 }
 
 void consoleClear() {
-    #if OS_UNIX
+    #if __ACTIVE_OS_UNIX
         system("clear");
     #else
         system("cls");

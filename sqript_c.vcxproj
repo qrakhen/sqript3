@@ -180,9 +180,15 @@
     <ClInclude Include="value.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="core.sqr" />
+    <None Include="core.sqr">
+      <DeploymentContent>true</DeploymentContent>
+      <FileType>Script</FileType>
+    </None>
     <None Include="README.md" />
-    <None Include="test.sqr" />
+    <None Include="test.sqr">
+      <DeploymentContent>true</DeploymentContent>
+      <FileType>Script</FileType>
+    </None>
     <None Include="TODO.md" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
