@@ -7,7 +7,7 @@
 #include "runner.h"
 #include "io.h";
 
-Register nativeMethods[512];
+Register nativeMethods[1024];
 
 void registerNativeMethod(ValueType type, char* name, Byte minArgs, Byte maxArgs, NativeMethod member) {
     PtrNativeMethod* fn = newNativeMethod(member);
