@@ -1,5 +1,4 @@
 # TODOS
-
 ## type safe stuff
 mode_dyn, mode_strict, mode_const
 

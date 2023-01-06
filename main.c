@@ -1,3 +1,7 @@
+#define _TIMESPEC_DEFINED
+#define PTW32_STATIC_LIB 
+
+#include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -25,8 +29,15 @@ int main(int argc, const char* argv[]) {
     initRunner();
     consoleInit();
 
+    /*pthread_t thread_id;
+    printf("Before Thread\n");
+    pthread_create(&thread_id, NULL, consoleRun, NULL);
+    pthread_join(thread_id, NULL);
+    printf("After Thread\n");
+    exit(0);*/
+
     //runFile("./core.sqr", __SQR_DEFAULT_FLAGS);
-    //runFile("./test.sqr", __SQR_DEFAULT_FLAGS);
+    runFile("./test.sqr", __SQR_DEFAULT_FLAGS);
 
     if (argc == 1) {
         consoleRun(__SQR_DEFAULT_FLAGS);
