@@ -669,13 +669,11 @@ InterpretResult interpret(const char* source) {
         double te = NOW_MS;
         double t1 = tc - ti;
         double t2 = te - tc;
-        double t3 = t1 + t2;
         
         COUTLNC(F(
-                " :~ T: %s (%s : %s)", 
-                formatTime(t3, TIME_UNIT_MS), 
-                formatTime(t1, TIME_UNIT_MS),
-                formatTime(t2, TIME_UNIT_MS)),
+                " :~ Tx: %s | Td: %s", 
+                formatTime(t2, TIME_UNIT_MS), 
+                formatTime(t1, TIME_UNIT_MS)),
             C_COLOR_DGRAY);
     #endif
     return error;
