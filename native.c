@@ -31,6 +31,11 @@ static Value nativeToString(int argCount, Value* args) {
     return PTR_VAL(makeString(str, strlen(str)));
 }
 
+static Value nativeTest(int argCount, Value* args) {
+    if (argCount != 1) return NULL_VAL;
+    return NUMBER_VAL(AS_NUMBER(args[0]) + 1);
+}
+
 void initNativeMethods() {
     for (int i = 0; i < 512; i++) {
         initRegister(&nativeMethods[i]);
@@ -41,6 +46,7 @@ void initNativeMethods() {
     defineNative("str", nativeToString);
     defineNative("clear", consoleClear);
     defineNative("run", nativeRunFile);
+    defineNative("t", nativeTest);
 
     registerNativeMethod(PTR_STRING, "length", 0, 0, native_StringLength);
     registerNativeMethod(PTR_STRING, "indexOf", 1, 1, native_StringIndexOf);
