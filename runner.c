@@ -17,6 +17,12 @@
 
 Runner runner;
 
+typedef int (*OperationCallback)();
+
+typedef struct {
+    OperationCallback fn;
+} Operation;
+
 static void resetStack() {
     runner.cursor = runner.stack;
     runner.qc = 0;
@@ -110,7 +116,9 @@ static bool callValue(Value callee, int argCount) {
             case PTR_NATIVE_METHOD: {
                 PtrTargetedNativeMethod* targeted = AS_TNMETHOD(callee);
                 NativeMethod fn = targeted->method->callback;
-                Value result = fn(targeted->target, argCount, runner.cursor - (argCount + 1));
+                //runner.cursor[-(argCount + 2)] = targeted->target;
+                Value result = fn(targeted->target, argCount, runner.cursor - (argCount + 1)); //v - (argCount + 1
+                //runner.cursor -= argCount + 2;
                 push(result);
                 return true;
             }
@@ -663,7 +671,9 @@ InterpretResult interpret(const char* source) {
         double tc = NOW_MS;
     #endif
 
+    double t = NOW_MS;
     int error = run();
+    printf("%.4f", NOW_MS - t);
 
     #if __DBG_PRINT_EXEC_TIME
         double te = NOW_MS;

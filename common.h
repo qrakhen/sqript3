@@ -23,7 +23,7 @@
 #define __DBG_PRINT_STATEMENTS false
 #define __DBG_PRINT_EXEC_TIME true
 #define __DBG_SHOW_FULL_INFO false
-#define __DBG_STACK false
+#define __DBG_STACK true
 #define __DBG_TRACE false
 #define __DBG_GCLOG false
 
@@ -62,6 +62,7 @@
 #define NOW ((double)clock() / CLOCKS_PER_SEC)
 #define NOW_MS ((double)clock() / ((double)CLOCKS_PER_SEC * 0.001))
 #define NOW_NS ((double)clock() / ((double)CLOCKS_PER_SEC * 0.000001))
+#define MEASURE(f) ( double t = NOW_MS; (f); printf("%.4f", NOW_MS - t); )
 #define TIME ((unsigned long)time());
 
 #define F formatToString

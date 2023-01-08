@@ -48,3 +48,16 @@ print 'fib(16)';
 print fib(16);
 print 'fib(24)';
 print fib(24);
+
+fq _fib(n) {
+	*~ r <~ 1;
+	*~ s <~ 0;
+	*~ a <~ 0;
+	while(n > 1) {
+		s <~ r + a;
+		a <~ r;
+		r <~ s;
+		n <~ n - 1;
+	}
+	<: r;
+}
