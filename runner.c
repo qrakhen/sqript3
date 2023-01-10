@@ -331,8 +331,8 @@ static InterpretResult run() {
         #endif
 
         Byte instruction;
-        if (frame->ip == NULL)
-            return SQR_INTRP_OK;
+        //if (frame->ip == NULL)
+            //return SQR_INTRP_OK;
         switch (instruction = READ_BYTE()) {
             case OP_CONSTANT: {
                 Value constant = READ_CONSTANT();
@@ -495,9 +495,9 @@ static InterpretResult run() {
             }
             case OP_PRINT_EXPR: {
                 consoleSetColor(C_COLOR_DGRAY);
-                printf(" :> ");
+                printf(" ~: ");
                 ///consoleWriteLine(valueToString(peek(-1)));
-                printValue(peek(-1));
+                printValue(peek(0));
                 printf("\n");
                 consoleResetColor();
                 break;
@@ -671,9 +671,7 @@ InterpretResult interpret(const char* source) {
         double tc = NOW_MS;
     #endif
 
-    double t = NOW_MS;
     int error = run();
-    printf("%.4f", NOW_MS - t);
 
     #if __DBG_PRINT_EXEC_TIME
         double te = NOW_MS;

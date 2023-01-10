@@ -5,6 +5,9 @@
 
 #include "common.h";
 
+int SQR_OPTION_FLAGS = SQR_OPTION_FLAG_NOFLAGS;
+int SQR_DEBUG_FLAGS = SQR_DBG_FLAG_PRINT_STATEMENTS | SQR_DBG_FLAG_PRINT_EXEC_TIME;
+
 static char* TIME_UNIT[5] = { "ns", "ms", "s", "m", "h" };
 
 char* formatTime(double v, int unit) {

@@ -228,7 +228,7 @@ static Funqtion* endCompiler() {
     emitReturn();
     Funqtion* function = current->function;
 
-    #if __DBG_STACK
+    #if SQR_DBG_FLAG_ENABLED(SQR_DBG_FLAG_TRACE)
     if (!digester.failed) {
         __dbgDissect(currentSegment(), function->name != NULL ? function->name->chars : "<script>");
     }
@@ -831,10 +831,10 @@ static void expressionStatement() {
     expression();
     if (digester.current.type != TOKEN_EOF)
         consume(TOKEN_SEMICOLON, "missing ; after expression");
-    emitByte(OP_POP);
-    #if __DBG_PRINT_STATEMENTS;
+    #if SQR_DBG_FLAG_ENABLED(SQR_DBG_FLAG_PRINT_STATEMENTS);
         emitByte(OP_PRINT_EXPR);
     #endif
+    emitByte(OP_POP);
 }
 
 static void forStatement() {
