@@ -32,6 +32,8 @@ typedef enum {
     OP_BITWISE_OR,
     OP_BITWISE_XOR,
     OP_BITWISE_NOT,
+    OP_INCREMENT,
+    OP_DECREMENT,
     OP_NOT,
     OP_NEGATE,
     OP_ARRAY,

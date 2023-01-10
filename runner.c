@@ -306,6 +306,16 @@ static InterpretResult run() {
             push(valueType(a op b)); \
         } while (false)
 
+    #define CREMENT_OP(valueType, op) \
+        do { \
+            if (!IS_NUMBER(peek(0))) { \
+                runtimeError("pperand must be a number"); \
+                return SQR_INTRP_ERROR_RUNTIME; \
+            } \
+            double a = AS_NUMBER(pop()); \
+            push(valueType(a op)); \
+        } while (false)
+
     #define BITWISE_OP(valueType, op) \
         do { \
             if (!MAYBE_INT(peek(0)) || !MAYBE_INT(peek(1))) { \
@@ -464,6 +474,8 @@ static InterpretResult run() {
             case OP_SUBTRACT:       BINARY_OP(NUMBER_VAL, -); break;
             case OP_MULTIPLY:       BINARY_OP(NUMBER_VAL, *); break;
             case OP_DIVIDE:         BINARY_OP(NUMBER_VAL, /); break;
+            case OP_INCREMENT:      CREMENT_OP(NUMBER_VAL, ++ ); break;
+            case OP_DECREMENT:      CREMENT_OP(NUMBER_VAL, -- ); break;
             case OP_BITWISE_AND:    BITWISE_OP(NUMBER_VAL, &); break;
             case OP_BITWISE_OR:     BITWISE_OP(NUMBER_VAL, |); break;
             case OP_BITWISE_XOR:    BITWISE_OP(NUMBER_VAL, ^); break;

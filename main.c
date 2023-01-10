@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 #include "common.h"
 #include "segment.h"
@@ -11,6 +12,24 @@
 #include "runner.h"
 #include "console.h"
 #include "io.h"
+#include "thread.h"
+
+
+/*
+
+static void* myThreadFun(void* vargp) {
+    printf("Printing GeeksQuiz from Thread \n");
+    return NULL;
+}
+
+static  int test() {
+    pthread_t thread_id;
+    printf("Before Thread\n");
+    pthread_create(&thread_id, NULL, myThreadFun, NULL);
+    pthread_join(thread_id, NULL);
+    printf("After Thread\n");
+    exit(0);
+}*/
 
 int main(int argc, const char* argv[]) {
     #ifdef __OS_NOT_SUPPORTED
@@ -22,16 +41,8 @@ int main(int argc, const char* argv[]) {
         printf("flags not supported (yet)\n");
         return 1;
     }
-
     initRunner();
     consoleInit();
-
-    /*thread_t thread_id;
-    printf("Before Thread\n");
-    pthread_create(&thread_id, NULL, consoleRun, NULL);
-    pthread_join(thread_id, NULL);
-    printf("After Thread\n");
-    exit(0);*/
 
     //runFile("./core.sqr", __SQR_DEFAULT_FLAGS);
     runFile("./test.sqr", SQR_OPTION_FLAGS);
@@ -45,4 +56,3 @@ int main(int argc, const char* argv[]) {
     freeRunner();
     return 0;
 }
-

@@ -145,5 +145,6 @@
     <None Include="core.sqr">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="packages.config" />
   </ItemGroup>
 </Project>

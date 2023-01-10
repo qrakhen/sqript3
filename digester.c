@@ -424,6 +424,8 @@ static void __BIN(bool canAssign) {
         case TOKEN_BITWISE_OR :   emitByte(OP_BITWISE_OR); break;
         case TOKEN_BITWISE_XOR:   emitByte(OP_BITWISE_XOR); break;
         case TOKEN_BITWISE_NOT:   emitByte(OP_BITWISE_NOT); break;
+        case TOKEN_INCREMENT:     emitByte(OP_INCREMENT); break;
+        case TOKEN_DECREMENT:     emitByte(OP_DECREMENT); break;
         default: return;
     }
 }
@@ -597,6 +599,11 @@ static void __MOD(bool canAssign) {
     }
 }
 
+static void __CDOT(bool canAssign) {
+    __CUR(canAssign);
+    __DOT(canAssign);
+}
+
 WeightRule rules[] = {
     [TOKEN_GROUP_OPEN]      = { __GRP,  __CAL,  W_CALL },
     [TOKEN_GROUP_CLOSE]     = { NULL,   NULL,   W_NONE },
@@ -606,11 +613,13 @@ WeightRule rules[] = {
     [TOKEN_ARRAY_CLOSE]     = { NULL,   NULL,   W_NONE },
     [TOKEN_ARRAY_ADD]       = { NULL,   NULL,   W_NONE },
     [TOKEN_ARRAY_REMOVE]    = { NULL,   NULL,   W_NONE },
-    [TOKEN_COLON]           = { NULL,   __DOT,  W_CALL },
+    [TOKEN_COLON]           = { NULL,  __DOT,   W_CALL },
     [TOKEN_COMMA]           = { NULL,   NULL,   W_NONE },
     [TOKEN_DOT]             = { NULL,   __DOT,  W_CALL },
     [TOKEN_MINUS]           = { __MOD,  __BIN,  W_TERM },
     [TOKEN_PLUS]            = { NULL,   __BIN,  W_TERM },
+    [TOKEN_INCREMENT]       = { __BIN,   NULL,  W_TERM },
+    [TOKEN_DECREMENT]       = { __BIN,   NULL,  W_TERM },
     [TOKEN_BITWISE_AND]     = { NULL,   __BIN,  W_TERM },
     [TOKEN_BITWISE_OR]      = { NULL,   __BIN,  W_TERM },
     [TOKEN_BITWISE_XOR]     = { NULL,   __BIN,  W_TERM },

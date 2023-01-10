@@ -7,7 +7,7 @@
 typedef struct {
     String* key;
     Value value;
-    bool typeStrict; // hier oder bei value???
+    TypeMode mode;
 } Entry;
 
 typedef struct {
