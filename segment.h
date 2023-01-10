@@ -36,6 +36,7 @@ typedef enum {
     OP_DECREMENT,
     OP_NOT,
     OP_NEGATE,
+    OP_REF,
     OP_ARRAY,
     OP_ARRAY_GET,
     OP_ARRAY_SET,

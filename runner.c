@@ -496,6 +496,10 @@ static InterpretResult run() {
                 }
                 push(NUMBER_VAL(-AS_NUMBER(pop())));
                 break;
+            case OP_REF:
+                Value r = pop();
+                push(REF_VAL(r));
+                break;
             case OP_PRINT: {
                 consoleSetColor(C_COLOR_GREEN);
                 printf(" :> ");

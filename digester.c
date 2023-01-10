@@ -595,6 +595,7 @@ static void __MOD(bool canAssign) {
     switch (operatorType) {
         case TOKEN_BANG: emitByte(OP_NOT); break;
         case TOKEN_MINUS: emitByte(OP_NEGATE); break;
+        case TOKEN_BITWISE_AND: emitByte(OP_REF); break;
         default: ;
     }
 }
@@ -618,9 +619,9 @@ WeightRule rules[] = {
     [TOKEN_DOT]             = { NULL,   __DOT,  W_CALL },
     [TOKEN_MINUS]           = { __MOD,  __BIN,  W_TERM },
     [TOKEN_PLUS]            = { NULL,   __BIN,  W_TERM },
-    [TOKEN_INCREMENT]       = { __BIN,   __BIN,  W_TERM },
-    [TOKEN_DECREMENT]       = { __BIN,   __BIN,  W_TERM },
-    [TOKEN_BITWISE_AND]     = { NULL,   __BIN,  W_TERM },
+    [TOKEN_INCREMENT]       = { __BIN,   __BIN,  W_CALL },
+    [TOKEN_DECREMENT]       = { __BIN,   __BIN,  W_CALL },
+    [TOKEN_BITWISE_AND]     = { __MOD,   __BIN,  W_TERM },
     [TOKEN_BITWISE_OR]      = { NULL,   __BIN,  W_TERM },
     [TOKEN_BITWISE_XOR]     = { NULL,   __BIN,  W_TERM },
     [TOKEN_BITWISE_NOT]     = { __MOD,  NULL,   W_TERM },
