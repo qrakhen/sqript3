@@ -79,18 +79,22 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
     <CopyLocalDeploymentContent>true</CopyLocalDeploymentContent>
+    <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <CopyLocalDeploymentContent>true</CopyLocalDeploymentContent>
+    <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
     <CopyLocalDeploymentContent>true</CopyLocalDeploymentContent>
+    <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
     <CopyLocalDeploymentContent>true</CopyLocalDeploymentContent>
+    <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -252,6 +256,7 @@
     <ClInclude Include="native.h" />
     <ClInclude Include="object.h" />
     <ClInclude Include="reader.h" />
+    <ClInclude Include="resource.h" />
     <ClInclude Include="runner.h" />
     <ClInclude Include="segment.h" />
     <ClInclude Include="register.h" />
@@ -272,6 +277,17 @@
       <FileType>Script</FileType>
     </None>
     <None Include="TODO.md" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="..\..\..\Downloads\icon.bmp">
+      <DeploymentContent>true</DeploymentContent>
+    </Image>
+    <Image Include="icon1.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="sqript_c.rc">
+      <DeploymentContent>true</DeploymentContent>
+    </ResourceCompile>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
