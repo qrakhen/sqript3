@@ -20,12 +20,12 @@
 #define __OS_ARCH_64    2
 #define __OS_ARCH_ARM   3
 
-#define __DBG_PRINT_STATEMENTS false
+#define __DBG_PRINT_STATEMENTS true
 #define __DBG_PRINT_EXEC_TIME true
 #define __DBG_SHOW_FULL_INFO false
-#define __DBG_STACK true
-#define __DBG_TRACE true
-#define __DBG_GCLOG true
+#define __DBG_STACK false
+#define __DBG_TRACE false
+#define __DBG_GCLOG false
 
 #define __CLI_SHOW_TIME false
 
