@@ -196,7 +196,8 @@ Token readToken() {
                 match('=') ? TOKEN_BANG_EQUAL : TOKEN_BANG);
         case '=':
             return makeToken(
-                match('=') ? TOKEN_EQUAL_EQUAL : TOKEN_EQUAL);
+                match('=') ? TOKEN_EQUAL_EQUAL : 
+                match('&') ? TOKEN_REF : TOKEN_EQUAL);
         case '>': return makeToken(
             match('=') ? TOKEN_GREATER_EQUAL : (
                 match('>') ? TOKEN_BITWISE_RIGHT : TOKEN_GREATER));
