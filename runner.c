@@ -17,6 +17,12 @@
 
 Runner runner;
 
+typedef int (*OperationCallback)();
+
+typedef struct {
+    OperationCallback fn;
+} Operation;
+
 static void resetStack() {
     runner.cursor = runner.stack;
     runner.qc = 0;
@@ -112,7 +118,7 @@ static bool callValue(Value callee, int argCount) {
                 NativeMethod fn = targeted->method->callback;
                 //runner.cursor[-(argCount + 2)] = targeted->target;
                 Value result = fn(targeted->target, argCount, runner.cursor - (argCount + 1)); //v - (argCount + 1
-                //runner.cursor -= argCount;
+                //runner.cursor -= argCount + 2;
                 push(result);
                 return true;
             }
