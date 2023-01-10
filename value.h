@@ -101,9 +101,10 @@ typedef struct {
 #define IS_NUMBER(v)        (((v).type & T_NUMBER) > 0)
 #define MAYBE_INT(v)        (IS_NUMBER(v) && (abs(ceil(AS_NUMBER(v)) - floor(AS_NUMBER(v))) == 0))
 #define IS_PTR(v)           (((int)(v).type & T_PTR) > 0)
-#define IS_REF(v)           (((int)(v).type & t_REF) > 0)
+#define IS_REF(v)           (((int)(v).type & T_REF) > 0)
 
 #define AS_PTR(value)       ((value).v.ptr)
+#define AS_REF(value)       ((value).v.ref)
 #define AS_BOOL(value)      ((value).v.boolean)
 #define AS_BYTE(value)      ((value).v.byte)
 #define AS_NUMBER(value)    ((value).v.number)
@@ -116,7 +117,7 @@ typedef struct {
 #define NUMBER_VAL(value) ((Value){ T_NUMBER,   TM_DYN, { .number = value }})
 #define INT_VAL(value)    ((Value){ T_INT,      TM_DYN, { .integer = value }})
 #define PTR_VAL(object)   ((Value){ T_PTR,      TM_DYN, { .ptr = (Ptr*)object }})
-#define REF_VAL(value)    ((Value){ T_REF,      TM_DYN, { .ref = (Value*)value }})
+#define REF_VAL(value)    ((Value){ T_REF,      TM_DYN, { .ref = (Value*)&value }})
 
 typedef struct {
     int capacity;
