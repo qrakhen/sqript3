@@ -20,6 +20,8 @@ typedef enum {
     
     TOKEN_MINUS, 
     TOKEN_PLUS,
+    TOKEN_DECREMENT,
+    TOKEN_INCREMENT,
 
     TOKEN_SLASH, 
     TOKEN_STAR,

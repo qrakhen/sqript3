@@ -182,12 +182,13 @@ Token readToken() {
         case ',': return makeToken(TOKEN_COMMA);
         case '.': return makeToken(match('~') ? TOKEN_THIS : TOKEN_DOT);
         case ':': return makeToken(match(':') ? TOKEN_PRINT : TOKEN_COLON);
-        case '-': return makeToken(TOKEN_MINUS);
-        case '+': return makeToken(TOKEN_PLUS);
+        case '-': return match('-') ? makeToken(TOKEN_DECREMENT) : makeToken(TOKEN_MINUS);
+        case '+': return match('+') ? makeToken(TOKEN_INCREMENT) : makeToken(TOKEN_PLUS);
         case '/': return makeToken(TOKEN_SLASH);
         case '*': return match('~') ? makeToken(TOKEN_VAR) : makeToken(TOKEN_STAR);
         case '^': return makeToken(TOKEN_BITWISE_XOR);
-        case '~': return makeToken(TOKEN_BITWISE_NOT);
+        case '~': return match('?') ? makeToken(TOKEN_ELSE) : makeToken(TOKEN_BITWISE_NOT);
+        case '?': return match('~') ? makeToken(TOKEN_IF) : makeToken(TOKEN_ERROR);
         case '&': return makeToken(match('&') ? TOKEN_AND : TOKEN_BITWISE_AND);
         case '|': return makeToken(match('|') ? TOKEN_OR : TOKEN_BITWISE_OR);
         case '!':

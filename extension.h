@@ -1,8 +1,6 @@
 #ifndef sqript_extension_h
 #define sqript_extension_h
 
-#include <stdarg.h>
-
 #include "value.h"
 
 typedef Value(*ExtensionFunctionCallback)(int argCount, Value* args);
