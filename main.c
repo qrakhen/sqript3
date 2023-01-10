@@ -12,8 +12,6 @@
 #include "console.h"
 #include "io.h"
 
-uint16_t __SQR_DEFAULT_FLAGS = SQR_OPTION_FLAG_NOFLAGS;
-
 int main(int argc, const char* argv[]) {
     #ifdef __OS_NOT_SUPPORTED
         sprtinf(stderr, "%s", "OS NOT SUPPORTED");
@@ -36,12 +34,12 @@ int main(int argc, const char* argv[]) {
     exit(0);*/
 
     //runFile("./core.sqr", __SQR_DEFAULT_FLAGS);
-    runFile("./test.sqr", __SQR_DEFAULT_FLAGS);
+    runFile("./test.sqr", SQR_OPTION_FLAGS);
 
     if (argc == 1) {
-        consoleRun(__SQR_DEFAULT_FLAGS);
+        consoleRun(SQR_OPTION_FLAGS);
     } else if (argc >= 2) {
-        runFile(argv[1], __SQR_DEFAULT_FLAGS);
+        runFile(argv[1], SQR_OPTION_FLAGS);
     }
 
     freeRunner();
