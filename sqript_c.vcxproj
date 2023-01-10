@@ -106,7 +106,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <AssemblerOutput>AssemblyAndMachineCode</AssemblerOutput>
-      <Optimization>MaxSpeed</Optimization>
+      <Optimization>Disabled</Optimization>
       <WholeProgramOptimization>false</WholeProgramOptimization>
       <ShowIncludes>true</ShowIncludes>
       <AdditionalIncludeDirectories>C:\Users\filos\projects\sqript_c\sqript_c\lib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -116,7 +116,7 @@
       <AdditionalOptions>
       </AdditionalOptions>
       <OpenMPSupport>true</OpenMPSupport>
-      <CallingConvention>FastCall</CallingConvention>
+      <CallingConvention>Cdecl</CallingConvention>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -169,7 +169,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <AssemblerOutput>AssemblyAndMachineCode</AssemblerOutput>
-      <Optimization>MaxSpeed</Optimization>
+      <Optimization>Disabled</Optimization>
       <WholeProgramOptimization>false</WholeProgramOptimization>
       <ShowIncludes>true</ShowIncludes>
       <AdditionalIncludeDirectories>C:\Users\filos\projects\sqript_c\sqript_c\lib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -179,7 +179,7 @@
       <AdditionalOptions>
       </AdditionalOptions>
       <OpenMPSupport>true</OpenMPSupport>
-      <CallingConvention>FastCall</CallingConvention>
+      <CallingConvention>Cdecl</CallingConvention>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>

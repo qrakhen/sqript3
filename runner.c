@@ -116,9 +116,8 @@ static bool callValue(Value callee, int argCount) {
             case PTR_NATIVE_METHOD: {
                 PtrTargetedNativeMethod* targeted = AS_TNMETHOD(callee);
                 NativeMethod fn = targeted->method->callback;
-                //runner.cursor[-(argCount + 2)] = targeted->target;
-                Value result = fn(targeted->target, argCount, runner.cursor - (argCount + 1)); //v - (argCount + 1
-                //runner.cursor -= argCount + 2;
+                Value result = fn(targeted->target, argCount, runner.cursor - (argCount + 1));
+                runner.cursor -= argCount + 2;
                 push(result);
                 return true;
             }
@@ -405,6 +404,7 @@ static InterpretResult run() {
                     Value value = peek(0);
                     PtrTargetedNativeMethod* method = bindNativeMethod(value, name);
                     if (method != NULL) {
+                        pop();
                         pop();
                         push(PTR_VAL(method));
                         break;

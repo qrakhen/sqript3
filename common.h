@@ -23,8 +23,8 @@
 #define __DBG_PRINT_STATEMENTS false
 #define __DBG_PRINT_EXEC_TIME true
 #define __DBG_SHOW_FULL_INFO false
-#define __DBG_STACK false
-#define __DBG_TRACE false
+#define __DBG_STACK true
+#define __DBG_TRACE true
 #define __DBG_GCLOG true
 
 #define __CLI_SHOW_TIME false
