@@ -79,6 +79,7 @@ void printValue(Value value) {
             break;
         case T_REF:
             printf("&");
+            Value x = *AS_REF(value);
             printValue(*AS_REF(value));
         case T_PTR: 
             if (matchPtrType(value, PTR_ARRAY)) {
