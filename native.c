@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <math.h>
 
 #include "native.h"
 #include "object.h";
@@ -31,6 +32,21 @@ static Value nativeToString(int argCount, Value* args) {
     return PTR_VAL(makeString(str, strlen(str)));
 }
 
+static Value nativeSin(int argCount, Value* args) {
+    if (argCount != 1) return NULL_VAL;
+    return NUMBER_VAL(sin(AS_NUMBER(args[0])));
+}
+
+static Value nativeCos(int argCount, Value* args) {
+    if (argCount != 1) return NULL_VAL;
+    return NUMBER_VAL(cos(AS_NUMBER(args[0])));
+}
+
+static Value nativeTan(int argCount, Value* args) {
+    if (argCount != 1) return NULL_VAL;
+    return NUMBER_VAL(tan(AS_NUMBER(args[0])));
+}
+
 void initNativeMethods() {
     for (int i = 0; i < 512; i++) {
         initRegister(&nativeMethods[i]);
@@ -41,6 +57,12 @@ void initNativeMethods() {
     defineNative("str", nativeToString);
     defineNative("clear", consoleClear);
     defineNative("run", nativeRunFile);
+
+    defineNative("sin", nativeSin);
+    defineNative("cos", nativeCos);
+    defineNative("tan", nativeTan);
+
+    registerSet(&runner.globals, "PI", NUMBER_VAL(3.141));
 
     registerNativeMethod(PTR_STRING, "length", 0, 0, native_StringLength);
     registerNativeMethod(PTR_STRING, "indexOf", 1, 1, native_StringIndexOf);
@@ -78,7 +100,24 @@ Value nativeRunFile(int argCount, Value* args) {
     char* f = readFile(AS_STRING(args[0])->chars);
     interpret(f);
     free(f);
-    //runFile((AS_STRING(args[0])->chars), argCount > 1 ? AS_INT(args[1]) : SQR_OPTION_FLAG_NOFLAGS);
-    //runner.cursor = runner.stack;
     return NULL_VAL;
 }
+/*
+Value xxx(int argCount, Value* args) {
+    #include <windows.h> 
+    #include <gl/GLU.h> 
+    #include <gl/GL.h> 
+        glClearColor(0.0f, 0.0f, 0.0f, 1.0f); // Set background color to black and opaque
+        glClear(GL_COLOR_BUFFER_BIT);         // Clear the color buffer (background)
+
+        // Draw a Red 1x1 Square centered at origin
+        glBegin(GL_QUADS);              // Each set of 4 vertices form a quad
+        glColor3f(1.0f, 0.0f, 0.0f); // Red
+        glVertex2f(-0.5f, -0.5f);    // x, y
+        glVertex2f(0.5f, -0.5f);
+        glVertex2f(0.5f, 0.5f);
+        glVertex2f(-0.5f, 0.5f);
+        glEnd();
+
+        
+}*/
