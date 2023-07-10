@@ -11,6 +11,18 @@ class LinkedList {
 		cur.next = __Node(value);
 	}
 
+	get(index) {
+		*~ cur <~ this.head;
+		*~ i <~ 0;
+		while (i <= index) {
+			i <~ i + 1;
+			cur <~ cur.next;
+			if (cur == null)
+				return null;
+		}
+		return cur.value;
+	}
+
 	last() {
 		*~ current <~ this.head;
 		while(current.next != null) {

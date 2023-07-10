@@ -250,6 +250,13 @@ static void defineMethod(String* name) {
     pop();
 }
 
+static void defineStaticMethod(String* name) {
+    Value member = peek(0);
+    Qlass* qlass = AS_QLASS(peek(1));
+    registerSet(&qlass->methods, name, member);
+    pop();
+}
+
 static void defineProperty(String* name) {
     Value member = peek(0);
     Qlass* qlass = AS_QLASS(peek(1));
@@ -652,6 +659,10 @@ static InterpretResult run() {
             }
             case OP_METHOD:
                 defineMethod(READ_STRING());
+                break;
+            case OP_STATIC_METHOD:
+                pop();
+                defineStaticMethod(READ_STRING());
                 break;
             case OP_PROPERTY:
                 defineProperty(READ_STRING());
