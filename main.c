@@ -36,7 +36,6 @@ int main(int argc, const char* argv[]) {
         sprtinf(stderr, "%s", "OS NOT SUPPORTED");
         exit(E_ERR_SYS_NOT_SUPPORTED);
     #endif
-
     if (argc > 3) {
         printf("flags not supported (yet)\n");
         return 1;

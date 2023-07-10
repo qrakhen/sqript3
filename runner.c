@@ -474,8 +474,8 @@ static InterpretResult run() {
             case OP_SUBTRACT:       BINARY_OP(NUMBER_VAL, -); break;
             case OP_MULTIPLY:       BINARY_OP(NUMBER_VAL, *); break;
             case OP_DIVIDE:         BINARY_OP(NUMBER_VAL, /); break;
-            case OP_INCREMENT:      CREMENT_OP(NUMBER_VAL, ++ ); break;
-            case OP_DECREMENT:      CREMENT_OP(NUMBER_VAL, -- ); break;
+            case OP_INCREMENT:      CREMENT_OP(NUMBER_VAL, ++); break;
+            case OP_DECREMENT:      CREMENT_OP(NUMBER_VAL, --); break;
             case OP_BITWISE_AND:    BITWISE_OP(NUMBER_VAL, &); break;
             case OP_BITWISE_OR:     BITWISE_OP(NUMBER_VAL, |); break;
             case OP_BITWISE_XOR:    BITWISE_OP(NUMBER_VAL, ^); break;
@@ -486,6 +486,8 @@ static InterpretResult run() {
                 }
                 push(NUMBER_VAL(~(Int)AS_NUMBER(pop())));
                 break;
+            case OP_BITWISE_LEFT:   BITWISE_OP(NUMBER_VAL, <<); break;
+            case OP_BITWISE_RIGHT:  BITWISE_OP(NUMBER_VAL, >>); break;
             case OP_NOT:
                 push(BOOL_VAL(isFalsey(pop())));
                 break;

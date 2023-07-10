@@ -120,8 +120,7 @@ void printObject(Value value) {
             printFunction(AS_FUNQ(value));
             break;
         case PTR_OBJEQT:
-            printf("%s instance",
-                   AS_OBJEQT(value)->qlass->name->chars);
+            printf("%s instance", AS_OBJEQT(value)->qlass->name->chars);
             break;        
         case PTR_NATIVE_FUNQ:
             printf("<native fn>");
