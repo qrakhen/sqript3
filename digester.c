@@ -57,7 +57,8 @@ typedef enum {
     F_FUNC,
     F_INIT,
     F_INST,
-    F_CODE
+    F_CODE,
+    F_ANON
 } FunctionType;
 
 typedef struct Compiler {
@@ -607,6 +608,50 @@ static void __CDOT(bool canAssign) {
     __DOT(canAssign);
 }
 
+static void block() {
+    while (!check(TOKEN_CONTEXT_CLOSE) && !check(TOKEN_EOF))
+        declaration();
+    consume(TOKEN_CONTEXT_CLOSE, "missing } after bracket block");
+}
+
+static void function(FunctionType type) {
+    Compiler compiler;
+    initCompiler(&compiler, type);
+    beginScope();
+
+    consume(TOKEN_GROUP_OPEN, "expected ( after funq declaration");
+    if (!check(TOKEN_GROUP_CLOSE)) {
+        do {
+            current->function->argc++;
+            if (current->function->argc > 255) {
+                errorAtCurrent("Can't have more than 255 parameters.");
+            }
+            Byte constant = parseVariable("Expect parameter name.");
+            defineVariable(constant);
+        } while (match(TOKEN_COMMA));
+    }
+    consume(TOKEN_GROUP_CLOSE, "Expect ')' after parameters.");
+    if (!check(TOKEN_CONTEXT_OPEN)) {
+        statement();
+    } else {
+        consume(TOKEN_CONTEXT_OPEN, "Expect '{' before function body.");
+        block();
+    }
+
+    Funqtion* function = endCompiler();
+
+    emitBytes(OP_CLOSURE, makeConstant(PTR_VAL(function)));
+
+    for (int i = 0; i < function->revalCount; i++) {
+        emitByte(compiler.upvalues[i].isLocal ? 1 : 0);
+        emitByte(compiler.upvalues[i].index);
+    }
+}
+
+static void __FQ(bool canAssign) {
+    function(F_ANON);
+}
+
 WeightRule rules[] = {
     [TOKEN_GROUP_OPEN]      = { __GRP,  __CAL,  W_CALL },
     [TOKEN_GROUP_CLOSE]     = { NULL,   NULL,   W_NONE },
@@ -648,7 +693,7 @@ WeightRule rules[] = {
     [TOKEN_ELSE]            = { NULL,   NULL,   W_NONE },
     [TOKEN_FALSE]           = { __LIT,  NULL,   W_NONE },
     [TOKEN_FOR]             = { NULL,   NULL,   W_NONE },
-    [TOKEN_FUNCTION]        = { NULL,   NULL,   W_NONE },
+    [TOKEN_FUNCTION]        = { __FQ,   NULL,   W_NONE },
     [TOKEN_IF]              = { NULL,   NULL,   W_NONE },
     [TOKEN_NULL]            = { __LIT,  NULL,   W_NONE },
     [TOKEN_OR]              = { NULL,   __OR,   W_OR },
@@ -694,12 +739,6 @@ static void expression() {
     digestWeight(W_ASSIGN);
 }
 
-static void block() {
-    while (!check(TOKEN_CONTEXT_CLOSE) && !check(TOKEN_EOF))
-        declaration();
-    consume(TOKEN_CONTEXT_CLOSE, "missing } after bracket block");
-}
-
 static void inlineBlock() {
     while (!check(TOKEN_SEMICOLON) && !check(TOKEN_EOF))
         statement();
@@ -708,40 +747,6 @@ static void inlineBlock() {
 
 static void array(ValueType type) {
 
-}
-
-static void function(FunctionType type) {
-    Compiler compiler;
-    initCompiler(&compiler, type);
-    beginScope();
-
-    consume(TOKEN_GROUP_OPEN, "expected ( after funq declaration");
-    if (!check(TOKEN_GROUP_CLOSE)) {
-        do {
-            current->function->argc++;
-            if (current->function->argc > 255) {
-                errorAtCurrent("Can't have more than 255 parameters.");
-            }
-            Byte constant = parseVariable("Expect parameter name.");
-            defineVariable(constant);
-        } while (match(TOKEN_COMMA));
-    }
-    consume(TOKEN_GROUP_CLOSE, "Expect ')' after parameters.");
-    if (!check(TOKEN_CONTEXT_OPEN)) {
-        statement();
-    } else {
-        consume(TOKEN_CONTEXT_OPEN, "Expect '{' before function body.");
-        block();
-    }
-
-    Funqtion* function = endCompiler();
-
-    emitBytes(OP_CLOSURE, makeConstant(PTR_VAL(function)));
-
-    for (int i = 0; i < function->revalCount; i++) {
-        emitByte(compiler.upvalues[i].isLocal ? 1 : 0);
-        emitByte(compiler.upvalues[i].index);
-    }
 }
 
 static void method(Byte constant) {
@@ -788,7 +793,7 @@ static void classDeclaration() {
     classCompiler.enclosing = currentClass;
     currentClass = &classCompiler;
 
-    if (match(TOKEN_LESS)) {
+    if (match(TOKEN_COLON)) {
         consume(TOKEN_IDENTIFIER, "missing inheriting qlass name");
         __REF(false);
 

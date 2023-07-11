@@ -186,7 +186,9 @@ Token readToken() {
         case '+': return match('+') ? makeToken(TOKEN_INCREMENT) : makeToken(TOKEN_PLUS);
         case '/': return makeToken(TOKEN_SLASH);
         case '*': return match('~') ? makeToken(TOKEN_VAR) : makeToken(TOKEN_STAR);
-        case '^': return makeToken(TOKEN_BITWISE_XOR);
+        case '^':  
+            return makeToken(
+                match('~') ? TOKEN_SUPER : TOKEN_BITWISE_XOR);
         case '~': return match('?') ? makeToken(TOKEN_ELSE) : makeToken(TOKEN_BITWISE_NOT);
         case '?': return match('~') ? makeToken(TOKEN_IF) : makeToken(TOKEN_ERROR);
         case '&': return makeToken(match('&') ? TOKEN_AND : TOKEN_BITWISE_AND);
