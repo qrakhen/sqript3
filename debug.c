@@ -5,7 +5,7 @@
 
 void __dbgDissect(Segment* segment, char* name) {
     printf("== %s ==\n", name);
-
+    return;
     for (int offset = 0; offset < segment->count;) {
         offset = __dbgDissectOp(segment, offset);
     }

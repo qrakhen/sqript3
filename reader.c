@@ -198,19 +198,19 @@ Token readToken() {
                 match('=') ? TOKEN_BANG_EQUAL : TOKEN_BANG);
         case '=':
             return makeToken(
-                match('=') ? TOKEN_EQUAL_EQUAL : 
-                match('&') ? TOKEN_REF : TOKEN_EQUAL);
+                match('=') ? TOKEN_EQUAL : 
+                match('&') ? TOKEN_ASSIGN_REF : TOKEN_ASSIGN);
         case '>': return makeToken(
             match('=') ? TOKEN_GREATER_EQUAL : (
                 match('>') ? TOKEN_BITWISE_RIGHT : TOKEN_GREATER));
         case '<': return makeToken(
             match('=') ? TOKEN_LESS_EQUAL : 
             match('<') ? TOKEN_BITWISE_LEFT : 
-            match('~') ? TOKEN_EQUAL : 
+            match('~') ? TOKEN_ASSIGN : 
             match(':') ? TOKEN_RETURN :
             match('+') ? TOKEN_ARRAY_ADD :
             match('-') ? TOKEN_ARRAY_REMOVE :
-            match('&') ? TOKEN_REF : TOKEN_LESS);
+            match('&') ? TOKEN_ASSIGN_REF : TOKEN_LESS);
         case '"': return string('"');
         case '\'': return string('\'');
     }

@@ -100,16 +100,17 @@ typedef struct {
 #define IS_DEC(v)           ((v).type == T_DEC)
 #define IS_NUMBER(v)        (((v).type & T_NUMBER) > 0)
 #define MAYBE_INT(v)        (IS_NUMBER(v) && (abs(ceil(AS_NUMBER(v)) - floor(AS_NUMBER(v))) == 0))
+#define IS_PRIMITIVE(v)     ((v).type < T_REF || (v).type == T_PTR_STRING)
 #define IS_PTR(v)           (((int)(v).type & T_PTR) > 0)
 #define IS_REF(v)           (((int)(v).type & T_REF) > 0)
 
-#define AS_PTR(value)       ((value).v.ptr)
-#define AS_REF(value)       ((value).v.ref)
-#define AS_BOOL(value)      ((value).v.boolean)
-#define AS_BYTE(value)      ((value).v.byte)
-#define AS_NUMBER(value)    ((value).v.number)
-#define AS_DEC(value)       ((value).v.number)
-#define AS_INT(value)       ((value).v.integer)
+#define AS_PTR(value)       ((getValue(value)).v.ptr)
+#define AS_REF(value)       ((getValue(value)).v.ref)
+#define AS_BOOL(value)      ((getValue(value)).v.boolean)
+#define AS_BYTE(value)      ((getValue(value)).v.byte)
+#define AS_NUMBER(value)    ((getValue(value)).v.number)
+#define AS_DEC(value)       ((getValue(value)).v.number)
+#define AS_INT(value)       ((getValue(value)).v.integer)
 
 #define BOOL_VAL(value)   ((Value){ T_BOOL,     TM_DYN, { .boolean = value }})
 #define NULL_VAL          ((Value){ T_NULL,     TM_DYN, { .ptr = NULL }})
@@ -117,7 +118,8 @@ typedef struct {
 #define NUMBER_VAL(value) ((Value){ T_NUMBER,   TM_DYN, { .number = value }})
 #define INT_VAL(value)    ((Value){ T_INT,      TM_DYN, { .integer = value }})
 #define PTR_VAL(object)   ((Value){ T_PTR,      TM_DYN, { .ptr = (Ptr*)object }})
-#define REF_VAL(value)    ((Value){ T_REF,      TM_DYN, { .ref = (Value*)&value }})
+#define REF_VAL(value)    ((Value){ T_REF,      TM_DYN, { .ref = (Value*)value }})
+
 
 typedef struct {
     int capacity;
@@ -126,6 +128,7 @@ typedef struct {
 } ValueArray;
 
 bool valuesEqual(Value a, Value b);
+Value getValue(Value v);
 void initValueArray(ValueArray* array);
 void writeValueArray(ValueArray* array, Value value);
 void freeValueArray(ValueArray* array);

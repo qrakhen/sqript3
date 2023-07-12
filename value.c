@@ -45,6 +45,13 @@ void freeValueArray(ValueArray* array) {
     initValueArray(array);
 }
 
+Value getValue(Value value) {
+    if (value.type == T_REF)
+        return *value.v.ref;
+    else
+        return value;
+}
+
 char* valueToString(Value value) {
     char buffer[1024];
     if (IS_BOOL(value)) {
@@ -79,8 +86,9 @@ void printValue(Value value) {
             break;
         case T_REF:
             printf("&");
-            Value x = *AS_REF(value);
-            printValue(*AS_REF(value));
+            //Value x = *AS_REF(value);
+            printValue(*value.v.ref);
+            break;
         case T_PTR: 
             if (matchPtrType(value, PTR_ARRAY)) {
                 printf("[");
@@ -104,7 +112,7 @@ char* printType(Value value) {
         case T_BYTE:return ("byte"); break;
         case T_INT:return ("int"); break;
         case T_NUMBER:return ("number"); break;
-        case T_REF:return ("ref<...>"); break;
+        case T_REF:return ("ref<>"); break;
         case T_PTR:
             switch (AS_PTR(value)->type) {
                 case PTR_METHOD:return ("method"); break;

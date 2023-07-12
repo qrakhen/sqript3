@@ -44,7 +44,7 @@ int main(int argc, const char* argv[]) {
     initRunner();
     consoleInit();
 
-    runFile("./core.sqr", SQR_OPTION_FLAGS);
+    //runFile("./core.sqr", SQR_OPTION_FLAGS);
     //runFile("./test.sqr", SQR_OPTION_FLAGS);
 
     if (argc == 1) {

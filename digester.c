@@ -412,7 +412,7 @@ static void __BIN(bool canAssign) {
 
     switch (operatorType) {
         case TOKEN_BANG_EQUAL:    emitBytes(OP_EQUAL, OP_NOT); break;
-        case TOKEN_EQUAL_EQUAL:   emitByte(OP_EQUAL); break;
+        case TOKEN_EQUAL:         emitByte(OP_EQUAL); break;
         case TOKEN_GREATER:       emitByte(OP_GREATER); break;
         case TOKEN_GREATER_EQUAL: emitBytes(OP_LESS, OP_NOT); break;
         case TOKEN_LESS:          emitByte(OP_LESS); break;
@@ -442,7 +442,7 @@ static void __DOT(bool canAssign) {
     consume(TOKEN_IDENTIFIER, "Expect property name after '.'.");
     Byte name = identifierConstant(&digester.previous);
 
-    if (canAssign && match(TOKEN_EQUAL)) {
+    if (canAssign && match(TOKEN_ASSIGN)) {
         expression();
         emitBytes(OP_SET_PROPERTY, name);
     } else if (match(TOKEN_GROUP_OPEN)) {
@@ -493,7 +493,7 @@ static void __IDX(bool canAssign) {
     if (canAssign && match(TOKEN_ARRAY_ADD)) {
         expression();
         emitByte(OP_ARRAY_ADD);
-    } else if (canAssign && match(TOKEN_EQUAL)) {
+    } else if (canAssign && match(TOKEN_ASSIGN)) {
         expression();
         emitByte(OP_ARRAY_SET);
     } else {
@@ -536,7 +536,7 @@ static void namedVariable(Token name, bool canAssign) {
         setOp = OP_SET_GLOBAL;
     }
 
-    if (canAssign && match(TOKEN_EQUAL)) {
+    if (canAssign && match(TOKEN_ASSIGN)) {
         expression();
         emitBytes(setOp, (Byte)arg);
     } else if (match(TOKEN_ARRAY_ADD)) {
@@ -679,8 +679,8 @@ WeightRule rules[] = {
     [TOKEN_STAR]            = { NULL,   __BIN,  W_FACTOR },
     [TOKEN_BANG]            = { __MOD,  NULL,   W_NONE },
     [TOKEN_BANG_EQUAL]      = { NULL,   __BIN,  W_EQUALS },
-    [TOKEN_EQUAL]           = { NULL,   NULL,   W_NONE },
-    [TOKEN_EQUAL_EQUAL]     = { NULL,   __BIN,  W_EQUALS },
+    [TOKEN_ASSIGN]           = { NULL,   NULL,   W_NONE },
+    [TOKEN_EQUAL]     = { NULL,   __BIN,  W_EQUALS },
     [TOKEN_GREATER]         = { NULL,   __BIN,  W_COMPARE },
     [TOKEN_GREATER_EQUAL]   = { NULL,   __BIN,  W_COMPARE },
     [TOKEN_LESS]            = { NULL,   __BIN,  W_COMPARE },
@@ -726,7 +726,7 @@ static void digestWeight(Weight precedence) {
         fn(canAssign);
     }
 
-    if (canAssign && match(TOKEN_EQUAL)) {
+    if (canAssign && match(TOKEN_ASSIGN)) {
         error("Invalid assignment target.");
     }
 }
@@ -761,7 +761,7 @@ static void method(Byte constant) {
 }
 
 static void field(Byte constant) {
-    if (check(TOKEN_EQUAL)) {
+    if (check(TOKEN_ASSIGN)) {
         next();
         expression();
     } else consume(TOKEN_SEMICOLON, "missing ; after qlass property declaration");
@@ -835,7 +835,7 @@ static void funqDeclaration() {
 static void varDeclaration() {
     Byte global = parseVariable("provide your variable with a name");
 
-    if (match(TOKEN_EQUAL)) {
+    if (match(TOKEN_ASSIGN)) {
         expression();
     } else {
         emitByte(OP_NULL);
