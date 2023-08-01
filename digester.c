@@ -57,8 +57,7 @@ typedef enum {
     F_FUNC,
     F_INIT,
     F_INST,
-    F_CODE,
-    F_ANON
+    F_CODE
 } FunctionType;
 
 typedef struct Compiler {
@@ -412,7 +411,7 @@ static void __BIN(bool canAssign) {
 
     switch (operatorType) {
         case TOKEN_BANG_EQUAL:    emitBytes(OP_EQUAL, OP_NOT); break;
-        case TOKEN_EQUAL:         emitByte(OP_EQUAL); break;
+        case TOKEN_EQUAL_EQUAL:   emitByte(OP_EQUAL); break;
         case TOKEN_GREATER:       emitByte(OP_GREATER); break;
         case TOKEN_GREATER_EQUAL: emitBytes(OP_LESS, OP_NOT); break;
         case TOKEN_LESS:          emitByte(OP_LESS); break;
@@ -425,8 +424,6 @@ static void __BIN(bool canAssign) {
         case TOKEN_BITWISE_OR :   emitByte(OP_BITWISE_OR); break;
         case TOKEN_BITWISE_XOR:   emitByte(OP_BITWISE_XOR); break;
         case TOKEN_BITWISE_NOT:   emitByte(OP_BITWISE_NOT); break;
-        case TOKEN_BITWISE_LEFT:  emitByte(OP_BITWISE_LEFT); break;
-        case TOKEN_BITWISE_RIGHT: emitByte(OP_BITWISE_RIGHT); break;
         case TOKEN_INCREMENT:     emitByte(OP_INCREMENT); break;
         case TOKEN_DECREMENT:     emitByte(OP_DECREMENT); break;
         default: return;
@@ -442,7 +439,7 @@ static void __DOT(bool canAssign) {
     consume(TOKEN_IDENTIFIER, "Expect property name after '.'.");
     Byte name = identifierConstant(&digester.previous);
 
-    if (canAssign && match(TOKEN_ASSIGN)) {
+    if (canAssign && match(TOKEN_EQUAL)) {
         expression();
         emitBytes(OP_SET_PROPERTY, name);
     } else if (match(TOKEN_GROUP_OPEN)) {
@@ -493,7 +490,7 @@ static void __IDX(bool canAssign) {
     if (canAssign && match(TOKEN_ARRAY_ADD)) {
         expression();
         emitByte(OP_ARRAY_ADD);
-    } else if (canAssign && match(TOKEN_ASSIGN)) {
+    } else if (canAssign && match(TOKEN_EQUAL)) {
         expression();
         emitByte(OP_ARRAY_SET);
     } else {
@@ -536,7 +533,7 @@ static void namedVariable(Token name, bool canAssign) {
         setOp = OP_SET_GLOBAL;
     }
 
-    if (canAssign && match(TOKEN_ASSIGN)) {
+    if (canAssign && match(TOKEN_EQUAL)) {
         expression();
         emitBytes(setOp, (Byte)arg);
     } else if (match(TOKEN_ARRAY_ADD)) {
@@ -608,50 +605,6 @@ static void __CDOT(bool canAssign) {
     __DOT(canAssign);
 }
 
-static void block() {
-    while (!check(TOKEN_CONTEXT_CLOSE) && !check(TOKEN_EOF))
-        declaration();
-    consume(TOKEN_CONTEXT_CLOSE, "missing } after bracket block");
-}
-
-static void function(FunctionType type) {
-    Compiler compiler;
-    initCompiler(&compiler, type);
-    beginScope();
-
-    consume(TOKEN_GROUP_OPEN, "expected ( after funq declaration");
-    if (!check(TOKEN_GROUP_CLOSE)) {
-        do {
-            current->function->argc++;
-            if (current->function->argc > 255) {
-                errorAtCurrent("what under the sun drove you to write 255 parameters for a single function?");
-            }
-            Byte constant = parseVariable("parameters usually need names in order to be accessed from the functions body.");
-            defineVariable(constant);
-        } while (match(TOKEN_COMMA));
-    }
-    consume(TOKEN_GROUP_CLOSE, "Expect ')' after parameters.");
-    if (!check(TOKEN_CONTEXT_OPEN)) {
-        statement();
-    } else {
-        consume(TOKEN_CONTEXT_OPEN, "Expect '{' before function body.");
-        block();
-    }
-
-    Funqtion* function = endCompiler();
-
-    emitBytes(OP_CLOSURE, makeConstant(PTR_VAL(function)));
-
-    for (int i = 0; i < function->revalCount; i++) {
-        emitByte(compiler.upvalues[i].isLocal ? 1 : 0);
-        emitByte(compiler.upvalues[i].index);
-    }
-}
-
-static void __FQ(bool canAssign) {
-    function(F_ANON);
-}
-
 WeightRule rules[] = {
     [TOKEN_GROUP_OPEN]      = { __GRP,  __CAL,  W_CALL },
     [TOKEN_GROUP_CLOSE]     = { NULL,   NULL,   W_NONE },
@@ -666,21 +619,19 @@ WeightRule rules[] = {
     [TOKEN_DOT]             = { NULL,   __DOT,  W_CALL },
     [TOKEN_MINUS]           = { __MOD,  __BIN,  W_TERM },
     [TOKEN_PLUS]            = { NULL,   __BIN,  W_TERM },
-    [TOKEN_INCREMENT]       = { __BIN,  __BIN,  W_CALL },
-    [TOKEN_DECREMENT]       = { __BIN,  __BIN,  W_CALL },
-    [TOKEN_BITWISE_AND]     = { __MOD,  __BIN,  W_TERM },
+    [TOKEN_INCREMENT]       = { __BIN,   __BIN,  W_CALL },
+    [TOKEN_DECREMENT]       = { __BIN,   __BIN,  W_CALL },
+    [TOKEN_BITWISE_AND]     = { __MOD,   __BIN,  W_TERM },
     [TOKEN_BITWISE_OR]      = { NULL,   __BIN,  W_TERM },
     [TOKEN_BITWISE_XOR]     = { NULL,   __BIN,  W_TERM },
     [TOKEN_BITWISE_NOT]     = { __MOD,  NULL,   W_TERM },
-    [TOKEN_BITWISE_LEFT]    = { NULL,   __BIN,  W_TERM },
-    [TOKEN_BITWISE_RIGHT]   = { NULL,   __BIN,  W_TERM },
     [TOKEN_SEMICOLON]       = { NULL,   NULL,   W_NONE },
     [TOKEN_SLASH]           = { NULL,   __BIN,  W_FACTOR },
     [TOKEN_STAR]            = { NULL,   __BIN,  W_FACTOR },
     [TOKEN_BANG]            = { __MOD,  NULL,   W_NONE },
     [TOKEN_BANG_EQUAL]      = { NULL,   __BIN,  W_EQUALS },
-    [TOKEN_ASSIGN]          = { NULL,   NULL,   W_NONE },
-    [TOKEN_EQUAL]           = { NULL,   __BIN,  W_EQUALS },
+    [TOKEN_EQUAL]           = { NULL,   NULL,   W_NONE },
+    [TOKEN_EQUAL_EQUAL]     = { NULL,   __BIN,  W_EQUALS },
     [TOKEN_GREATER]         = { NULL,   __BIN,  W_COMPARE },
     [TOKEN_GREATER_EQUAL]   = { NULL,   __BIN,  W_COMPARE },
     [TOKEN_LESS]            = { NULL,   __BIN,  W_COMPARE },
@@ -693,7 +644,7 @@ WeightRule rules[] = {
     [TOKEN_ELSE]            = { NULL,   NULL,   W_NONE },
     [TOKEN_FALSE]           = { __LIT,  NULL,   W_NONE },
     [TOKEN_FOR]             = { NULL,   NULL,   W_NONE },
-    [TOKEN_FUNCTION]        = { __FQ,   NULL,   W_NONE },
+    [TOKEN_FUNCTION]        = { NULL,   NULL,   W_NONE },
     [TOKEN_IF]              = { NULL,   NULL,   W_NONE },
     [TOKEN_NULL]            = { __LIT,  NULL,   W_NONE },
     [TOKEN_OR]              = { NULL,   __OR,   W_OR },
@@ -726,7 +677,7 @@ static void digestWeight(Weight precedence) {
         fn(canAssign);
     }
 
-    if (canAssign && match(TOKEN_ASSIGN)) {
+    if (canAssign && match(TOKEN_EQUAL)) {
         error("Invalid assignment target.");
     }
 }
@@ -739,6 +690,12 @@ static void expression() {
     digestWeight(W_ASSIGN);
 }
 
+static void block() {
+    while (!check(TOKEN_CONTEXT_CLOSE) && !check(TOKEN_EOF))
+        declaration();
+    consume(TOKEN_CONTEXT_CLOSE, "missing } after bracket block");
+}
+
 static void inlineBlock() {
     while (!check(TOKEN_SEMICOLON) && !check(TOKEN_EOF))
         statement();
@@ -747,6 +704,40 @@ static void inlineBlock() {
 
 static void array(ValueType type) {
 
+}
+
+static void function(FunctionType type) {
+    Compiler compiler;
+    initCompiler(&compiler, type);
+    beginScope();
+
+    consume(TOKEN_GROUP_OPEN, "expected ( after funq declaration");
+    if (!check(TOKEN_GROUP_CLOSE)) {
+        do {
+            current->function->argc++;
+            if (current->function->argc > 255) {
+                errorAtCurrent("Can't have more than 255 parameters.");
+            }
+            Byte constant = parseVariable("Expect parameter name.");
+            defineVariable(constant);
+        } while (match(TOKEN_COMMA));
+    }
+    consume(TOKEN_GROUP_CLOSE, "Expect ')' after parameters.");
+    if (!check(TOKEN_CONTEXT_OPEN)) {
+        statement();
+    } else {
+        consume(TOKEN_CONTEXT_OPEN, "Expect '{' before function body.");
+        block();
+    }
+
+    Funqtion* function = endCompiler();
+
+    emitBytes(OP_CLOSURE, makeConstant(PTR_VAL(function)));
+
+    for (int i = 0; i < function->revalCount; i++) {
+        emitByte(compiler.upvalues[i].isLocal ? 1 : 0);
+        emitByte(compiler.upvalues[i].index);
+    }
 }
 
 static void method(Byte constant) {
@@ -761,7 +752,7 @@ static void method(Byte constant) {
 }
 
 static void field(Byte constant) {
-    if (check(TOKEN_ASSIGN)) {
+    if (check(TOKEN_EQUAL)) {
         next();
         expression();
     } else consume(TOKEN_SEMICOLON, "missing ; after qlass property declaration");
@@ -793,7 +784,7 @@ static void classDeclaration() {
     classCompiler.enclosing = currentClass;
     currentClass = &classCompiler;
 
-    if (match(TOKEN_COLON)) {
+    if (match(TOKEN_LESS)) {
         consume(TOKEN_IDENTIFIER, "missing inheriting qlass name");
         __REF(false);
 
@@ -835,7 +826,7 @@ static void funqDeclaration() {
 static void varDeclaration() {
     Byte global = parseVariable("provide your variable with a name");
 
-    if (match(TOKEN_ASSIGN)) {
+    if (match(TOKEN_EQUAL)) {
         expression();
     } else {
         emitByte(OP_NULL);

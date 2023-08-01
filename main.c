@@ -36,15 +36,15 @@ int main(int argc, const char* argv[]) {
         sprtinf(stderr, "%s", "OS NOT SUPPORTED");
         exit(E_ERR_SYS_NOT_SUPPORTED);
     #endif
-    //if (argc > 3) {
-    //    printf("flags not supported (yet)\n");
-    //    return 1;
-    //}
 
+    if (argc > 3) {
+        printf("flags not supported (yet)\n");
+        return 1;
+    }
     initRunner();
     consoleInit();
 
-    //runFile("./core.sqr", SQR_OPTION_FLAGS);
+    //runFile("./core.sqr", __SQR_DEFAULT_FLAGS);
     //runFile("./test.sqr", SQR_OPTION_FLAGS);
 
     if (argc == 1) {

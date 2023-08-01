@@ -1,2 +1,0 @@
-[HKEY_CLASSES_ROOT\.sqr\shell\Open\command]
-@="sqript_c.exe %1 %*"

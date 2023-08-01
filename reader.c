@@ -186,9 +186,7 @@ Token readToken() {
         case '+': return match('+') ? makeToken(TOKEN_INCREMENT) : makeToken(TOKEN_PLUS);
         case '/': return makeToken(TOKEN_SLASH);
         case '*': return match('~') ? makeToken(TOKEN_VAR) : makeToken(TOKEN_STAR);
-        case '^':  
-            return makeToken(
-                match('~') ? TOKEN_SUPER : TOKEN_BITWISE_XOR);
+        case '^': return makeToken(TOKEN_BITWISE_XOR);
         case '~': return match('?') ? makeToken(TOKEN_ELSE) : makeToken(TOKEN_BITWISE_NOT);
         case '?': return match('~') ? makeToken(TOKEN_IF) : makeToken(TOKEN_ERROR);
         case '&': return makeToken(match('&') ? TOKEN_AND : TOKEN_BITWISE_AND);
@@ -198,19 +196,19 @@ Token readToken() {
                 match('=') ? TOKEN_BANG_EQUAL : TOKEN_BANG);
         case '=':
             return makeToken(
-                match('=') ? TOKEN_EQUAL : 
-                match('&') ? TOKEN_ASSIGN_REF : TOKEN_ASSIGN);
+                match('=') ? TOKEN_EQUAL_EQUAL : 
+                match('&') ? TOKEN_REF : TOKEN_EQUAL);
         case '>': return makeToken(
             match('=') ? TOKEN_GREATER_EQUAL : (
                 match('>') ? TOKEN_BITWISE_RIGHT : TOKEN_GREATER));
         case '<': return makeToken(
             match('=') ? TOKEN_LESS_EQUAL : 
             match('<') ? TOKEN_BITWISE_LEFT : 
-            match('~') ? TOKEN_ASSIGN : 
+            match('~') ? TOKEN_EQUAL : 
             match(':') ? TOKEN_RETURN :
             match('+') ? TOKEN_ARRAY_ADD :
             match('-') ? TOKEN_ARRAY_REMOVE :
-            match('&') ? TOKEN_ASSIGN_REF : TOKEN_LESS);
+            match('&') ? TOKEN_REF : TOKEN_LESS);
         case '"': return string('"');
         case '\'': return string('\'');
     }

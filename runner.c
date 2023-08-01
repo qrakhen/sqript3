@@ -98,14 +98,9 @@ static bool call(Qontext* qlosure, int argCount) {
         return false;
     }
 
-    if (runner.qc < 0) {
-        runtimeError("Stack UNDERflow. yes.");
-        return false;
-    }
-
-    if (runner.qc >= MAX_QALLS) {
+    if (runner.qc == MAX_QALLS) {
         runtimeError("Stack overflow.");
-        return false; 
+        return false;
     }
 
     Qall* frame = &runner.qalls[runner.qc++];
@@ -255,13 +250,6 @@ static void defineMethod(String* name) {
     pop();
 }
 
-static void defineStaticMethod(String* name) {
-    Value member = peek(0);
-    Qlass* qlass = AS_QLASS(peek(1));
-    registerSet(&qlass->methods, name, member);
-    pop();
-}
-
 static void defineProperty(String* name) {
     Value member = peek(0);
     Qlass* qlass = AS_QLASS(peek(1));
@@ -317,14 +305,14 @@ static InterpretResult run() {
             push(valueType(a op b)); \
         } while (false)
 
-    #define CREMENT_OP(valueType, val) \
+    #define CREMENT_OP(valueType, op) \
         do { \
             if (!IS_NUMBER(peek(0))) { \
-                runtimeError("Operand must be a number"); \
+                runtimeError("pperand must be a number"); \
                 return SQR_INTRP_ERROR_RUNTIME; \
             } \
             double a = AS_NUMBER(pop()); \
-            push(valueType(a + val)); \
+            push(valueType(a op)); \
         } while (false)
 
     #define BITWISE_OP(valueType, op) \
@@ -381,8 +369,6 @@ static InterpretResult run() {
                     runtimeError("Undefined variable '%s'.", name->chars);
                     return SQR_INTRP_ERROR_RUNTIME;
                 }
-                if (value.type == T_REF)
-                    value = *value.v.ref;
                 push(value);
                 break;
             }
@@ -393,7 +379,6 @@ static InterpretResult run() {
                 break;
             }
             case OP_SET_GLOBAL: {
-                Value v = peek(0);
                 String* name = READ_STRING();
                 if (registerSet(&runner.globals, name, peek(0))) {
                     registerDelete(&runner.globals, name);
@@ -444,7 +429,7 @@ static InterpretResult run() {
             }
             case OP_SET_PROPERTY: {
                 if (!IS_OBJEQT(peek(1))) {
-                    runtimeError("u stoped? only instance (class) are have field yes? no?");
+                    runtimeError("Only instances have fields.");
                     return SQR_INTRP_ERROR_RUNTIME;
                 }
 
@@ -489,8 +474,8 @@ static InterpretResult run() {
             case OP_SUBTRACT:       BINARY_OP(NUMBER_VAL, -); break;
             case OP_MULTIPLY:       BINARY_OP(NUMBER_VAL, *); break;
             case OP_DIVIDE:         BINARY_OP(NUMBER_VAL, /); break;
-            case OP_INCREMENT:      CREMENT_OP(NUMBER_VAL, 1); break;
-            case OP_DECREMENT:      CREMENT_OP(NUMBER_VAL, -1); break;
+            case OP_INCREMENT:      CREMENT_OP(NUMBER_VAL, ++ ); break;
+            case OP_DECREMENT:      CREMENT_OP(NUMBER_VAL, -- ); break;
             case OP_BITWISE_AND:    BITWISE_OP(NUMBER_VAL, &); break;
             case OP_BITWISE_OR:     BITWISE_OP(NUMBER_VAL, |); break;
             case OP_BITWISE_XOR:    BITWISE_OP(NUMBER_VAL, ^); break;
@@ -501,8 +486,6 @@ static InterpretResult run() {
                 }
                 push(NUMBER_VAL(~(Int)AS_NUMBER(pop())));
                 break;
-            case OP_BITWISE_LEFT:   BITWISE_OP(NUMBER_VAL, <<); break;
-            case OP_BITWISE_RIGHT:  BITWISE_OP(NUMBER_VAL, >>); break;
             case OP_NOT:
                 push(BOOL_VAL(isFalsey(pop())));
                 break;
@@ -514,12 +497,8 @@ static InterpretResult run() {
                 push(NUMBER_VAL(-AS_NUMBER(pop())));
                 break;
             case OP_REF:
-                if (!IS_PRIMITIVE(peek(0))) {
-                    runtimeError("Can not reference any value that is not a primitive type");
-                    return SQR_INTRP_ERROR_RUNTIME;
-                }
                 Value r = pop();
-                push(REF_VAL(&r));
+                push(REF_VAL(r));
                 break;
             case OP_PRINT: {
                 consoleSetColor(C_COLOR_GREEN);
@@ -672,10 +651,6 @@ static InterpretResult run() {
             case OP_METHOD:
                 defineMethod(READ_STRING());
                 break;
-            case OP_STATIC_METHOD:
-                pop();
-                defineStaticMethod(READ_STRING());
-                break;
             case OP_PROPERTY:
                 defineProperty(READ_STRING());
                 break;
@@ -699,10 +674,10 @@ InterpretResult interpret(const char* source) {
     #endif
 
     Funqtion* function = digest(source);
-    __dbgDissect(&function->segment, " === ");
     if (function == NULL) return SQR_INTRP_ERROR_DIGEST;
 
     push(PTR_VAL(function));
+
     Qontext* qlosure = newClosure(function);
     pop();
     push(PTR_VAL(qlosure));

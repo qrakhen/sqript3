@@ -32,8 +32,6 @@ typedef enum {
     OP_BITWISE_OR,
     OP_BITWISE_XOR,
     OP_BITWISE_NOT,
-    OP_BITWISE_LEFT,
-    OP_BITWISE_RIGHT,
     OP_INCREMENT,
     OP_DECREMENT,
     OP_NOT,
@@ -58,8 +56,7 @@ typedef enum {
     OP_RETURN,
     OP_CLASS,
     OP_INHERIT,
-    OP_METHOD,
-    OP_STATIC_METHOD
+    OP_METHOD
 } OpCode;
 
 typedef struct {

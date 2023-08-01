@@ -151,6 +151,9 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="..\..\..\Downloads\icon.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
     <Image Include="icon1.ico">
       <Filter>Resource Files</Filter>
     </Image>

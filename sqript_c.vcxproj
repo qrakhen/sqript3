@@ -279,6 +279,9 @@
     <None Include="TODO.md" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="..\..\..\Downloads\icon.bmp">
+      <DeploymentContent>true</DeploymentContent>
+    </Image>
     <Image Include="icon1.ico" />
   </ItemGroup>
   <ItemGroup>

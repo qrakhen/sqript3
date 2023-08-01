@@ -44,12 +44,8 @@ bool registerGet(Register* table, String* key, Value* value) {
 
     Entry* entry = findEntry(table->entries, table->capacity, key);
     if (entry->key == NULL) return false;
-    
 
-    if (entry->value.type == T_REF)
-        *value = entry->value; // .v.ref;
-    else
-        *value = entry->value;
+    *value = entry->value;
     return true;
 }
 
@@ -88,10 +84,7 @@ bool registerSet(Register* table, String* key, Value value) {
     if (isNewKey && IS_NULL(entry->value)) table->count++;
 
     entry->key = key;
-    if (entry->value.type == T_REF)
-        entry->value.v.ref = &value;
-    else
-        entry->value = value;
+    entry->value = value;
     return isNewKey;
 }
 

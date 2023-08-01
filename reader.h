@@ -37,8 +37,8 @@ typedef enum {
     TOKEN_BANG, 
     TOKEN_BANG_EQUAL,
 
-    TOKEN_ASSIGN, 
-    TOKEN_EQUAL,
+    TOKEN_EQUAL, 
+    TOKEN_EQUAL_EQUAL,
 
     TOKEN_GREATER, 
     TOKEN_GREATER_EQUAL,
@@ -67,7 +67,7 @@ typedef enum {
     TOKEN_TRUE, 
     TOKEN_VAR, 
     TOKEN_WHILE,
-    TOKEN_ASSIGN_REF,
+    TOKEN_REF,
 
     TOKEN_ERROR, 
     TOKEN_EOF
