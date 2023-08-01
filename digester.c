@@ -624,9 +624,9 @@ static void function(FunctionType type) {
         do {
             current->function->argc++;
             if (current->function->argc > 255) {
-                errorAtCurrent("Can't have more than 255 parameters.");
+                errorAtCurrent("what under the sun drove you to write 255 parameters for a single function?");
             }
-            Byte constant = parseVariable("Expect parameter name.");
+            Byte constant = parseVariable("parameters usually need names in order to be accessed from the functions body.");
             defineVariable(constant);
         } while (match(TOKEN_COMMA));
     }
@@ -679,8 +679,8 @@ WeightRule rules[] = {
     [TOKEN_STAR]            = { NULL,   __BIN,  W_FACTOR },
     [TOKEN_BANG]            = { __MOD,  NULL,   W_NONE },
     [TOKEN_BANG_EQUAL]      = { NULL,   __BIN,  W_EQUALS },
-    [TOKEN_ASSIGN]           = { NULL,   NULL,   W_NONE },
-    [TOKEN_EQUAL]     = { NULL,   __BIN,  W_EQUALS },
+    [TOKEN_ASSIGN]          = { NULL,   NULL,   W_NONE },
+    [TOKEN_EQUAL]           = { NULL,   __BIN,  W_EQUALS },
     [TOKEN_GREATER]         = { NULL,   __BIN,  W_COMPARE },
     [TOKEN_GREATER_EQUAL]   = { NULL,   __BIN,  W_COMPARE },
     [TOKEN_LESS]            = { NULL,   __BIN,  W_COMPARE },

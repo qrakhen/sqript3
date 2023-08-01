@@ -98,7 +98,12 @@ static bool call(Qontext* qlosure, int argCount) {
         return false;
     }
 
-    if (runner.qc == MAX_QALLS) {
+    if (runner.qc < 0) {
+        runtimeError("Stack UNDERflow. yes.");
+        return false;
+    }
+
+    if (runner.qc >= MAX_QALLS) {
         runtimeError("Stack overflow.");
         return false; 
     }
@@ -439,7 +444,7 @@ static InterpretResult run() {
             }
             case OP_SET_PROPERTY: {
                 if (!IS_OBJEQT(peek(1))) {
-                    runtimeError("Only instances have fields.");
+                    runtimeError("u stoped? only instance (class) are have field yes? no?");
                     return SQR_INTRP_ERROR_RUNTIME;
                 }
 
@@ -694,7 +699,7 @@ InterpretResult interpret(const char* source) {
     #endif
 
     Funqtion* function = digest(source);
-    __dbgDissect(&function->segment, "debugerinhhó");
+    __dbgDissect(&function->segment, " === ");
     if (function == NULL) return SQR_INTRP_ERROR_DIGEST;
 
     push(PTR_VAL(function));

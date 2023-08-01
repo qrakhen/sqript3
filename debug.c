@@ -5,14 +5,15 @@
 
 void __dbgDissect(Segment* segment, char* name) {
     printf("== %s ==\n", name);
-    return;
     for (int offset = 0; offset < segment->count;) {
         offset = __dbgDissectOp(segment, offset);
     }
 }
 
-static int constantInstruction(const char* name, Segment* segment,
-                               int offset) {
+static int constantInstruction(
+        const char* name, 
+        Segment* segment,
+        int offset) {
     Byte constant = segment->code[offset + 1];
     printf("%-16s %4d '", name, constant);
     printValue(segment->constants.values[constant]);
@@ -20,8 +21,10 @@ static int constantInstruction(const char* name, Segment* segment,
     return offset + 2;
 }
 
-static int invokeInstruction(const char* name, Segment* segment,
-                             int offset) {
+static int invokeInstruction(
+        const char* name, 
+        Segment* segment,
+        int offset) {
     Byte constant = segment->code[offset + 1];
     Byte argCount = segment->code[offset + 2];
     printf("%-16s (%d args) %4d '", name, argCount, constant);
