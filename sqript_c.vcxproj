@@ -46,7 +46,7 @@
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>Unicode</CharacterSet>
-    <WholeProgramOptimization>false</WholeProgramOptimization>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
     <PlatformToolset>v142</PlatformToolset>
     <PreferredToolArchitecture>x64</PreferredToolArchitecture>
   </PropertyGroup>
@@ -255,6 +255,7 @@
     <ClInclude Include="memory.h" />
     <ClInclude Include="native.h" />
     <ClInclude Include="object.h" />
+    <ClInclude Include="options.h" />
     <ClInclude Include="reader.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="runner.h" />

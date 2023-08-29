@@ -38,6 +38,7 @@ static void updateColor() {
 }
 
 void consoleRun(int flags) {
+    printf("\n    ...made with <3 by qrakhen ~\n\n");
     char line[8192];
     int r = 0;
     do {
