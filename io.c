@@ -7,6 +7,7 @@
 #include "segment.h"
 #include "debug.h"
 #include "runner.h"
+#include "string.h"
 
 char* readFile(char* path) {
     FILE* file = fopen((const char*)path, "rb");

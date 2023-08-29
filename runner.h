@@ -24,7 +24,7 @@ typedef struct {
     Register globals;
     Register strings;
 
-    Objeqt* module;
+    Module* module;
 
     String* __initString;
     PtrPreval* __openPrevals;

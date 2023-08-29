@@ -83,12 +83,13 @@ Objeqt* newInstance(Qlass* qlass) {
     return instance;
 }
 
-Module* newModule(Module* module, String* name, String* source) {
-    Module* module = ALLOCATE_PTR(Module, PTR_OBJEQT);
-    module->name = name;
-    module->source = source;
-    initRegister(&module->fields);
-    return module;
+Module* newModule(String* name, String* source) {
+    Module* _m = ALLOCATE_PTR(Module, PTR_MODULE);
+    _m->name = name;
+    _m->source = source;
+    initRegister(&_m->fields);
+    initRegister(&_m->exports);
+    return _m;
 }
 
 NativeQall* newNative(NativeFunq function) {

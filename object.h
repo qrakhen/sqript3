@@ -94,6 +94,7 @@ typedef struct {
     String* name;
     String* source;
     Register fields;
+    Register exports;
 } Module;
 
 typedef struct {
@@ -120,7 +121,7 @@ Qontext* newClosure(Funqtion* function);
 Funqtion* newFunction();
 Qlass* newClass(String* name);
 Objeqt* newInstance(Qlass* qlass);
-Module* newModule(Module* module, String* name, String* source);
+Module* newModule(String* name, String* source);
 Method* newBoundMethod(Value target, Qontext* member);
 
 NativeQall* newNative(NativeFunq function);

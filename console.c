@@ -7,6 +7,8 @@
 #include "debug.h"
 #include "runner.h"
 #include "console.h"
+#include "string.h"
+#include "io.h"
 
 #ifdef __OS_WIN
     #include <windows.h>
@@ -47,7 +49,14 @@ void consoleRun(int flags) {
             consoleWriteLine("");
             break;
         }
-        r = (int)interpret(line);
+        if (memcmp(line, "#read", 5) == 0) {
+            int length = getCharLength(line + 6, '\n');
+            char file[256];
+            memcpy(file, line + 6, length);
+            char* src = readFile(file);
+            r = (int)interpret(src);
+        } else 
+            r = (int)interpret(line);
     } while ((flags & SQR_OPTION_FLAG_SAFE_MODE) == 0 || r == 0);
 }
 

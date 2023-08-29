@@ -62,6 +62,14 @@ String* makeString(const char* chars, int length) {
     return allocateString(heapChars, length, h);
 }
 
+int getCharLength(char* chars, char extraTerminator) {
+    int i = 0;
+    while (*(chars + i) != '\0' && *(chars + i) != extraTerminator) {
+        i++;
+    }
+    return i;
+}
+
 String* subString(String* str, int from, int length) {
     if (length == -1) length = str->length - from;
     else if (from >= str->length) return EMPTY_STRING;

@@ -20,6 +20,7 @@ struct String {
 
 String* takeString(char* chars, int length);
 String* makeString(const char* chars, int length);
+int getCharLength(char* chars, char extraTerminator);
 
 String* subString(String* str, int from, int length);
 Value stringIndexOf(String* str, String* needle);
