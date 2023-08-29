@@ -47,6 +47,7 @@ static LaunchOption parseLaunchOption(const char* str) {
     LaunchOption option;
     option.info = NULL;
     option.value = -1;
+    option.strValue = NULL;
     char* c = str;
     int start = 0;
     int length = 0;
@@ -67,6 +68,7 @@ static LaunchOption parseLaunchOption(const char* str) {
 
     if (start == 0) {
         option.info = &__LAUNCH_OPTION_INFOS[0];
+        option.value = 1;
         option.strValue = str;
         return option;
     }
@@ -76,7 +78,7 @@ static LaunchOption parseLaunchOption(const char* str) {
         if ((start == 1 && *c == info->c) ||
             (start == 2 && memcmp(str + start, info->key, length) == 0)) {
             option.info = info;
-            option.value = 1;
+            option.value = atoi(str + start + length + 1);
             return option;
         }
     }

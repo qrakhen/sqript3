@@ -59,7 +59,6 @@ int main(int argc, const char* argv[]) {
     else {
         if (__GET_ARG("file") == NULL)
             return E_ERR_IO_NOFILE;
-
         runFile(__GET_ARG("file")->strValue, SQR_OPTION_FLAGS);
         if (__GET_ARG("keep-alive") != NULL) { 
             initRunner();

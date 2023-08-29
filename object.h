@@ -39,7 +39,8 @@ typedef enum {
     PTR_NATIVE_FUNQ = T_PTR_NATIVE_FUNQ,
     PTR_NATIVE_METHOD = T_PTR_NATIVE_METHOD,
     PTR_STRING = T_PTR_STRING,
-    PTR_PREVAL = T_PTR_PREVAL
+    PTR_PREVAL = T_PTR_PREVAL,
+    PTR_MODULE = T_PTR_MODULE
 } PtrType;
 
 struct Ptr {
@@ -90,6 +91,13 @@ typedef struct {
 
 typedef struct {
     Ptr ptr;
+    String* name;
+    String* source;
+    Register fields;
+} Module;
+
+typedef struct {
+    Ptr ptr;
     Value target;
     Qontext* method;
 } Method;
@@ -112,6 +120,7 @@ Qontext* newClosure(Funqtion* function);
 Funqtion* newFunction();
 Qlass* newClass(String* name);
 Objeqt* newInstance(Qlass* qlass);
+Module* newModule(Module* module, String* name, String* source);
 Method* newBoundMethod(Value target, Qontext* member);
 
 NativeQall* newNative(NativeFunq function);

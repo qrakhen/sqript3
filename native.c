@@ -57,12 +57,15 @@ void initNativeMethods() {
     defineNative("str", nativeToString);
     defineNative("clear", consoleClear);
     defineNative("run", nativeRunFile);
+    defineNative("import", nativeImport);
 
     defineNative("sin", nativeSin);
     defineNative("cos", nativeCos);
     defineNative("tan", nativeTan);
 
-    registerSet(&runner.globals, "PI", NUMBER_VAL(3.141));
+    registerSet(&runner.globals, makeString("PI", 2), NUMBER_VAL(3.1415926535897932384626433832795));
+    registerSet(&runner.globals, makeString("radToDeg", 2), NUMBER_VAL(3.1415926535897932384626433832795 / 180));
+    registerSet(&runner.globals, makeString("degToRad", 2), NUMBER_VAL(180 / 3.1415926535897932384626433832795));
 
     registerNativeMethod(PTR_STRING, "length", 0, 0, native_StringLength);
     registerNativeMethod(PTR_STRING, "indexOf", 1, 1, native_StringIndexOf);
@@ -102,6 +105,16 @@ Value nativeRunFile(int argCount, Value* args) {
     free(f);
     return NULL_VAL;
 }
+
+Value nativeImport(int argCount, Value* args) {
+    if (argCount != 1) return NULL_VAL;
+    if (!IS_STRING(args[0])) return NULL_VAL;
+    char* f = readFile(AS_STRING(args[0])->chars);
+    interpret(f);
+    free(f);
+    return BOOL_VAL(true);
+}
+
 /*
 Value xxx(int argCount, Value* args) {
     #include <windows.h> 

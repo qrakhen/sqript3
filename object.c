@@ -83,6 +83,14 @@ Objeqt* newInstance(Qlass* qlass) {
     return instance;
 }
 
+Module* newModule(Module* module, String* name, String* source) {
+    Module* module = ALLOCATE_PTR(Module, PTR_OBJEQT);
+    module->name = name;
+    module->source = source;
+    initRegister(&module->fields);
+    return module;
+}
+
 NativeQall* newNative(NativeFunq function) {
     NativeQall* native = ALLOCATE_PTR(NativeQall, PTR_NATIVE_FUNQ);
     native->function = function;

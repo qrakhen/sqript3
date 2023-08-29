@@ -53,7 +53,8 @@ typedef enum {
     T_PTR_NATIVE_FUNQ = T_PTR_NATIVE | T_PTR_FUNQ,
     T_PTR_NATIVE_METHOD = T_PTR_NATIVE | T_PTR_METHOD,
     T_PTR_STRING = T_PTR | 128,
-    T_PTR_PREVAL = T_PTR | 256
+    T_PTR_PREVAL = T_PTR | 256,
+    T_PTR_MODULE = T_PTR | 512
 } ValueType;
 
 typedef enum {
