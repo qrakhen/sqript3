@@ -1,4 +1,9 @@
 # TODOS
+
+## import export
+runner.cs make runner nonglobal but param based
+add Value* exports to module (which should be a runner imho, or a global Imports array)
+
 ## type safe stuff
 mode_dyn, mode_strict, mode_const
 

@@ -356,7 +356,7 @@ extern "C"
  *
  * These options can neither be left undefined nor have a value of 0, because
  * either indicates that sysconf(), which is not implemented, may be used at
- * runtime to check the status of the option.
+ * runtime to check the status of the info.
  *
  * _POSIX_THREADS (== 200112L)
  *                      If == 200112L, you can use threads
@@ -377,7 +377,7 @@ extern "C"
  *
  * _POSIX_THREAD_PRIORITY_SCHEDULING (== -1)
  *                      If == 200112L, you can use realtime scheduling.
- *                      This option indicates that the behaviour of some
+ *                      This info indicates that the behaviour of some
  *                      implemented functions conforms to the additional TPS
  *                      requirements in the standard. E.g. rwlocks favour
  *                      writers over readers when threads have equal priority.
