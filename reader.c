@@ -29,6 +29,10 @@ static bool isDigit(char c) {
     return c >= '0' && c <= '9';
 }
 
+static bool isHexDigit(char c) {
+    return c >= '0' && c <= 'f';
+}
+
 static bool done() {
     return *reader.current == '\0';
 }
@@ -143,12 +147,23 @@ static Token identifier() {
 }
 
 static Token number() {
-    while (isDigit(current())) next();
-    if (current() == '.' && isDigit(peek())) {
+    bool hex = (current() == 'x');
+
+    if (hex)
+        next();    
+
+    while ((!hex && isDigit(current())) || (hex && isHexDigit(current())))
+        next();
+
+    if (!hex && current() == '.' && isDigit(peek())) {
         next();
         while (isDigit(current())) next();
     }
     return makeToken(TOKEN_NUMBER);
+}
+
+static Token hexNumber() {
+    next();
 }
 
 static Token string(char delimiter) {

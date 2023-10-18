@@ -499,7 +499,8 @@ static void __IDX(bool canAssign) {
 }
 
 static void __NUM(bool canAssign) {
-    double value = strtod(digester.previous.start, NULL);
+    bool hex = ((digester.previous.start + 1) == 'x');
+    double value = strtod(digester.previous.start, NULL, hex ? 16 : 10);
     emitConstant(NUMBER_VAL(value));
 }
 
