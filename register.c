@@ -25,6 +25,7 @@ static Entry* findEntry(Entry* entries, int capacity, String* key) {
     Entry* tombstone = NULL;
 
     for (;;) {
+
         Entry* entry = &entries[index];
         if (entry->key == NULL) {
             if (IS_NULL(entry->value)) {
@@ -84,6 +85,9 @@ bool registerSet(Register* table, String* key, Value value) {
 
     entry->key = key;
     entry->value = value;
+    printf("set %s with value ", key->chars);
+    printValue(value);
+    printf("\n");
     return isNewKey;
 }
 

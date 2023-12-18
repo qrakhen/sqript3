@@ -68,18 +68,17 @@ void initRunner(bool initial) {
     runner.bAlloc = 0;
 
     initRegister(&runner.globals);
-    initRegister(&runner.strings);
     initRegister(&runner.imports);
 
-    if (initial)
+    if (initial) {
         initRegister(&runner.exports);
-    else {
-         printf(&runner.exports.count);
+        initRegister(&runner.strings);
+    } else {
         if (&runner.exports.entries != NULL) {
             for (int i = 0; i < runner.exports.count; i++) {
                 if (runner.exports.entries[i].key == NULL)
                     continue;
-                printf("%s : ", runner.exports.entries[i].key->chars);
+                printf("%s > ", runner.exports.entries[i].key->chars);
                 printValue(runner.exports.entries[i].value);
                 printf("\n");
             }             
