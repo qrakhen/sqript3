@@ -126,6 +126,8 @@ int __dbgDissectOp(Segment* segment, int offset) {
             return invokeInstruction("OP_INVOKE", segment, offset);
         case OP_SUPER_INVOKE:
             return invokeInstruction("OP_SUPER_INVOKE", segment, offset);
+        case OP_EXPORT:
+            return constantInstruction("OP_EXPORT", segment, offset);
         case OP_CLOSURE: {
             offset++;
             Byte constant = segment->code[offset++];

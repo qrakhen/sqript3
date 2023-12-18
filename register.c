@@ -85,9 +85,11 @@ bool registerSet(Register* table, String* key, Value value) {
 
     entry->key = key;
     entry->value = value;
-    printf("set %s with value ", key->chars);
-    printValue(value);
-    printf("\n");
+    #if __DBG_REGISTER
+        printf("set %s with value ", key->chars);
+        printValue(value);
+        printf("\n");
+    #endif
     return isNewKey;
 }
 

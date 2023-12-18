@@ -651,6 +651,7 @@ WeightRule rules[] = {
     [TOKEN_OR]              = { NULL,   __OR,   W_OR },
     [TOKEN_PRINT]           = { NULL,   NULL,   W_NONE },
     [TOKEN_TYPEOF]          = { NULL,   NULL,   W_NONE },
+    [TOKEN_EXPORT]          = { NULL,   NULL,   W_NONE },
     [TOKEN_RETURN]          = { NULL,   NULL,   W_NONE },
     [TOKEN_SUPER]           = { __SUP,  NULL,   W_NONE },
     [TOKEN_THIS]            = { __CUR,  NULL,   W_NONE },
@@ -921,6 +922,13 @@ static void printStatement() {
     emitByte(OP_PRINT);
 }
 
+static void exportStatement() { // @TODO BROKEN
+    expression();
+    if (digester.current.type != TOKEN_EOF)
+        consume(TOKEN_SEMICOLON, "missing ; after export statement");
+    emitByte(OP_EXPORT);
+}
+
 static void returnStatement() {
     if (current->type == F_CODE) {
         error("interesting approach, but that does not work.");
@@ -993,7 +1001,9 @@ static void declaration() {
 }
 
 static void statement() {
-    if (match(TOKEN_PRINT)) {
+    if (match(TOKEN_EXPORT)) {
+        exportStatement();
+    } else if (match(TOKEN_PRINT)) {
         printStatement();
     } else if (match(TOKEN_TYPEOF)) {
         typeOf();

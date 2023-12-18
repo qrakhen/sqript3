@@ -25,6 +25,7 @@
 #define __DBG_SHOW_FULL_INFO false
 #define __DBG_STACK false
 #define __DBG_TRACE false
+#define __DBG_REGISTER false
 #define __DBG_GCLOG false
 
 #define __CLI_SHOW_TIME false
