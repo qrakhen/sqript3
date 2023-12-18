@@ -667,6 +667,7 @@ static InterpretResult run() {
                             &subclass->methods);
                 pop();
                 break;
+                break;
             }
             case OP_METHOD:
                 defineMethod(READ_STRING());
@@ -675,8 +676,8 @@ static InterpretResult run() {
                 defineProperty(READ_STRING());
                 break;
             case OP_EXPORT:
-                String* name = READ_STRING();
-                registerSet(&runner.exports, name, peek(0));
+                String* name = AS_STRING(pop());
+                registerSet(&runner.exports, name, NUMBER_VAL(1));
                 pop();
                 break;        
             }
