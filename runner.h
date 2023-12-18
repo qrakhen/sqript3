@@ -23,9 +23,8 @@ typedef struct {
 
     Register globals;
     Register strings;
-
-    Register exports;
     Register imports;
+    Register exports;
 
     Module* module;
 

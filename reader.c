@@ -109,7 +109,14 @@ static TokenType identifierType() {
     switch (reader.start[0]) {
         case 'c': return checkKeyword(1, 4, "lass", TOKEN_CLASS);
         case 'q': return checkKeyword(1, 4, "lass", TOKEN_CLASS);
-        case 'e': return checkKeyword(1, 3, "lse", TOKEN_ELSE);
+        case 'e': 
+            if (reader.current - reader.start > 1) {
+                switch (reader.start[1]) {
+                    case 'l': return checkKeyword(1, 3, "lse", TOKEN_ELSE);
+                    case 'x': return checkKeyword(2, 4, "port", TOKEN_EXPORT);
+                }
+            }
+            break;
         case 'f':
             if (reader.current - reader.start > 1) {
                 switch (reader.start[1]) {
@@ -120,7 +127,14 @@ static TokenType identifierType() {
                 }
             }
             break;
-        case 'i': return checkKeyword(1, 1, "f", TOKEN_IF);
+        case 'i': 
+            if (reader.current - reader.start > 1) {
+                switch (reader.start[1]) {
+                    case 'f': return TOKEN_IF;
+                    case 'm': return checkKeyword(2, 4, "port", TOKEN_IMPORT);
+                }
+            }
+            break;
         case 'n': return checkKeyword(1, 3, "ull", TOKEN_NULL);
         case 'p': return checkKeyword(1, 4, "rint", TOKEN_PRINT);
         case 'r': return checkKeyword(1, 5, "eturn", TOKEN_RETURN);

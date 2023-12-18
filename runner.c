@@ -69,6 +69,10 @@ void initRunner() {
 
     initRegister(&runner.globals);
     initRegister(&runner.strings);
+    initRegister(&runner.imports);
+
+    if (&runner.exports == NULL)
+        initRegister(&runner.exports);
 
     runner.__gcNext = 1024 * 1024;
     runner.__gcCount = 0;
@@ -375,6 +379,7 @@ static InterpretResult run() {
             case OP_DEFINE_GLOBAL: {
                 String* name = READ_STRING();
                 registerSet(&runner.globals, name, peek(0));
+                registerSet(&runner.exports, name, peek(0)); // @TODO TEMP
                 pop();
                 break;
             }
