@@ -62,7 +62,7 @@ void defineNative(const char* name, NativeFunq function) {
     pop();
 }
 
-void initRunner() {
+void initRunner(bool initial) {
     resetStack();
     runner.pointers = NULL;
     runner.bAlloc = 0;
@@ -71,8 +71,20 @@ void initRunner() {
     initRegister(&runner.strings);
     initRegister(&runner.imports);
 
-    if (&runner.exports == NULL)
+    if (initial)
         initRegister(&runner.exports);
+    else {
+         printf(&runner.exports.count);
+        if (&runner.exports.entries != NULL) {
+            for (int i = 0; i < runner.exports.count; i++) {
+                if (runner.exports.entries[i].key == NULL)
+                    continue;
+                printf("%s : ", runner.exports.entries[i].key->chars);
+                printValue(runner.exports.entries[i].value);
+                printf("\n");
+            }             
+        }
+    }
 
     runner.__gcNext = 1024 * 1024;
     runner.__gcCount = 0;
@@ -88,6 +100,7 @@ void initRunner() {
 void freeRunner() {
     freeRegister(&runner.globals);
     freeRegister(&runner.strings);
+    freeRegister(&runner.imports);
     runner.__initString = NULL;
     __freePointers();
 }
@@ -370,8 +383,10 @@ static InterpretResult run() {
                 String* name = READ_STRING();
                 Value value;
                 if (!registerGet(&runner.globals, name, &value)) {
-                    runtimeError("Undefined variable '%s'.", name->chars);
-                    return SQR_INTRP_ERROR_RUNTIME;
+                    if (!registerGet(&runner.exports, name, &value)) { // @TODO TEMP
+                        runtimeError("Undefined variable '%s'.", name->chars);
+                        return SQR_INTRP_ERROR_RUNTIME;
+                    }
                 }
                 push(value);
                 break;

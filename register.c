@@ -32,8 +32,7 @@ static Entry* findEntry(Entry* entries, int capacity, String* key) {
             } else {
                 if (tombstone == NULL) tombstone = entry;
             }
-        } else if (entry->key == key) return entry;
-
+        } else if (strcmp(entry->key->chars, key->chars) == 0) return entry;
 
         index = (index + 1) & (capacity - 1);
     }

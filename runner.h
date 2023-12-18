@@ -48,7 +48,7 @@ typedef enum {
 
 extern Runner runner;
 
-void initRunner();
+void initRunner(bool initial);
 void freeRunner();
 
 void defineNative(const char* name, NativeFunq funq);

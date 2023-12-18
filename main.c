@@ -50,7 +50,7 @@ int main(int argc, const char* argv[]) {
         }
     }
 
-    initRunner();
+    initRunner(true);
     consoleInit();
 
     if (argc == 1) {
@@ -61,7 +61,7 @@ int main(int argc, const char* argv[]) {
             return E_ERR_IO_NOFILE;
         runFile(__GET_ARG("file")->strValue, SQR_OPTION_FLAGS);
         if (__GET_ARG("keep-alive") != NULL) { 
-            initRunner();
+            initRunner(false);
             consoleRun(SQR_OPTION_FLAGS);
         }
     }
