@@ -1,6 +1,8 @@
 #ifndef sqript_options_h
 #define sqript_options_h
 
+#define LAUNCH_OPTION_NO_VALUE 0xffffffff
+
 typedef struct {
     const char* key;
     char c;
@@ -46,11 +48,12 @@ LaunchOptionInfo* getLaunchOptionInfos() {
 static LaunchOption parseLaunchOption(const char* str) {
     LaunchOption option;
     option.info = NULL;
-    option.value = -1;
+    option.value = LAUNCH_OPTION_NO_VALUE;
     option.strValue = NULL;
     char* c = str;
     int start = 0;
     int length = 0;
+    int _length = 0;
     do {
         if (*c == '-') {
             start++;
@@ -58,12 +61,20 @@ static LaunchOption parseLaunchOption(const char* str) {
         }
         else break;     
     } while (*(c++) != '\0'); 
+
     do {
         if (*c != '=') {
             length++;
             continue;
+        } else {
+            do {
+                if (*c != '\0') {
+                    _length++;
+                    continue;
+                }
+                else break;
+            } while (*(c++) != '\0');
         }
-        else break;
     } while (*(c++) != '\0');
 
     if (start == 0) {
@@ -78,7 +89,10 @@ static LaunchOption parseLaunchOption(const char* str) {
         if ((start == 1 && *c == info->c) ||
             (start == 2 && memcmp(str + start, info->key, length) == 0)) {
             option.info = info;
-            option.value = atoi(str + start + length + 1);
+            if (_length == 0)
+                option.value = 1;
+            else
+                option.value = atoi(str + start + length + 1);
             return option;
         }
     }
