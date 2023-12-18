@@ -101,7 +101,7 @@ Value nativeRunFile(int argCount, Value* args) {
     if (argCount < 1) return NULL_VAL;
     if (!IS_STRING(args[0])) return NULL_VAL;
     char* f = readFile(AS_STRING(args[0])->chars);
-    interpret(f);
+    interpret(AS_STRING(args[0])->chars, f);
     free(f);
     return NULL_VAL;
 }
@@ -110,7 +110,7 @@ Value nativeImport(int argCount, Value* args) {
     if (argCount != 1) return NULL_VAL;
     if (!IS_STRING(args[0])) return NULL_VAL;
     char* f = readFile(AS_STRING(args[0])->chars);
-    interpret(f);
+    interpret(AS_STRING(args[0])->chars, f);
     free(f);
     return BOOL_VAL(true);
 }

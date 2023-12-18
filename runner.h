@@ -26,7 +26,9 @@ typedef struct {
     Register imports;
     Register exports;
 
-    Module* module;
+    Module* module; // exports will be transported into this bad boy here
+
+    Register __cachedImports;
 
     String* __initString;
     PtrPreval* __openPrevals;
@@ -53,7 +55,7 @@ void freeRunner();
 
 void defineNative(const char* name, NativeFunq funq);
 
-InterpretResult interpret(const char* source);
+InterpretResult interpret(const char* module, const char* source);
 void push(Value value);
 Value pop();
 

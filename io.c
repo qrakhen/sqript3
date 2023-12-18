@@ -40,7 +40,7 @@ char* readFile(char* path) {
 
 void runFile(char* path, int flags) {
     char* source = readFile(path);
-    InterpretResult result = interpret(source);
+    InterpretResult result = interpret(path, source);
     free(source);
 
     if (result == SQR_INTRP_ERROR_DIGEST) exit(E_ERR_SQR_DIGEST);

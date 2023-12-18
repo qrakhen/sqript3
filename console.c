@@ -54,9 +54,9 @@ void consoleRun(int flags) {
             char file[256];
             memcpy(file, line + 6, length);
             char* src = readFile(file);
-            r = (int)interpret(src);
+            r = (int)interpret(file, src);
         } else 
-            r = (int)interpret(line);
+            r = (int)interpret(MODULE_DEFAULT, line);
     } while ((flags & SQR_OPTION_FLAG_SAFE_MODE) == 0 || r == 0);
 }
 

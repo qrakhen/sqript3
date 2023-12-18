@@ -71,6 +71,7 @@ void initRunner(bool initial) {
     initRegister(&runner.imports);
 
     if (initial) {
+        initRegister(&runner.__cachedImports);
         initRegister(&runner.exports);
         initRegister(&runner.strings);
     } else {
@@ -687,10 +688,20 @@ void hack(bool b) {
     if (b) hack(false);
 }
 
-InterpretResult interpret(const char* source) {
+InterpretResult interpret(const char* module, const char* source) {
     #if __DBG_PRINT_EXEC_TIME
         double ti = NOW_MS;
     #endif
+
+    printf(" === CURRENT MODULE: %s === \n", module);
+
+    if (module != "__main") {
+        Value value;
+        if (registerGet(&runner.__cachedImports, makeString(module, strlen(module)), &value)) {
+            runtimeError("file %s already read!", module);
+            return SQR_INTRP_ERROR_RUNTIME;
+        }
+    }
 
     Funqtion* function = digest(source);
     if (function == NULL) return SQR_INTRP_ERROR_DIGEST;
@@ -701,6 +712,8 @@ InterpretResult interpret(const char* source) {
     pop();
     push(PTR_VAL(qlosure));
     call(qlosure, 0);
+
+    registerSet(&runner.__cachedImports, makeString(module, strlen(module)), NUMBER_VAL(1));
 
     #if __DBG_PRINT_EXEC_TIME
         double tc = NOW_MS;
