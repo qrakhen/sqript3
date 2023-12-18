@@ -24,6 +24,9 @@ typedef struct {
     Register globals;
     Register strings;
 
+    Register exports;
+    Register imports;
+
     Module* module;
 
     String* __initString;
