@@ -394,7 +394,7 @@ static InterpretResult run() {
             case OP_DEFINE_GLOBAL: {
                 String* name = READ_STRING();
                 registerSet(&runner.globals, name, peek(0));
-                registerSet(&runner.globals, name, peek(0)); // @TODO TEMP
+                registerSet(&runner.exports, name, peek(0)); // @TODO TEMP
                 pop();
                 break;
             }
@@ -676,7 +676,7 @@ static InterpretResult run() {
                 break;
             case OP_EXPORT:
                 String* name = READ_STRING();
-                registerSet(&runner.globals, name, peek(0));
+                registerSet(&runner.exports, name, peek(0));
                 pop();
                 break;        
             }
