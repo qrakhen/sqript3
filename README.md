@@ -12,10 +12,21 @@ A small example file for usage is inside the root src folder. (test.sqr)
 
 General idea is very scattered, but will form over time.
 
-#### Usage:
+### Usage:
 Either sqript_c.exe ./yourFile.sqr 
 or
 sqript_c.exe, using the CLI
+
+#### Parameters
+##### --keep-alive, -k
+Keeps CLI alive after execution.
+
+##### --log-level=n, -l=n
+Sets logging level.
+
+##### --file=path/file.sqr, -f=path/file.sqr
+Sets file to be executed.
+Can also just be the first parameter without key, like sqr myFile.sqr
 
 ## Basics:
 ### Variable declaration
@@ -49,6 +60,14 @@ sqript_c.exe, using the CLI
  :> array<any>[3]
  <: :: typoef a[4];
  :> <native fn>
+```
+
+### Imports
+```js
+#import core.sqr
+#import web.sqr
+#import render.sqr
+#import list.sqr
 ```
 
 ### Operators
@@ -119,7 +138,7 @@ qlass Vector {
 	init(x, y, z) { 
 		this:x <~ x;  // all of these work
 		this.y = y;   // normie code works too! 
-		.~:z <~ z;    // very unsure about syntax just yet
+		.~:z <~ z;    // .~ is just "this". :)
 	}
 	
 	length() {
@@ -139,7 +158,7 @@ qlass Vector {
  :> 0.072ms // 500% faster than JS :^)
  ```
 
-Sqript comes with 0 core modules so it's prettyn bare bone atm, but I'm definietely looking into making this big time - 
-potentially even looking at Rust/Cpp for ~special tasks~.
+Sqript comes with 0 core modules so it's pretty bare bone atm, but I'm definietely looking into making this big time - 
+~potentially even looking at Rust/Cpp for special tasks~.
 
 I do wish all of you a great evening!
