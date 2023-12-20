@@ -51,6 +51,68 @@ sqript_c.exe, using the CLI
  :> <native fn>
 ```
 
+### Operators
+#### Declare
+```js
+*~ or var or *Type~
+
+*~ x <~ 0xf;
+var y <~ 5;
+*Number~ z <~ 0.43;
+*<T>~ generic <~ ...;
+```
+
+#### Auto Assign
+```js
+<~ or =
+
+*~ x <~ y;
+*~ var = y;
+```
+
+#### Assign by Reference
+```js
+& or <&
+
+*~ x <~ &y;
+*~ x <& y;
+```
+
+#### Assign by Value
+```js
+<| or <~ |
+
+*~ x <| y;
+*~ x <~ |y;
+```
+
+#### Assign by Reference
+```js
+& or <&
+
+*~ x <~ &y;
+*~ x <& y;
+```
+
+#### List Operators
+```js
+<+ add right to left
++> add left to right
+<- remove from right (and add to left)
+-> remove from left (and add to right)
+:* pop from list
+
+list <+ 5;
+list[5] ->
+list[3] +> list2
+*~ x <~ list:* //equal to x <- list[:]
+```
+
+#### Return
+```js
+<: or return
+```
+
 ### Classes
 ```js 
 qlass Vector { 
