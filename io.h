@@ -3,5 +3,6 @@
 
 char* readFile(char* path);
 void runFile(const char* path, int flags);
+int doImports(char* source);
 
 #endif
