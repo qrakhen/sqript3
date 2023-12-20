@@ -53,6 +53,8 @@ int main(int argc, const char* argv[]) {
     initRunner(true);
     consoleInit();
 
+    //runFile("core.sqr", SQR_OPTION_FLAGS);
+
     if (argc == 1) {
         consoleRun(SQR_OPTION_FLAGS);
     }

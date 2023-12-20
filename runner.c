@@ -14,6 +14,7 @@
 #include "console.h"
 #include "native.h"
 #include "string.h"
+#include "io.h"
 
 Runner runner;
 
@@ -701,15 +702,21 @@ InterpretResult interpret(const char* module, const char* source) {
 
     printf(" === CURRENT MODULE: %s === \n", module);
 
+    int offset = doImports(source);
+
     if (module != "__main") {
         Value value;
         if (registerGet(&runner.__cachedImports, makeString(module, strlen(module)), &value)) {
             runtimeError("file %s already read!", module);
             return SQR_INTRP_ERROR_RUNTIME;
+        } else {
+            registerSet(&runner.__cachedImports, makeString(module, strlen(module)), NUMBER_VAL(1));
         }
     }
 
-    Funqtion* function = digest(source);
+    const char* _source = source + offset;
+
+    Funqtion* function = digest(_source);
     if (function == NULL) return SQR_INTRP_ERROR_DIGEST;
 
     push(PTR_VAL(function));
@@ -718,8 +725,6 @@ InterpretResult interpret(const char* module, const char* source) {
     pop();
     push(PTR_VAL(qlosure));
     call(qlosure, 0);
-
-    registerSet(&runner.__cachedImports, makeString(module, strlen(module)), NUMBER_VAL(1));
 
     #if __DBG_PRINT_EXEC_TIME
         double tc = NOW_MS;

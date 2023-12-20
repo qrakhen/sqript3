@@ -40,8 +40,7 @@ char* readFile(char* path) {
 
 void runFile(char* path, int flags) {
     char* source = readFile(path);
-    int offset = doImports(source);
-    InterpretResult result = interpret(path, source + offset);
+    InterpretResult result = interpret(path, source);
     free(source);
 
     if (result == SQR_INTRP_ERROR_DIGEST) exit(E_ERR_SQR_DIGEST);
@@ -56,7 +55,11 @@ int doImports(char* source) {
         if (memcmp(c, "#import", 7) == 0) {
             n += 8;
             int length = getCharLength(c + n, '\n');
-            char fileName[256];
+            int _length = getCharLength(c + n, '\r');
+            if (_length < length)
+                length = _length;
+
+            char fileName[256] = "";
             memcpy(fileName, c + n, length);
             char* src = readFile(fileName);
             r = (int)interpret(fileName, src);
