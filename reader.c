@@ -113,7 +113,7 @@ static TokenType identifierType() {
             if (reader.current - reader.start > 1) {
                 switch (reader.start[1]) {
                     case 'l': return checkKeyword(1, 3, "lse", TOKEN_ELSE);
-                    case 'x': return checkKeyword(2, 4, "port", TOKEN_EXPORT);
+                    case 'x': return checkKeyword(1, 4, "port", TOKEN_EXPORT);
                 }
             }
             break;
