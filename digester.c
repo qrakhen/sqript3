@@ -380,6 +380,15 @@ static void defineVariable(Byte global) {
     emitBytes(OP_DEFINE_GLOBAL, global);
 }
 
+static void exportVariable(Byte global) {
+    if (current->scopeDepth != 0) {
+        errorAtCurrent("can only export values from root scope");
+        return;
+    }
+
+    emitBytes(OP_EXPORT, global);
+}
+
 static Byte argumentList() {
     Byte argCount = 0;
     if (!check(TOKEN_GROUP_CLOSE)) {
@@ -825,7 +834,7 @@ static void funqDeclaration() {
     defineVariable(global);
 }
 
-static void varDeclaration() {
+static void varDeclaration(bool export) {
     Byte global = parseVariable("provide your variable with a name");
 
     if (match(TOKEN_EQUAL)) {
@@ -837,6 +846,8 @@ static void varDeclaration() {
         consume(TOKEN_SEMICOLON, "missing ; after variable declaration");
 
     defineVariable(global);
+    if (export)
+        exportVariable(global);
 }
 
 static void expressionStatement() {
@@ -855,7 +866,7 @@ static void forStatement() {
 
     if (match(TOKEN_SEMICOLON)) { // w.e.
     } else if (match(TOKEN_VAR)) {
-        varDeclaration();
+        varDeclaration(false);
     } else {
         expressionStatement();
     }
@@ -922,7 +933,7 @@ static void printStatement() {
     emitByte(OP_PRINT);
 }
 
-static void exportStatement() { // @TODO BROKEN
+static void exportStatement() {
     expression();
     if (digester.current.type != TOKEN_EOF)
         consume(TOKEN_SEMICOLON, "missing ; after export statement");
@@ -992,7 +1003,9 @@ static void declaration() {
     } else if (match(TOKEN_FUNCTION)) {
         funqDeclaration();
     } else if (match(TOKEN_VAR)) {
-        varDeclaration();
+        varDeclaration(false);
+    } else if (match(TOKEN_EXPORT)) {
+        varDeclaration(true);
     } else {
         statement();
     }
