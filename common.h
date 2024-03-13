@@ -84,10 +84,14 @@ int SQR_DEBUG_FLAGS;
 
 #define F formatToString
 
-
 bool optionEnabled(int optionFlag);
 
 char* formatToString(char* format, ...);
 char* formatTime(double ms, int unit);
+
+struct KeyValuePair {
+	const char* key;
+	const char* val;
+};
 
 #endif

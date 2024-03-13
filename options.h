@@ -31,18 +31,26 @@ LaunchOption* __GET_ARG(const char* key) {
     return NULL;
 }
 
-static void __set(int index, const char* key, char c, const char* description) {
-    LaunchOptionInfo* info = (__LAUNCH_OPTION_INFOS + index);
+int __optionIndex = 0;
+static void __set(char* key, char c, const char* description) {
+    LaunchOptionInfo* info = (__LAUNCH_OPTION_INFOS + __optionIndex++);
     info->key = key;
     info->c = c;
     info->description = description;
 }
 
 LaunchOptionInfo* getLaunchOptionInfos() {
-    __set(0, "file", "f", "file to execute");
-    __set(1, "log-level", "l", "log level (0-2)");
-    __set(2, "keep-alive", "k", "whether sqript should terminate after execution");
-    __set(3, "cache", "c", "whether bytecodes should be cached for re-use");
+    __set("config",         "c", "config to be used (*.qfc) [default=]");
+    __set("out",            "o", "compile target [default='./out/']");
+    __set("source",         "s", "source *.prq file to build, alternatively provide the root folder [default='./']");
+    __set("run",            "r", "file to execute (compiles and directly executes) [default=]");
+    __set("log-level",      "l", "log level (0-5) [default=0]");
+    __set("log-file",       "w", "file to write logs to. always verbose. [default=]");
+    __set("no-null",        "n", "null references are forbidden [default=0]");
+    __set("no-overwrite",   "r", "prohibit overwriting existing identifiers [default=0]");
+    __set("no-undeclared",  "u", "prohibit using undeclared values [default=1]");
+    __set("keep-alive",     "k", "whether sqript should terminate after execution [default=1]");
+    __set("cache",          "h", "whether bytecodes should be cached for re-use [default=0]");
 }
 
 static LaunchOption parseLaunchOption(const char* str) {

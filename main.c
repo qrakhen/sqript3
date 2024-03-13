@@ -32,6 +32,19 @@ static  int test() {
     exit(0);
 }*/
 
+struct Param {
+    const char* key;
+    struct Param* alias;
+};
+
+struct Param* __addAlias(struct Param* param, const char* alias) {
+    param->alias = Param();
+}
+
+const char* __ACCEPTED_PARAMS[] = {
+    "o"
+};
+
 
 int main(int argc, const char* argv[]) {
     #ifdef __OS_NOT_SUPPORTED
