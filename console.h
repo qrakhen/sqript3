@@ -8,6 +8,7 @@
 #include "common.h"
 #include "value.h"
 
+#define LOG_LEVEL_MUTE 0
 #define LOG_LEVEL_ERROR 1
 #define LOG_LEVEL_WARN 2
 #define LOG_LEVEL_INFO 4
@@ -127,6 +128,7 @@ void consoleWriteColor(char* message, Byte color);
 void consoleClear();
 void consoleResetColor();
 
+void setLogLevel(Byte level);
 void logError(char* message, ...);
 void logWarn(char* message, ...);
 void logInfo(char* message, ...);

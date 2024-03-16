@@ -3,6 +3,8 @@
 
 #define LAUNCH_OPTION_NO_VALUE 0xffffffff
 
+#include "string.h"
+
 typedef struct {
     const char* key;
     char c;
@@ -33,10 +35,14 @@ LaunchOption* __GET_ARG(const char* key) {
 
 int __optionIndex = 0;
 static void __set(char* key, char c, const char* description) {
-    LaunchOptionInfo* info = (__LAUNCH_OPTION_INFOS + __optionIndex++);
-    info->key = key;
-    info->c = c;
-    info->description = description;
+    //LaunchOptionInfo* info = (__LAUNCH_OPTION_INFOS + __optionIndex++);
+    __LAUNCH_OPTION_INFOS[__optionIndex].key = key;
+    __LAUNCH_OPTION_INFOS[__optionIndex].c = c;
+    __LAUNCH_OPTION_INFOS[__optionIndex].description = description;
+    __optionIndex++;
+   //info->key = key;
+   //info->c = c;
+   //info->description = description;
 }
 
 LaunchOptionInfo* getLaunchOptionInfos() {
@@ -60,7 +66,7 @@ static LaunchOption parseLaunchOption(const char* str) {
     option.strValue = NULL;
     char* c = str;
     int start = 0;
-    int length = 0;
+    int length = 0; 
     int _length = 0;
     do {
         if (*c == '-') {
@@ -91,8 +97,8 @@ static LaunchOption parseLaunchOption(const char* str) {
         option.strValue = str;
         return option;
     }
-    
-    for (int i = 0; i < 4; i++) {
+
+    for (int i = 0; i < __optionIndex - 1; i++) {
         LaunchOptionInfo* info = &__LAUNCH_OPTION_INFOS[i];
         if ((start == 1 && *c == info->c) ||
             (start == 2 && memcmp(str + start, info->key, length) == 0)) {

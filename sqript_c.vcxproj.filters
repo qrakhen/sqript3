@@ -137,6 +137,9 @@
     <ClInclude Include="options.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="serializer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="test.sqr">
@@ -152,6 +155,7 @@
       <Filter>Resource Files</Filter>
     </None>
     <None Include="packages.config" />
+    <None Include="linked_list.sqr" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="icon1.ico">

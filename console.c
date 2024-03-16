@@ -21,6 +21,10 @@ static Byte logLevel = LOG_LEVEL_SPAM;
 Console console;
 HANDLE hOut, hCin;
 
+void setLogLevel(Byte level) {
+    logLevel = level;
+}
+
 static void setCursor(short x, short y) {
     printf("%c[%d;%dH", 27, x, y);
 }
