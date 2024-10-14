@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/stat.h>
 
 #include "common.h"
 #include "segment.h"
@@ -57,6 +58,9 @@ void consoleRun(int flags) {
             int length = getCharLength(line + 6, '\n');
             char file[256];
             memcpy(file, line + 6, length);
+            struct stat _buffer;
+            if (stat(file, &_buffer) < 0)
+                continue;
             char* src = readFile(file);
             r = (int)interpret(file, src);
         } else 

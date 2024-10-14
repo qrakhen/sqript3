@@ -45,6 +45,8 @@ static void __set(char* key, char c, const char* description) {
    //info->description = description;
 }
 
+
+
 LaunchOptionInfo* getLaunchOptionInfos() {
     __set("config",         "c", "config to be used (*.qfc) [default=]");
     __set("out",            "o", "compile target [default='./out/']");

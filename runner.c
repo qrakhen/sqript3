@@ -717,8 +717,8 @@ InterpretResult interpret(const char* module, const char* source) {
     const char* _source = source + offset;
 
     Funqtion* function = digest(_source);
-    __dbgDissect(&function->segment, "everything");
     if (function == NULL) return SQR_INTRP_ERROR_DIGEST;
+    __dbgDissect(&function->segment, "everything");
 
     push(PTR_VAL(function));
 

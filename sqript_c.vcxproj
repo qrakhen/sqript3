@@ -280,7 +280,7 @@
     <None Include="README.md" />
     <None Include="test.sqr">
       <DeploymentContent>true</DeploymentContent>
-      <FileType>Script</FileType>
+      <FileType>Text</FileType>
     </None>
     <None Include="TODO.md" />
   </ItemGroup>

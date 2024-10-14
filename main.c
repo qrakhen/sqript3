@@ -15,26 +15,14 @@
 #include "thread.h"
 #include "options.h"
 
-/*
-static void* myThreadFun(void* vargp) {
-    printf("Printing x from Thread \n");
-    return NULL;
-}
-
-static  int test() {
-    pthread_t thread_id;
-    printf("Before Thread\n");
-    pthread_create(&thread_id, NULL, myThreadFun, NULL);
-    pthread_join(thread_id, NULL);
-    printf("After Thread\n");
-    exit(0);
-}*/
-
 int main(int argc, const char* argv[]) {
     #ifdef __OS_NOT_SUPPORTED
         sprtinf(stderr, "%s", "OS NOT SUPPORTED");
         exit(E_ERR_SYS_NOT_SUPPORTED);
     #endif
+    int src = 1;
+    int dst;
+
         
     printf("Launch options passed:\n");
     LaunchOption* options = parseLaunchOptions(argc, argv);

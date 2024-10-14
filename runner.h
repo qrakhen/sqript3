@@ -20,7 +20,6 @@ typedef struct {
 
     Value stack[STACK_MAX];
     Value* cursor;
-
     Register globals;
     Register strings;
     Register imports;
