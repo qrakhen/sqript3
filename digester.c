@@ -339,7 +339,8 @@ static void addLocal(Token name) {
 }
 
 static void declareVariable() {
-    if (current->scopeDepth == 0) return;
+    if (current->scopeDepth == 0)
+        return;
 
     Token* name = &digester.previous;
     for (int i = current->localCount - 1; i >= 0; i--) {

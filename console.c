@@ -22,6 +22,15 @@ static Byte logLevel = LOG_LEVEL_SPAM;
 Console console;
 HANDLE hOut, hCin;
 
+static Byte l2c[0x10] = { 
+    C_COLOR_RED,
+    C_COLOR_LRED, 
+    C_COLOR_YELLOW,
+    C_COLOR_WHITE,
+    C_COLOR_LGRAY,
+    C_COLOR_DGRAY
+};
+
 void setLogLevel(Byte level) {
     logLevel = level;
 }
@@ -149,19 +158,38 @@ static void __logWrite(char* format, Byte level, va_list args) {
     if (level > logLevel)
         return;
 
-    char buffer[32];
-    time_t t;
-    struct tm * timeInfo;
-    time(&t);
-    timeInfo = localtime(&t);
-    strftime(buffer, 32, "%H:%M:%S", timeInfo);
     #if __CLI_SHOW_TIME
+        char buffer[32];
+        time_t t;
+        struct tm * timeInfo;
+        time(&t);
+        timeInfo = localtime(&t);
+        strftime(buffer, 32, "%H:%M:%S", timeInfo);
         printf(buffer);
     #endif
 
-    print(formatToString(format, args));
+    Byte _color = console.color;
+    CSETC(l2c[level]);
+    char prefix[6];
+    if (level < LOG_LEVEL_ERROR)
+        strcpy(prefix, "FATAL");
+    else if (level < LOG_LEVEL_WARN)
+        strcpy(prefix, "ERROR");
+    else if (level < LOG_LEVEL_INFO)
+        strcpy(prefix, "WARN ");
+    else if (level < LOG_LEVEL_DEBUG)
+        strcpy(prefix, "INFO ");
+    else if (level < LOG_LEVEL_SPAM)
+        strcpy(prefix, "DEBUG");
+    else 
+        strcpy(prefix, "SPAM ");
+
+    char* formatted = formatToString(format, args);
+    print(formatToString("[%s]: %s\n", prefix, formatted));
+    CSETC(_color);
 }
 
+void logMessage(Byte level, char* message, va_list args) { __logWrite(message, level, args); }
 void logError(char* message, va_list args) { __logWrite(message, LOG_LEVEL_ERROR, args); }
 void logWarn(char* message, va_list args) { __logWrite(message, LOG_LEVEL_WARN, args); }
 void logInfo(char* message, va_list args) { __logWrite(message, LOG_LEVEL_INFO, args); }

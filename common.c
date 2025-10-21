@@ -27,10 +27,17 @@ char* formatTime(double v, int unit) {
 }
 
 char* formatToString(char* format, ...) {
-    char r[8192];
-    va_list ptr;
-    va_start(ptr, format);
-    vsprintf(r, format, ptr);
-    va_end(ptr);
+    va_list args;
+    va_start(args, format);
+    int required_size = vsnprintf(NULL, 0, format, args) + 1;
+    va_end(args);
+
+    char* r = (char*)malloc(required_size);
+    if (r == NULL) {
+        return NULL;
+    }
+    va_start(args, format);
+    vsnprintf(r, required_size, format, args);
+    va_end(args);
     return r;
 }
