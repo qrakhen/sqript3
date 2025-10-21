@@ -56,14 +56,16 @@ static void updateColor() {
 void consoleRun(int flags) {
     printf("\n    ...made with <3 by qrakhen ~\n\n");
     char line[8192];
+    int offset = 0;
+    bool insideString = false;
     int r = 0;
     do {
         consoleWrite(__C_PREFIX_INPUT);
-        if (!fgets(line, sizeof(line), stdin)) {
+        if (!fgets(line + offset, sizeof(line), stdin)) {
             consoleWriteLine("");
             break;
         }
-        if (memcmp(line, "#read", 5) == 0) {
+        if (!insideString && memcmp(line, "#read", 5) == 0) {
             int length = getCharLength(line + 6, '\n');
             char file[256];
             memcpy(file, line + 6, length);
@@ -72,8 +74,24 @@ void consoleRun(int flags) {
                 continue;
             char* src = readFile(file);
             r = (int)interpret(file, src);
-        } else 
-            r = (int)interpret(MODULE_DEFAULT, line);
+        } else {
+            for (int i = offset; i < sizeof(line); i++) {
+                if (line[i] == '"') {
+                    insideString = !insideString;
+                }
+                if (line[i] == '\n') {
+                    if (!insideString) {
+                        offset = 0;
+                        r = (int)interpret(MODULE_DEFAULT, line);
+                        break;
+                    } else {
+                        line[++i] = '\n';
+                        offset = i;
+                        break;
+                    }
+                }
+            }
+        }
     } while ((flags & SQR_OPTION_FLAG_SAFE_MODE) == 0 || r == 0);
 }
 
