@@ -8,11 +8,12 @@
 #include "common.h"
 #include "value.h"
 
+#define LOG_LEVEL_MUTE 0
 #define LOG_LEVEL_ERROR 1
 #define LOG_LEVEL_WARN 2
-#define LOG_LEVEL_INFO 4
-#define LOG_LEVEL_DEBUG 8
-#define LOG_LEVEL_SPAM 16
+#define LOG_LEVEL_INFO 3
+#define LOG_LEVEL_DEBUG 4
+#define LOG_LEVEL_SPAM 5
 
 #define COUT(m) (consoleWrite(m))
 #define CERR(m) (COUTC(F("ERR: %s", m), C_COLOR_RED))
@@ -127,10 +128,12 @@ void consoleWriteColor(char* message, Byte color);
 void consoleClear();
 void consoleResetColor();
 
-void logError(char* message, ...);
-void logWarn(char* message, ...);
-void logInfo(char* message, ...);
-void logDebug(char* message, ...);
-void logSpam(char* message, ...);
+void setLogLevel(Byte level);
+void logMessage(Byte logLevel, char* message, va_list args);
+void logError(char* message, va_list args);
+void logWarn(char* message, va_list args);
+void logInfo(char* message, va_list args);
+void logDebug(char* message, va_list args);
+void logSpam(char* message, va_list args);
 
 #endif

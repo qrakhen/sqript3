@@ -15,29 +15,14 @@
 #include "thread.h"
 #include "options.h"
 
-
-/*
-
-static void* myThreadFun(void* vargp) {
-    printf("Printing x from Thread \n");
-    return NULL;
-}
-
-static  int test() {
-    pthread_t thread_id;
-    printf("Before Thread\n");
-    pthread_create(&thread_id, NULL, myThreadFun, NULL);
-    pthread_join(thread_id, NULL);
-    printf("After Thread\n");
-    exit(0);
-}*/
-
-
 int main(int argc, const char* argv[]) {
     #ifdef __OS_NOT_SUPPORTED
         sprtinf(stderr, "%s", "OS NOT SUPPORTED");
         exit(E_ERR_SYS_NOT_SUPPORTED);
     #endif
+    int src = 1;
+    int dst;
+
         
     printf("Launch options passed:\n");
     LaunchOption* options = parseLaunchOptions(argc, argv);
@@ -45,10 +30,16 @@ int main(int argc, const char* argv[]) {
         if (options[i].info != NULL) {
             if (options[i].strValue != NULL)
                 printf("%s = %s\n", options[i].info->key, options[i].strValue);
-            else
+            else 
                 printf("%s = %i\n", options[i].info->key, options[i].value);
         }
     }
+
+    LaunchOption* logLevel = __GET_ARG("log-level");
+    if (logLevel != NULL)
+        setLogLevel(logLevel->value);
+    else
+        setLogLevel(LOG_LEVEL_WARN);
 
     initRunner(true);
     consoleInit();

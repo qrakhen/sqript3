@@ -156,6 +156,16 @@ int __dbgDissectOp(Segment* segment, int offset) {
             return simpleInstruction("OP_INHERIT", offset);
         case OP_METHOD:
             return constantInstruction("OP_METHOD", segment, offset);
+        case OP_ARRAY:
+            return constantInstruction("OP_ARRAY", segment, offset);
+        case OP_ARRAY_ADD:
+            return constantInstruction("OP_ARRAY_ADD", segment, offset);
+        case OP_ARRAY_GET:
+            return constantInstruction("OP_ARRAY_GET", segment, offset);
+        case OP_ARRAY_REMOVE:
+            return constantInstruction("OP_ARRAY_REMOVE", segment, offset);
+        case OP_ARRAY_SET:
+            return constantInstruction("OP_ARRAY_SET", segment, offset);
         default:
             printf("Unknown opcode %d\n", instruction);
             return offset + 1;

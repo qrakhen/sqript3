@@ -1,0 +1,40 @@
+review of the desaster you called 'C:\Users\filos\projects\sqript3\sqript_c'
+
+
+
+.c:
+  count: 3237
+  comments: 14
+  total files: 18
+
+.h:
+  count: 928
+  comments: 21
+  total files: 22
+
+.md:
+  count: 163
+  comments: 1
+  total files: 2
+
+Favourite words:
+ 1. return(x303)
+ 2. case(x241)
+ 3. int(x150)
+ 4. break;(x141)
+ 5. void(x85)
+ 6. char*(x72)
+ 7. NULL,(x71)
+ 8. else(x70)
+ 9. Value(x63)
+ 10. Byte(x49)
+ 11. for(x48)
+ 12. struct(x46)
+ 13. offset);(x44)
+ 14. String*(x42)
+ 15. NULL)(x41)
+ 16. __C_ESC(x40)
+ 17. Value*(x39)
+ 18. while(x39)
+ 19. segment,(x35)
+ 20. name,(x32)

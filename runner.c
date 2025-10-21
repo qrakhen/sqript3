@@ -345,7 +345,7 @@ static InterpretResult run() {
         } while (false)
 
     for (;;) {
-        #if __DBG_TRACE
+        #if __DBG_TRACE        
         printf("          ");
         for (Value* slot = runner.stack; slot < runner.cursor; slot++) {
             printf("[ ");
@@ -718,6 +718,7 @@ InterpretResult interpret(const char* module, const char* source) {
 
     Funqtion* function = digest(_source);
     if (function == NULL) return SQR_INTRP_ERROR_DIGEST;
+    __dbgDissect(&function->segment, "everything");
 
     push(PTR_VAL(function));
 

@@ -3,6 +3,8 @@
 
 #define LAUNCH_OPTION_NO_VALUE 0xffffffff
 
+#include "string.h"
+
 typedef struct {
     const char* key;
     char c;
@@ -31,18 +33,32 @@ LaunchOption* __GET_ARG(const char* key) {
     return NULL;
 }
 
-static void __set(int index, const char* key, char c, const char* description) {
-    LaunchOptionInfo* info = (__LAUNCH_OPTION_INFOS + index);
-    info->key = key;
-    info->c = c;
-    info->description = description;
+int __optionIndex = 0;
+static void __set(char* key, char c, const char* description) {
+    //LaunchOptionInfo* info = (__LAUNCH_OPTION_INFOS + __optionIndex++);
+    __LAUNCH_OPTION_INFOS[__optionIndex].key = key;
+    __LAUNCH_OPTION_INFOS[__optionIndex].c = c;
+    __LAUNCH_OPTION_INFOS[__optionIndex].description = description;
+    __optionIndex++;
+   //info->key = key;
+   //info->c = c;
+   //info->description = description;
 }
 
+
+
 LaunchOptionInfo* getLaunchOptionInfos() {
-    __set(0, "file", "f", "file to execute");
-    __set(1, "log-level", "l", "log level (0-2)");
-    __set(2, "keep-alive", "k", "whether sqript should terminate after execution");
-    __set(3, "cache", "c", "whether bytecodes should be cached for re-use");
+    __set("config",         "c", "config to be used (*.qfc) [default=]");
+    __set("out",            "o", "compile target [default='./out/']");
+    __set("source",         "s", "source *.prq file to build, alternatively provide the root folder [default='./']");
+    __set("run",            "r", "file to execute (compiles and directly executes) [default=]");
+    __set("log-level",      "l", "log level (0-5) [default=0]");
+    __set("log-file",       "w", "file to write logs to. always verbose. [default=]");
+    __set("no-null",        "n", "null references are forbidden [default=0]");
+    __set("no-overwrite",   "r", "prohibit overwriting existing identifiers [default=0]");
+    __set("no-undeclared",  "u", "prohibit using undeclared values [default=1]");
+    __set("keep-alive",     "k", "whether sqript should terminate after execution [default=1]");
+    __set("cache",          "h", "whether bytecodes should be cached for re-use [default=0]");
 }
 
 static LaunchOption parseLaunchOption(const char* str) {
@@ -52,7 +68,7 @@ static LaunchOption parseLaunchOption(const char* str) {
     option.strValue = NULL;
     char* c = str;
     int start = 0;
-    int length = 0;
+    int length = 0; 
     int _length = 0;
     do {
         if (*c == '-') {
@@ -83,8 +99,8 @@ static LaunchOption parseLaunchOption(const char* str) {
         option.strValue = str;
         return option;
     }
-    
-    for (int i = 0; i < 4; i++) {
+
+    for (int i = 0; i < __optionIndex - 1; i++) {
         LaunchOptionInfo* info = &__LAUNCH_OPTION_INFOS[i];
         if ((start == 1 && *c == info->c) ||
             (start == 2 && memcmp(str + start, info->key, length) == 0)) {

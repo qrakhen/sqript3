@@ -261,6 +261,7 @@
     <ClInclude Include="runner.h" />
     <ClInclude Include="segment.h" />
     <ClInclude Include="register.h" />
+    <ClInclude Include="serializer.h" />
     <ClInclude Include="string.h" />
     <ClInclude Include="thread.h" />
     <ClInclude Include="types.h" />
@@ -279,7 +280,7 @@
     <None Include="README.md" />
     <None Include="test.sqr">
       <DeploymentContent>true</DeploymentContent>
-      <FileType>Script</FileType>
+      <FileType>Text</FileType>
     </None>
     <None Include="TODO.md" />
   </ItemGroup>

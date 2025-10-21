@@ -1,5 +1,22 @@
 # TODOS
 
+## compiler
+
+File Structure:
+```
+meta:
+	uint size_strings;
+	uint size_qlosures;
+	byte[32] extra;
+qlosures:
+	qlosure[size_qlosures];
+strings:
+	(uint, String)[size_strings];
+program:
+	Byte*
+\EOF
+```
+
 ## import export
 runner.cs make runner nonglobal but param based
 add Value* exports to module (which should be a runner imho, or a global Imports array)

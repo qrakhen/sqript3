@@ -45,6 +45,10 @@ static char current() {
     return *reader.current;
 }
 
+static char previous() {
+    return *(reader.current - 1);
+}
+
 static char peek() {
     return done() ? '\0' : reader.current[1];
 }
@@ -113,7 +117,7 @@ static TokenType identifierType() {
             if (reader.current - reader.start > 1) {
                 switch (reader.start[1]) {
                     case 'l': return checkKeyword(1, 3, "lse", TOKEN_ELSE);
-                    case 'x': return checkKeyword(2, 4, "port", TOKEN_EXPORT);
+                    case 'x': return checkKeyword(1, 4, "port", TOKEN_EXPORT);
                 }
             }
             break;
@@ -181,8 +185,9 @@ static Token hexNumber() {
 }
 
 static Token string(char delimiter) {
-    while (current() != delimiter && !done()) {
-        if (current() == '\n') reader.line++;
+    char c = current();
+    while ((c = current()) != delimiter || (c == delimiter && previous() == '\\') && !done()) {
+        if (c == '\n') reader.line++;
         next();
     }
     if (done()) return errorToken("Unterminated string.");

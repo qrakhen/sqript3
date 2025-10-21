@@ -20,10 +20,10 @@
 #define __OS_ARCH_64    2
 #define __OS_ARCH_ARM   3
 
-#define __DBG_PRINT_STATEMENTS true
+#define __DBG_PRINT_STATEMENTS false
 #define __DBG_PRINT_EXEC_TIME true
 #define __DBG_SHOW_FULL_INFO false
-#define __DBG_STACK true
+#define __DBG_STACK false
 #define __DBG_TRACE false
 #define __DBG_REGISTER false
 #define __DBG_GCLOG false
@@ -84,10 +84,14 @@ int SQR_DEBUG_FLAGS;
 
 #define F formatToString
 
-
 bool optionEnabled(int optionFlag);
 
 char* formatToString(char* format, ...);
 char* formatTime(double ms, int unit);
+
+struct KeyValuePair {
+	const char* key;
+	const char* val;
+};
 
 #endif

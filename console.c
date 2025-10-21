@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/stat.h>
 
 #include "common.h"
 #include "segment.h"
@@ -20,6 +21,19 @@
 static Byte logLevel = LOG_LEVEL_SPAM;
 Console console;
 HANDLE hOut, hCin;
+
+static Byte l2c[0x10] = { 
+    C_COLOR_RED,
+    C_COLOR_LRED, 
+    C_COLOR_YELLOW,
+    C_COLOR_WHITE,
+    C_COLOR_LGRAY,
+    C_COLOR_DGRAY
+};
+
+void setLogLevel(Byte level) {
+    logLevel = level;
+}
 
 static void setCursor(short x, short y) {
     printf("%c[%d;%dH", 27, x, y);
@@ -42,14 +56,42 @@ static void updateColor() {
 void consoleRun(int flags) {
     printf("\n    ...made with <3 by qrakhen ~\n\n");
     char line[8192];
+    int offset = 0;
+    bool insideString = false;
     int r = 0;
     do {
         consoleWrite(__C_PREFIX_INPUT);
-        if (!fgets(line, sizeof(line), stdin)) {
+        if (!fgets(line + offset, sizeof(line), stdin)) {
             consoleWriteLine("");
             break;
         }
-        r = (int)interpret(MODULE_DEFAULT, line);
+        if (!insideString && memcmp(line, "#read", 5) == 0) {
+            int length = getCharLength(line + 6, '\n');
+            char file[256];
+            memcpy(file, line + 6, length);
+            struct stat _buffer;
+            if (stat(file, &_buffer) < 0)
+                continue;
+            char* src = readFile(file);
+            r = (int)interpret(file, src);
+        } else {
+            for (int i = offset; i < sizeof(line); i++) {
+                if (line[i] == '"' && (i > 0 && line[i - 1] != '\\')) {
+                    insideString = !insideString;
+                }
+                if (line[i] == '\n') {
+                    if (!insideString) {
+                        offset = 0;
+                        r = (int)interpret(MODULE_DEFAULT, line);
+                        break;
+                    } else {
+                        line[++i] = '\n';
+                        offset = i;
+                        break;
+                    }
+                }
+            }
+        }
     } while ((flags & SQR_OPTION_FLAG_SAFE_MODE) == 0 || r == 0);
 }
 
@@ -134,19 +176,38 @@ static void __logWrite(char* format, Byte level, va_list args) {
     if (level > logLevel)
         return;
 
-    char buffer[32];
-    time_t t;
-    struct tm * timeInfo;
-    time(&t);
-    timeInfo = localtime(&t);
-    strftime(buffer, 32, "%H:%M:%S", timeInfo);
     #if __CLI_SHOW_TIME
+        char buffer[32];
+        time_t t;
+        struct tm * timeInfo;
+        time(&t);
+        timeInfo = localtime(&t);
+        strftime(buffer, 32, "%H:%M:%S", timeInfo);
         printf(buffer);
     #endif
 
-    print(formatToString(format, args));
+    Byte _color = console.color;
+    CSETC(l2c[level]);
+    char prefix[6];
+    if (level < LOG_LEVEL_ERROR)
+        strcpy(prefix, "FATAL");
+    else if (level < LOG_LEVEL_WARN)
+        strcpy(prefix, "ERROR");
+    else if (level < LOG_LEVEL_INFO)
+        strcpy(prefix, "WARN ");
+    else if (level < LOG_LEVEL_DEBUG)
+        strcpy(prefix, "INFO ");
+    else if (level < LOG_LEVEL_SPAM)
+        strcpy(prefix, "DEBUG");
+    else 
+        strcpy(prefix, "SPAM ");
+
+    char* formatted = formatToString(format, args);
+    print(formatToString("[%s]: %s\n", prefix, formatted));
+    CSETC(_color);
 }
 
+void logMessage(Byte level, char* message, va_list args) { __logWrite(message, level, args); }
 void logError(char* message, va_list args) { __logWrite(message, LOG_LEVEL_ERROR, args); }
 void logWarn(char* message, va_list args) { __logWrite(message, LOG_LEVEL_WARN, args); }
 void logInfo(char* message, va_list args) { __logWrite(message, LOG_LEVEL_INFO, args); }
