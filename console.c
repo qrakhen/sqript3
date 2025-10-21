@@ -76,7 +76,7 @@ void consoleRun(int flags) {
             r = (int)interpret(file, src);
         } else {
             for (int i = offset; i < sizeof(line); i++) {
-                if (line[i] == '"') {
+                if (line[i] == '"' && (i > 0 && line[i - 1] != '\\')) {
                     insideString = !insideString;
                 }
                 if (line[i] == '\n') {
